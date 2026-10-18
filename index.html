@@ -350,13 +350,16 @@ body.ready .lockfoot{animation:greetIn 1s cubic-bezier(.22,.8,.24,1) 1.1s both}
    - data is encrypted at rest (AES-256-GCM, key from PIN via PBKDF2)
    - schema migrations run on unlock so updates never break data
    ========================================================= */
-const VERSION = '0.6.7';
+const VERSION = '0.6.8';
 const SCHEMA = 3;
 const DEMO_PIN = '1234';
 const VAULT = 'kura.vault.v1';
 const META = 'kura.meta.v1';
 
 const CHANGELOG = [
+  { v: '0.6.8', date: '2026-10-18',
+    ja: ['「更新する」を押しても反応しないことがある問題を修正', 'ネットにつながっているときは、開くたびに最新の画面を読み込むように', '設定 → アップデートを確認 で、本当に新しい版があるか確かめて更新できるように', 'うまく反映されないとき用に「最新版を読み込み直す」を追加（データは消えません）'],
+    en: ['Fixed the Update button sometimes doing nothing', 'When online, the app now loads the newest screen every time it opens', 'Settings → Check for updates now really checks and applies updates', 'Added "Reload the latest version" for stubborn updates (your data stays)'] },
   { v: '0.6.7', date: '2026-10-18',
     ja: ['Noto Sans JPをアプリの中に同梱。通信状況やiPhoneの設定に関係なく、いつでもNoto Sans JPで表示されるように'],
     en: ['Noto Sans JP is now bundled inside the app, so it always displays regardless of connection or device settings'] },
@@ -437,7 +440,7 @@ const I = {
     amount:'金額', desc:'内容', date:'日付', category:'カテゴリ', account:'口座', payer:'支払った人', memo:'メモ',
     learnRule:'この内容を次回から自動で分類する', newTx:'入出金を追加', editTx:'入出金を編集', saved:'保存しました', deleted:'削除しました',
     pinEnter:'PINを入力', pinWrong:n=>`PINが違います（あと${n}回）`, pinLocked:s=>`${s}秒後にもう一度お試しください`, pinHint:'最初のPINは 1234 です。設定から変更してください',
-    usePin:'PINで開く', fontTitle:'フォント', spentThisMonth:'今月の支出', noBudget:'予算はまだ設定されていません', setBudget:'予算を設定', secProfile:'プロフィール', displayName:'表示名', notSet:'未設定', nameLead:'ロック画面のあいさつとアイコンに使います。ロックを解除する前に表示するため、この名前だけは暗号化せずに保存します。', bioProto:'', bioOn:'オン', bioOff:'オフ', pkCount:n=>`${n}件`, bioListTitle:'登録済みのパスキー', pkDefault:'パスキー', pkAddedOn:d=>`${d}に追加`, pkAddMore:'パスキーを追加', pkLabel:'名前（あとで見分けるため）', pkLabelPh:'例：iPhone（iCloud）、Googleアカウント',
+    usePin:'PINで開く', curVersion:v=>`今のバージョン：v${v}`, checking:'確認しています…', updateReady:'新しいバージョンがあります', updateNow:'今すぐ更新する', updating:'更新しています…', forceLatest:'最新版を読み込み直す', forceNote:'更新がうまく反映されないときに使います。アプリの画面だけを読み込み直し、入力したデータやPIN・Face IDの設定は消えません。', fontTitle:'フォント', spentThisMonth:'今月の支出', noBudget:'予算はまだ設定されていません', setBudget:'予算を設定', secProfile:'プロフィール', displayName:'表示名', notSet:'未設定', nameLead:'ロック画面のあいさつとアイコンに使います。ロックを解除する前に表示するため、この名前だけは暗号化せずに保存します。', bioProto:'', bioOn:'オン', bioOff:'オフ', pkCount:n=>`${n}件`, bioListTitle:'登録済みのパスキー', pkDefault:'パスキー', pkAddedOn:d=>`${d}に追加`, pkAddMore:'パスキーを追加', pkLabel:'名前（あとで見分けるため）', pkLabelPh:'例：iPhone（iCloud）、Googleアカウント',
     pkNew:'新しいパスキーを作る', pkExisting:'保存済みのパスキーを使う', pkAdded:'パスキーを追加しました。次からFace IDで開けます', pkDup:'このパスキーはすでに登録されています', pkRemoved:'パスキーを削除しました',
     googleTitle:'Googleアカウント（Chrome）に保存するには', googleSteps:['iPhone：設定 → 一般 → 自動入力とパスワード で「Chrome」をオンにします（iOS 17以降）', '「新しいパスキーを作る」を押し、保存先を選ぶ画面が出たら Chrome（Google パスワード マネージャー）を選びます', '初めてのときは、Google パスワード マネージャーのPINを作るよう求められます', 'Mac・WindowsのChromeでKuraを開いた場合は、「新しいパスキーを作る」でそのままGoogleアカウントに保存されます', '別の端末でGoogleに保存したKuraのパスキーがあるときは、「保存済みのパスキーを使う」から選びます', 'Googleのパスキーがデータの鍵の取り出しに対応していない場合は、その旨が表示されます。そのときはiCloudキーチェーンのパスキーを使ってください'], bioOpen:'Face IDで開く',
     bioLead:'設定すると、PINの代わりにFace ID（MacではTouch ID）でKuraを開けます。「Kura」のパスキーがiCloudキーチェーンかGoogle パスワード マネージャーに保存され、Face IDが通ったときだけ、データの鍵が取り出されます。複数登録でき、どれか1つで開けます。PINは予備としてそのまま使えます。',
@@ -504,7 +507,7 @@ const I = {
     amount:'Amount', desc:'Description', date:'Date', category:'Category', account:'Account', payer:'Paid by', memo:'Note',
     learnRule:'Categorize this automatically next time', newTx:'Add transaction', editTx:'Edit transaction', saved:'Saved', deleted:'Deleted',
     pinEnter:'Enter PIN', pinWrong:n=>`Wrong PIN (${n} tries left)`, pinLocked:s=>`Try again in ${s}s`, pinHint:'The starting PIN is 1234. Change it in Settings',
-    usePin:'Use PIN', fontTitle:'Font', spentThisMonth:'spent this month', noBudget:'No budget set yet', setBudget:'Set budget', secProfile:'Profile', displayName:'Display name', notSet:'Not set', nameLead:'Used for the greeting and avatar on the lock screen. Because it shows before unlocking, this name alone is stored unencrypted.', bioProto:'', bioOn:'On', bioOff:'Off', pkCount:n=>`${n}`, bioListTitle:'Registered passkeys', pkDefault:'Passkey', pkAddedOn:d=>`Added ${d}`, pkAddMore:'Add a passkey', pkLabel:'Name (to tell them apart)', pkLabelPh:'e.g. iPhone (iCloud), Google account',
+    usePin:'Use PIN', curVersion:v=>`Current version: v${v}`, checking:'Checking…', updateReady:'A new version is ready', updateNow:'Update now', updating:'Updating…', forceLatest:'Reload the latest version', forceNote:'Use this if an update does not seem to apply. It reloads the app itself only; your data, PIN and Face ID settings stay.', fontTitle:'Font', spentThisMonth:'spent this month', noBudget:'No budget set yet', setBudget:'Set budget', secProfile:'Profile', displayName:'Display name', notSet:'Not set', nameLead:'Used for the greeting and avatar on the lock screen. Because it shows before unlocking, this name alone is stored unencrypted.', bioProto:'', bioOn:'On', bioOff:'Off', pkCount:n=>`${n}`, bioListTitle:'Registered passkeys', pkDefault:'Passkey', pkAddedOn:d=>`Added ${d}`, pkAddMore:'Add a passkey', pkLabel:'Name (to tell them apart)', pkLabelPh:'e.g. iPhone (iCloud), Google account',
     pkNew:'Create a new passkey', pkExisting:'Use a saved passkey', pkAdded:'Passkey added. Next time, open Kura with Face ID', pkDup:'This passkey is already registered', pkRemoved:'Passkey removed',
     googleTitle:'Saving to your Google account (Chrome)', googleSteps:['iPhone: Settings → General → AutoFill & Passwords, turn on Chrome (iOS 17+)', 'Tap Create a new passkey and, when asked where to save it, choose Chrome (Google Password Manager)', 'The first time, you will be asked to create a Google Password Manager PIN', 'In Chrome on Mac or Windows, Create a new passkey saves straight to your Google account', 'If you already saved a Kura passkey to Google on another device, use "Use a saved passkey"', 'If Google passkeys cannot release the data key, Kura will tell you. Use an iCloud Keychain passkey instead'], bioOpen:'Open with Face ID',
     bioLead:'Open Kura with Face ID (Touch ID on Mac) instead of your PIN. A "Kura" passkey is saved in iCloud Keychain or Google Password Manager, and the data key is released only when Face ID succeeds. You can register several; any one opens Kura. Your PIN still works as a backup.',
@@ -1687,7 +1690,18 @@ function openChangelog(isNew){
   openSheet(`<h2>${esc(t(isNew ? 'whatsNew' : 'changelog'))}</h2><p class="lead">Kura v${VERSION} · data v${SCHEMA}</p><div class="changelog">${CHANGELOG.map(c => `<div class="ver"><span>v${c.v}</span><span class="faint tnum">${c.date}</span></div><ul>${c[L()].map(l => `<li>${esc(l)}</li>`).join('')}</ul>`).join('')}</div><button class="btn mt" data-act="closesheet">${esc(t('close'))}</button>`);
 }
 function openUpdate(){
-  openSheet(`<h2>${esc(t('checkUpdate'))}</h2><div class="okbox">${ic('check')}<span>${esc(t('upToDate', VERSION))}</span></div><p class="note">${esc(t('updateLead'))}</p><button class="btn ghost mt" data-act="changelog">${esc(t('changelog'))}</button>`);
+  const U = window.kuraUpdate;
+  openSheet(`<h2>${esc(t('checkUpdate'))}</h2><p class="lead">${esc(t('curVersion', VERSION))}</p><div id="u-box"><div class="okbox">${ic('refresh')}<span>${esc(t('checking'))}</span></div></div>
+    ${U ? `<button class="btn ghost mt" id="u-hard">${esc(t('forceLatest'))}</button><p class="note">${esc(t('forceNote'))}</p>` : `<p class="note">${esc(t('updateLead'))}</p>`}
+    <button class="btn ghost mt" data-act="changelog">${esc(t('changelog'))}</button>`, sh => {
+    const box = sh.querySelector('#u-box');
+    const show = (ok, text, btn) => { box.innerHTML = `<div class="okbox ${ok ? '' : 'warnbox'}">${ic(ok ? 'check' : 'refresh')}<span>${esc(text)}</span></div>${btn ? `<button class="btn mt" id="u-go">${esc(t('updateNow'))}</button>` : ''}`;
+      const go = box.querySelector('#u-go'); if (go) go.addEventListener('click', () => { go.disabled = true; go.textContent = t('updating'); U.apply(); }); };
+    if (!U) { show(true, t('upToDate', VERSION)); return; }
+    U.check().then(st => st === 'waiting' ? show(false, t('updateReady'), true) : show(true, t('upToDate', VERSION)));
+    const hard = sh.querySelector('#u-hard');
+    if (hard) hard.addEventListener('click', () => { hard.disabled = true; hard.textContent = t('updating'); U.hardRefresh(); });
+  });
 }
 function openSecPlan(){
   const ja = L() === 'ja';
@@ -1795,20 +1809,44 @@ if (hasPasskey(readVault())) setTimeout(() => bioUnlock(true), 2300);
 (function(){
   if(!('serviceWorker' in navigator)) return;
   var lang='ja'; try{ lang=(JSON.parse(localStorage.getItem('kura.meta.v1')||'{}').lang)||'ja'; }catch(e){}
-  function banner(w){
+  var reloading=false;
+  navigator.serviceWorker.addEventListener('controllerchange',function(){ if(reloading) return; reloading=true; location.reload(); });
+  // Last resort: drop the cached app shell (never the user's data) and load fresh from the server.
+  function hardRefresh(){
+    var p=[];
+    if(window.caches) p.push(caches.keys().then(function(ks){ return Promise.all(ks.filter(function(k){ return k.indexOf('kura-')===0 && k!=='kura-fonts'; }).map(function(k){ return caches.delete(k); })); }));
+    p.push(navigator.serviceWorker.getRegistrations().then(function(rs){ return Promise.all(rs.map(function(r){ return r.unregister(); })); }));
+    return Promise.all(p).catch(function(){}).then(function(){ reloading=true; location.replace(location.pathname + '?r=' + Date.now()); });
+  }
+  function apply(){
+    return navigator.serviceWorker.getRegistration().then(function(reg){
+      if(!reg) return hardRefresh();
+      return reg.update().catch(function(){}).then(function(){
+        var w=reg.waiting||reg.installing;
+        if(w){ w.postMessage('skip'); }
+        setTimeout(function(){ if(!reloading) hardRefresh(); }, 2500);
+      });
+    }).catch(hardRefresh);
+  }
+  function check(){
+    return navigator.serviceWorker.getRegistration().then(function(reg){
+      if(!reg) return 'none';
+      return reg.update().catch(function(){}).then(function(){ return (reg.waiting||reg.installing) ? 'waiting' : 'none'; });
+    }).catch(function(){ return 'none'; });
+  }
+  window.kuraUpdate={ check:check, apply:apply, hardRefresh:hardRefresh };
+  function banner(){
     if(document.querySelector('.upd')) return;
     var b=document.createElement('div'); b.className='upd'; b.setAttribute('role','status');
     b.innerHTML=(lang==='en'?'A new version is ready':'新しいバージョンがあります')+'<button type="button">'+(lang==='en'?'Update':'更新する')+'</button>';
-    b.querySelector('button').onclick=function(){ w.postMessage('skip'); };
+    b.querySelector('button').onclick=function(){ this.disabled=true; this.textContent=(lang==='en'?'Updating…':'更新中…'); apply(); };
     document.body.appendChild(b);
   }
-  var reloading=false;
-  navigator.serviceWorker.addEventListener('controllerchange',function(){ if(reloading) return; reloading=true; location.reload(); });
   window.addEventListener('load',function(){
-    navigator.serviceWorker.register('sw.js').then(function(reg){
-      if(reg.waiting && navigator.serviceWorker.controller) banner(reg.waiting);
+    navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(function(reg){
+      if(reg.waiting && navigator.serviceWorker.controller) banner();
       reg.addEventListener('updatefound',function(){ var w=reg.installing; if(!w) return;
-        w.addEventListener('statechange',function(){ if(w.state==='installed' && navigator.serviceWorker.controller) banner(w); }); });
+        w.addEventListener('statechange',function(){ if(w.state==='installed' && navigator.serviceWorker.controller) banner(); }); });
       setInterval(function(){ reg.update().catch(function(){}); }, 60*60*1000);
       document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') reg.update().catch(function(){}); });
     }).catch(function(){});
