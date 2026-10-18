@@ -23,7 +23,7 @@
 <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="splash/828x1792.png">
 <style>
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-html,body{background:#000} body{margin:0} img{max-width:100%} [hidden]{display:none!important}
+html{background:#1b1430} body{background:#1b1430} body{margin:0} img{max-width:100%} [hidden]{display:none!important}
 .upd{position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));z-index:70;display:flex;gap:12px;align-items:center;background:#f6f3fa;color:#141019;padding:10px 10px 10px 18px;border-radius:999px;font:500 14px "Onest","Zen Kaku Gothic New",system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.35);white-space:nowrap}
 .upd button{background:#141019;color:#f6f3fa;border:0;border-radius:999px;padding:8px 14px;font:inherit;cursor:pointer}
 </style>
@@ -60,6 +60,7 @@ html,body{background:#000} body{margin:0} img{max-width:100%} [hidden]{display:n
 }
 *,*::before,*::after{box-sizing:border-box}
 html,body{height:100%}
+html{background:#1b1430;min-height:100%}
 body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 @property --b1{syntax:'<color>';inherits:true;initial-value:#7b3bf5}
 @property --b2{syntax:'<color>';inherits:true;initial-value:#f5e04a}
@@ -78,7 +79,7 @@ button{cursor:pointer;background:none;border:0;padding:0}
 .tnum{font-variant-numeric:tabular-nums}
 
 /* colour field */
-.mesh{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:var(--base);opacity:0;transform:scale(1.06);transition:opacity 1.6s cubic-bezier(.4,0,.2,1),transform 2.2s cubic-bezier(.2,.7,.2,1)}
+.mesh{position:fixed;top:calc(-1 * env(safe-area-inset-top,0px) - 60px);bottom:calc(-1 * env(safe-area-inset-bottom,0px) - 160px);left:0;right:0;z-index:0;overflow:hidden;pointer-events:none;background:var(--base);opacity:0;transform:scale(1.06);transition:opacity 1.6s cubic-bezier(.4,0,.2,1),transform 2.2s cubic-bezier(.2,.7,.2,1)}
 body.ready .mesh{opacity:1;transform:none}
 .blob{position:absolute;border-radius:50%;will-change:transform}
 .blob.a{width:120vmax;height:120vmax;left:-62vmax;top:-70vmax;background:radial-gradient(closest-side,var(--b1) 0%,var(--b1) 45%,transparent 100%);animation:drift1 13s ease-in-out infinite alternate}
@@ -228,8 +229,13 @@ h1.pg{font-size:36px;font-weight:700;letter-spacing:-.025em;margin:18px 0 6px;te
 .catrow .meter{margin-top:7px;height:6px}
 
 /* nav */
-.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:20;width:min(488px,calc(100% - 2 * max(16px,env(safe-area-inset-left,0px))));display:grid;grid-template-columns:repeat(5,1fr);padding:6px;border-radius:999px;background:rgba(20,19,24,.8);backdrop-filter:blur(30px) saturate(1.5);-webkit-backdrop-filter:blur(30px) saturate(1.5);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),0 12px 32px rgba(0,0,0,.3)}
-.nav button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 2px 10px;border-radius:999px;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.74);transition:background-color .25s ease,color .25s ease}
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:20;width:min(488px,calc(100% - 2 * max(16px,env(safe-area-inset-left,0px))));transition:width .55s cubic-bezier(.34,1.56,.64,1),padding .55s cubic-bezier(.34,1.56,.64,1),bottom .45s cubic-bezier(.34,1.4,.64,1);display:grid;grid-template-columns:repeat(5,1fr);padding:6px;border-radius:999px;background:rgba(20,19,24,.8);backdrop-filter:blur(30px) saturate(1.5);-webkit-backdrop-filter:blur(30px) saturate(1.5);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),0 12px 32px rgba(0,0,0,.3)}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 2px 10px;border-radius:999px;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.74);transition:background-color .25s ease,color .25s ease,padding .55s cubic-bezier(.34,1.56,.64,1),gap .4s ease}
+.nav button span:not(.ndot){display:block;max-height:18px;line-height:18px;opacity:1;overflow:hidden;transition:max-height .45s cubic-bezier(.34,1.3,.64,1),opacity .25s ease}
+body.navmini .nav{width:min(330px,calc(100% - 96px));padding:5px;bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+body.navmini .nav button{padding:12px 2px;gap:0}
+body.navmini .nav button span:not(.ndot){max-height:0;opacity:0}
+body.navmini .ndot{top:7px}
 .nav button svg{width:26px;height:26px;stroke-width:2.1}
 .nav button[aria-current="page"]{background:rgba(255,255,255,.11);color:#fff}
 
@@ -287,6 +293,19 @@ textarea.inp{height:110px;padding:12px 14px;font-size:12px;font-family:ui-monosp
 
 /* toast */
 .nav button{position:relative}
+#lock.leaving{opacity:0;transform:scale(1.06);filter:blur(10px);transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .9s cubic-bezier(.2,.7,.2,1),filter .7s ease;pointer-events:none}
+#app.entering > *{animation:riseIn .9s cubic-bezier(.22,.8,.24,1) both}
+#app.entering > *:nth-child(2){animation-delay:.08s}
+#app.entering > *:nth-child(3){animation-delay:.16s}
+#app.entering > *:nth-child(4){animation-delay:.24s}
+#app.entering > *:nth-child(5){animation-delay:.32s}
+#app.entering > *:nth-child(n+6){animation-delay:.4s}
+#app.entering .stack > *{animation:riseIn .9s cubic-bezier(.22,.8,.24,1) both}
+#app.entering .stack > *:nth-child(2){animation-delay:.48s}
+#app.entering .stack > *:nth-child(n+3){animation-delay:.56s}
+.nav.entering{animation:navIn .9s cubic-bezier(.34,1.4,.64,1) .35s both}
+@keyframes riseIn{from{opacity:0;transform:translateY(22px) scale(.985);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@keyframes navIn{from{opacity:0;transform:translate(-50%,40px) scale(.9)}to{opacity:1;transform:translateX(-50%)}}
 .ndot{position:absolute;top:6px;left:calc(50% + 8px);width:9px;height:9px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 2px rgba(28,22,38,.95)}
 .udot{position:absolute;left:-1px;top:-1px;width:11px;height:11px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 2px var(--bg);z-index:1}
 .sorthead{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
@@ -350,13 +369,19 @@ body.ready .lockfoot{animation:greetIn 1s cubic-bezier(.22,.8,.24,1) 1.1s both}
    - data is encrypted at rest (AES-256-GCM, key from PIN via PBKDF2)
    - schema migrations run on unlock so updates never break data
    ========================================================= */
-const VERSION = '0.6.8';
+const VERSION = '0.6.10';
 const SCHEMA = 3;
 const DEMO_PIN = '1234';
 const VAULT = 'kura.vault.v1';
 const META = 'kura.meta.v1';
 
 const CHANGELOG = [
+  { v: '0.6.10', date: '2026-10-18',
+    ja: ['内容が少ない画面（入出金など）で、画面の下が黒く切れて見える問題を修正。背景の色が画面の一番下まで続くように'],
+    en: ['Fixed a black strip at the bottom of short screens such as Activity; the background now reaches the very bottom'] },
+  { v: '0.6.9', date: '2026-10-18',
+    ja: ['画面を下にスクロールすると、下のメニューバーが「ニュイーん」と縮んでアイコンだけに。上に戻すと元の大きさに', 'Face IDやPINでロックを解除したあと、ロック画面がふわっと消えて、ホームの中身が下から順に浮かび上がるように'],
+    en: ['Scrolling down shrinks the bottom bar to icons only with a springy motion; scrolling up brings it back', 'After unlocking, the lock screen dissolves and Home floats in piece by piece'] },
   { v: '0.6.8', date: '2026-10-18',
     ja: ['「更新する」を押しても反応しないことがある問題を修正', 'ネットにつながっているときは、開くたびに最新の画面を読み込むように', '設定 → アップデートを確認 で、本当に新しい版があるか確かめて更新できるように', 'うまく反映されないとき用に「最新版を読み込み直す」を追加（データは消えません）'],
     en: ['Fixed the Update button sometimes doing nothing', 'When online, the app now loads the newest screen every time it opens', 'Settings → Check for updates now really checks and applies updates', 'Added "Reload the latest version" for stubborn updates (your data stays)'] },
@@ -885,14 +910,31 @@ async function tryUnlock(pin){
 function afterUnlock(){
   writeMeta({ fails:0, lockUntil:0, lang:S.lang });
   pinBuf = ''; lastAct = Date.now();
-  const el = $('#lock'); if (el) el.hidden = true;
-  document.body.classList.remove('locked');
-  UI.month = mk(iso(today0()));
+  UI.month = mk(iso(today0())); UI.tab = 'home';
   snapshotHistory();
+  const app = $('#app'), nav = $('#nav');
+  app.classList.add('entering'); nav.classList.add('entering');
   render();
-  if (S.whatsNew) { S.whatsNew = false; persist(); openChangelog(true); }
+  document.body.classList.remove('locked', 'navmini');
+  const el = $('#lock');
+  if (el) { el.classList.add('leaving'); setTimeout(() => { el.hidden = true; el.classList.remove('leaving'); }, 750); }
+  setTimeout(() => { app.classList.remove('entering'); nav.classList.remove('entering'); }, 1700);
+  if (S.whatsNew) { S.whatsNew = false; persist(); setTimeout(() => openChangelog(true), 1300); }
 }
 function lockApp(){ persistNow(); S = null; KEY = null; DEKRAW = null; pinBuf = ''; showLock({ text:t('lockedOut') }); }
+let lastY = 0, scrollTick = false;
+addEventListener('scroll', () => {
+  if (scrollTick) return; scrollTick = true;
+  requestAnimationFrame(() => {
+    const y = Math.max(0, scrollY), d = y - lastY;
+    if (!document.body.classList.contains('locked')) {
+      if (y < 40) document.body.classList.remove('navmini');
+      else if (d > 6) document.body.classList.add('navmini');
+      else if (d < -10) document.body.classList.remove('navmini');
+    }
+    lastY = y; scrollTick = false;
+  });
+}, { passive:true });
 ['pointerdown','keydown','scroll','touchstart'].forEach(ev => addEventListener(ev, () => { lastAct = Date.now(); }, { passive:true }));
 setInterval(() => { if (S && Date.now() - lastAct > (S.lockMin || 5) * 60000) lockApp(); }, 10000);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S && Date.now() - lastAct > (S.lockMin || 5) * 60000) lockApp(); });
@@ -1750,7 +1792,7 @@ document.addEventListener('click', e => {
   const el = e.target.closest('[data-act]'); if (!el) return;
   const a = el.dataset.act, arg = el.dataset.arg;
   switch (a) {
-    case 'tab': closeSheet(true); UI.tab = arg; if (arg !== 'tx') UI.q = ''; render(); scrollTo(0,0); break;
+    case 'tab': closeSheet(true); UI.tab = arg; if (arg !== 'tx') UI.q = ''; render(); scrollTo(0,0); document.body.classList.remove('navmini'); break;
     case 'add': openTx(); break;
     case 'edit': openTx(arg); break;
     case 'import': openImport(); break;
