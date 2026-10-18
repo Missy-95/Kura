@@ -251,6 +251,17 @@ textarea.inp{height:110px;padding:12px 14px;font-size:12px;font-family:ui-monosp
 .layer p{margin:2px 0 0;font-size:13px;color:var(--fg-2)}
 
 /* toast */
+.nav button{position:relative}
+.ndot{position:absolute;top:6px;left:calc(50% + 8px);width:9px;height:9px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 2px rgba(28,22,38,.95)}
+.udot{position:absolute;left:-1px;top:-1px;width:11px;height:11px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 2px var(--bg);z-index:1}
+.sorthead{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.sortcard{background:rgba(255,255,255,.06);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:2px}
+.sdesc{font-size:19px;font-weight:600;margin-top:4px;overflow-wrap:anywhere}
+.samt{font-size:32px;font-weight:700;letter-spacing:-.02em}
+.scur{margin-top:8px;font-size:14px;color:var(--fg-2)}
+.catgrid{display:flex;flex-wrap:wrap;gap:8px}
+.okic{width:64px;height:64px;border-radius:50%;background:rgba(99,214,164,.16);color:var(--good);display:grid;place-items:center;margin:0 auto 12px}
+.okic svg{width:30px;height:30px}
 .toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);z-index:60;background:var(--fg);color:var(--ink);padding:12px 18px;border-radius:999px;font-weight:500;font-size:14px;opacity:0;transition:.22s;pointer-events:none;max-width:calc(100% - 40px);text-align:center}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
@@ -290,13 +301,25 @@ textarea.inp{height:110px;padding:12px 14px;font-size:12px;font-family:ui-monosp
    - data is encrypted at rest (AES-256-GCM, key from PIN via PBKDF2)
    - schema migrations run on unlock so updates never break data
    ========================================================= */
-const VERSION = '0.2.0';
-const SCHEMA = 1;
+const VERSION = '0.3.0';
+const SCHEMA = 2;
 const DEMO_PIN = '1234';
 const VAULT = 'kura.vault.v1';
 const META = 'kura.meta.v1';
 
 const CHANGELOG = [
+  { v: '0.3.0', date: '2026-10-18',
+    ja: ['取り込んだ入出金を1件ずつ確認する「仕分け」画面を追加', '確認が済んだものは既読になり、赤い丸が消えるように', '同じお店は一度決めれば、残りもまとめて同じカテゴリに', '入出金の画面に「未確認」の絞り込みを追加', 'データ形式をv2に自動移行（取り込み済みの入出金は未確認として扱います）'],
+    en: ['New Sort screen to review imported transactions one by one', 'Reviewed items are marked read and the red dot disappears', 'Pick a category once and other entries from the same shop follow', 'Added an Unreviewed filter to Activity', 'Data upgraded to format v2 automatically (already-imported entries start as unreviewed)'] },
+  { v: '0.2.3', date: '2026-10-18',
+    ja: ['取り込みが終わると、取り込んだ一番新しい月の入出金を表示するように', '月の名前をタップすると、データがある月の一覧から選べるように', '取り込み完了のお知らせに期間を表示'],
+    en: ['After an import, Activity opens on the newest imported month', 'Tap the month name to jump to any month that has data', 'The import message now shows the date range'] },
+  { v: '0.2.2', date: '2026-10-18',
+    ja: ['iPhoneでMoney ForwardのCSVがグレーになって選べない問題を修正'],
+    en: ['Fixed Money Forward CSV files being greyed out in the iPhone file picker'] },
+  { v: '0.2.1', date: '2026-10-18',
+    ja: ['「サンプルを消して始める」を追加。自分のデータだけで使い始められます', '純資産の推移を月ごとに自動で記録'],
+    en: ['Added "Start fresh": remove the sample data and use only your own', 'Net worth is now recorded month by month automatically'] },
   { v: '0.2.0', date: '2026-10-18',
     ja: ['口座・カード・電子マネー・証券・年金・ポイント・マイルを自分で追加できるように', 'よく使う金融機関の名前から選んで追加', '使わなくなった口座を削除、または記録を残して非表示に', 'カードの引き落とし日を編集できるように'],
     en: ['Add your own banks, cards, e-money, securities, pensions, points and miles', 'Pick from common institution names when adding', 'Delete unused accounts, or hide them while keeping their history', 'Edit the payment day of a card'] },
@@ -334,7 +357,7 @@ const I = {
     importStatus:'取り込み状況', daysAgo:n=>n===0?'今日':`${n}日前`, markDone:'振り返りを完了', reviewDone:'お疲れさまでした。また来週',
     importTitle:'CSVを取り込む', importLead:'Money Forward の書き出しCSV、または銀行・カードの明細CSVを選んでください。文字コード（Shift_JIS / UTF-8）は自動で判定します。',
     chooseFile:'CSVファイルを選ぶ', target:'取り込み先の口座', autoDetect:'自動（Money Forward形式）', positiveIsExpense:'プラスの金額を支出として扱う（カード明細向け）',
-    found:n=>`${n}件を読み込みました`, dupes:n=>`重複 ${n}件はスキップします`, uncatN:n=>`未分類 ${n}件（あとで分類できます）`, doImport:n=>`${n}件を取り込む`, imported:n=>`${n}件を取り込みました`,
+    found:n=>`${n}件を読み込みました`, dupes:n=>`重複 ${n}件はスキップします`, uncatN:n=>`未分類 ${n}件（あとで分類できます）`, doImport:n=>`${n}件を取り込む`, imported:n=>`${n}件を取り込みました`, importedRange:(n,a,b)=>`${n}件を取り込みました（${a}〜${b}）`, pickMonth:'月を選ぶ', sortTitle:'仕分け', sortLeft:n=>`残り ${n}件`, current:'今のカテゴリ', pickCat:'カテゴリを選ぶ（タップで決定）', keepOk:'このカテゴリでOK', pickFirst:'カテゴリを選んでください', later:'あとで', applySame:'同じお店は残りもまとめて、次からも自動で分類', appliedSame:n=>`同じお店の${n}件にも適用しました`, markAllRead:'残りをすべて既読にする', markAllConfirm:'もう一度押すと、残りを全部既読にします', allDone:'すべて確認しました', allDoneSub:'新しく取り込んだら、またここに並びます。', laterLeft:n=>`あとで回した${n}件が残っています`, laterLeftSub:'今続けるか、あとで入出金の画面から再開できます。', sortAgain:'続けて仕分けする', unreadBanner:n=>`確認待ちの入出金が${n}件あります`, unreadSub:'カテゴリを確認して既読にしましょう', sortNow:'仕分けする', unread:'未確認', nItems:n=>`${n}件`, noMonths:'まだ入出金がありません',
     csvErr:'列を見つけられませんでした。日付・内容・金額の列がある明細か確認してください。', mfDetected:'Money Forward 形式を検出しました',
     booksTitle:'ブック', booksLead:'家計を分けて記録します。ふたり・家族のブックでは、誰が払ったかを記録して精算額を出します。',
     personalD:'自分だけの家計と資産', coupleD:'パートナーとの共有支出', familyD:'家族との共有支出', inviteNote:'本番版ではメンバーを招待リンクで追加し、各自のスマホから入力できます。',
@@ -353,6 +376,8 @@ const I = {
     balance:'残高', rate:'1ptあたりの評価額（円）', editAcct:'口座を編集', name:'名前', manualNote:'年金・ポイントなど連携できない口座は、ここで残高を更新してください。',
     lastImport:'最終取り込み', notImported:'未取り込み', members:'メンバー',
     lockedOut:'ロックしました', me:'わたし',
+    fresh:'サンプルを消して始める', freshLead:'サンプルの入出金と推移を消し、口座の残高を0にします。口座の一覧とカテゴリ・ルールは残すので、残高を入れ直してからCSVを取り込んでください。', freshConfirm:'もう一度押すと消去', freshDone:'サンプルを消しました。自分のデータで始められます',
+    trendEmpty:'推移は月が変わるごとに自動で記録されます。',
     addAcct:'口座を追加', acctType:'種類', presets:'よく使う名前から選ぶ', payDay:'引き落とし日（毎月）', acctAdded:n=>`${n}を追加しました`,
     acctDup:'同じ名前の口座がすでにあります', nameReq:'名前を入れてください', delAcct:'この口座を削除', archiveAcct:'この口座を非表示にする',
     archiveNote:'入出金の記録があるため、削除ではなく非表示にします。記録と分析はそのまま残ります。', acctArchived:'非表示にしました',
@@ -389,7 +414,7 @@ const I = {
     importStatus:'Import status', daysAgo:n=>n===0?'today':`${n}d ago`, markDone:'Finish review', reviewDone:'Done. See you next week',
     importTitle:'Import CSV', importLead:'Pick a Money Forward export, or a statement CSV from your bank or card. Shift_JIS and UTF-8 are detected automatically.',
     chooseFile:'Choose CSV file', target:'Import into', autoDetect:'Automatic (Money Forward)', positiveIsExpense:'Treat positive amounts as spending (card statements)',
-    found:n=>`Read ${n} rows`, dupes:n=>`${n} duplicates will be skipped`, uncatN:n=>`${n} uncategorized (sort later)`, doImport:n=>`Import ${n}`, imported:n=>`Imported ${n}`,
+    found:n=>`Read ${n} rows`, dupes:n=>`${n} duplicates will be skipped`, uncatN:n=>`${n} uncategorized (sort later)`, doImport:n=>`Import ${n}`, imported:n=>`Imported ${n}`, importedRange:(n,a,b)=>`Imported ${n} (${a} to ${b})`, pickMonth:'Choose a month', sortTitle:'Sort', sortLeft:n=>`${n} left`, current:'Current category', pickCat:'Pick a category (tap to confirm)', keepOk:'Keep this category', pickFirst:'Pick a category', later:'Later', applySame:'Apply to other entries from this shop, and next time too', appliedSame:n=>`Also applied to ${n} entries from the same shop`, markAllRead:'Mark the rest as read', markAllConfirm:'Tap again to mark everything as read', allDone:'All reviewed', allDoneSub:'New imports will show up here.', laterLeft:n=>`${n} left for later`, laterLeftSub:'Continue now, or resume from Activity anytime.', sortAgain:'Keep sorting', unreadBanner:n=>`${n} transactions to review`, unreadSub:'Check their categories to mark them read', sortNow:'Sort now', unread:'Unreviewed', nItems:n=>`${n} entries`, noMonths:'No transactions yet',
     csvErr:'Could not find date, description and amount columns in this file.', mfDetected:'Money Forward format detected',
     booksTitle:'Books', booksLead:'Keep money separate. Shared books record who paid and work out who owes what.',
     personalD:'Your own budget and assets', coupleD:'Shared spending with your partner', familyD:'Shared spending with family', inviteNote:'In the full version, members join by invite link and add entries from their own phones.',
@@ -408,6 +433,8 @@ const I = {
     balance:'Balance', rate:'Value per point (¥)', editAcct:'Edit account', name:'Name', manualNote:'For pensions, points and other accounts that cannot sync, update the balance here.',
     lastImport:'Last import', notImported:'Not imported', members:'Members',
     lockedOut:'Locked', me:'Me',
+    fresh:'Start fresh', freshLead:'Removes the sample transactions and history and sets account balances to 0. Your account list, categories and rules stay, so enter real balances, then import your CSVs.', freshConfirm:'Tap again to erase', freshDone:'Sample data removed. Start with your own',
+    trendEmpty:'Net worth is recorded each time a new month starts.',
     addAcct:'Add account', acctType:'Type', presets:'Pick a common name', payDay:'Payment day (monthly)', acctAdded:n=>`Added ${n}`,
     acctDup:'An account with this name already exists', nameReq:'Enter a name', delAcct:'Delete this account', archiveAcct:'Hide this account',
     archiveNote:'This account has transactions, so it is hidden instead of deleted. Its history and insights stay.', acctArchived:'Hidden',
@@ -518,7 +545,8 @@ async function persistNow(){
 
 /* ---------- migrations: each step upgrades the data one schema version ---------- */
 const MIGRATIONS = {
-  // 1: s => { /* example for v2: add field */ return s; }
+  // v1 → v2: add the read flag. Entries that came from a CSV start as unreviewed.
+  1: s => { s.tx.forEach(x => { if (x.rev === undefined) x.rev = !(x.src === 'mf' || x.src === 'csv'); }); return s; }
 };
 function migrate(s){
   let from = s.schema || 1;
@@ -604,6 +632,7 @@ function makeSample(lang){
   const draft = { categories, accounts, tx };
   const now = netWorth(draft);
   v = now; for (let i = hist.length - 1; i >= 0; i--) { v = v - (52000 + (r2() - .45) * 90000); hist[i].v = Math.round(v / 1000) * 1000; }
+  tx.forEach(x => { x.rev = x.cat !== 'uncat'; });
   const ago = n => { const d = new Date(td); d.setDate(td.getDate() - n); return d.toISOString(); };
   return {
     schema: SCHEMA, appVersion: VERSION, lang: lang || 'ja', lockMin: 5, sample: true,
@@ -683,6 +712,7 @@ async function tryUnlock(pin){
     const el = $('#lock'); if (el) el.hidden = true;
     document.body.classList.remove('locked');
     UI.month = mk(iso(today0()));
+    snapshotHistory();
     render();
     if (S.whatsNew) { S.whatsNew = false; persist(); openChangelog(true); }
   } catch(e) {
@@ -706,7 +736,8 @@ function render(){
   document.documentElement.lang = L();
   document.body.dataset.tab = UI.tab;
   const nav = $('#nav'); nav.hidden = false;
-  nav.innerHTML = ['home','tx','insights','assets','settings'].map(k => `<button data-act="tab" data-arg="${k}" ${UI.tab === k ? 'aria-current="page"' : ''}>${ic(k)}<span>${esc(t(k))}</span></button>`).join('');
+  const unreadN = unreadList().length;
+  nav.innerHTML = ['home','tx','insights','assets','settings'].map(k => `<button data-act="tab" data-arg="${k}" ${UI.tab === k ? 'aria-current="page"' : ''}>${ic(k)}<span>${esc(t(k))}</span>${k === 'tx' && unreadN ? `<span class="ndot" aria-label="${esc(t('unreadBanner', unreadN))}"></span>` : ''}</button>`).join('');
   const v = { home:viewHome, tx:viewTx, insights:viewInsights, assets:viewAssets, settings:viewSettings }[UI.tab];
   pendingCharts = [];
   $('#app').innerHTML = topbar() + v();
@@ -728,7 +759,7 @@ function avatarFor(x){
   let badge = '';
   if (x.acct) { const a = acct(x.acct); if (a) { const col = { bank:'#4a6cf7', cash:'#4b9a6a', card:'#d0496e', emoney:'#e08a1e', invest:'#7a5af0' }[a.type] || '#666'; badge = `<span class="badge" style="background:${col}">${esc(a.name.replace(/[（(].*$/,'').slice(0,1))}</span>`; } }
   else if (x.payer) { badge = `<span class="badge" style="background:#7a5af0">${esc(memberName(x.book, x.payer).slice(0,1))}</span>`; }
-  return `<span class="av">${esc(ch)}${badge}</span>`;
+  return `<span class="av">${x.rev === false ? '<span class="udot"></span>' : ''}${esc(ch)}${badge}</span>`;
 }
 function txRow(x){
   const sub = [catName(x.cat), x.acct ? acct(x.acct)?.name : memberName(x.book, x.payer)].filter(Boolean).join(' · ');
@@ -750,7 +781,10 @@ function viewHome(){
   const late = Object.entries(S.lastImport).map(([id, at]) => ({ id, d: daysBetween(new Date(at), new Date()) })).filter(o => o.d >= 7 && acct(o.id) && ['card','bank','emoney'].includes(acct(o.id).type)).sort((a,b) => b.d - a.d);
   const recent = S.tx.filter(x => x.book === 'personal').sort((a,b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id)).slice(0,5);
   let banner = '';
-  if (!UI.bannerHidden && late.length) {
+  const unreadN = unreadList().length;
+  if (unreadN) {
+    banner = `<div class="card"><div class="banner"><span class="ic" style="position:relative">${ic('list')}<span class="udot" style="left:2px;top:2px"></span></span><div><h4>${esc(t('unreadBanner', unreadN))}</h4><p>${esc(t('unreadSub'))}</p></div></div><button class="btn mt" data-act="sort">${esc(t('sortNow'))}</button></div>`;
+  } else if (!UI.bannerHidden && late.length) {
     banner = `<div class="card"><div class="banner"><span class="ic">${ic('alert')}</span><div><h4>${esc(t('importLate', late[0].d))}</h4><p>${esc(t('importLateSub', late.map(o => acct(o.id).name).join('、')))}</p></div><button class="x" data-act="hidebanner" aria-label="${esc(t('close'))}">${ic('x')}</button></div><button class="btn mt" data-act="import">${esc(t('importNow'))}</button></div>`;
   } else if (!UI.bannerHidden && daysBetween(new Date(S.lastReview), new Date()) >= 7) {
     banner = `<div class="card"><div class="banner"><span class="ic">${ic('cal')}</span><div><h4>${esc(t('reviewDue'))}</h4><p>${esc(t('reviewDueSub'))}</p></div><button class="x" data-act="hidebanner" aria-label="${esc(t('close'))}">${ic('x')}</button></div><button class="btn mt" data-act="review">${esc(t('startReview'))}</button></div>`;
@@ -826,7 +860,69 @@ function viewHomeShared(){
 /* Activity */
 function monthSwitch(){
   const cur = mk(iso(today0()));
-  return `<div class="monthsw"><button data-act="month" data-arg="-1" aria-label="prev">${ic('chevL')}</button><span>${esc(monthLabel(UI.month))}</span><button data-act="month" data-arg="1" aria-label="next" ${UI.month >= cur ? 'disabled' : ''}>${ic('chev')}</button></div>`;
+  return `<div class="monthsw"><button data-act="month" data-arg="-1" aria-label="prev">${ic('chevL')}</button><button data-act="pickmonth" style="width:auto;height:auto;border-radius:8px;padding:2px 6px;color:var(--violet);font-weight:500">${esc(monthLabel(UI.month))}</button><button data-act="month" data-arg="1" aria-label="next" ${UI.month >= cur ? 'disabled' : ''}>${ic('chev')}</button></div>`;
+}
+const unreadList = () => S.tx.filter(x => x.rev === false).sort((a,b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+let sorterRule = true;
+function openSorter(){
+  let queue = unreadList().map(x => x.id), i = 0;
+  openSheet(`<div id="sorter"></div>`, sh => {
+    const box = sh.querySelector('#sorter');
+    const cur = () => S.tx.find(z => z.id === queue[i]);
+    const next = () => { while (i < queue.length && cur()?.rev !== false) i++; draw(); };
+    const draw = () => {
+      if (i >= queue.length) {
+        const rem = unreadList().length;
+        box.innerHTML = `<div style="text-align:center;padding:20px 0 8px"><div class="okic">${ic(rem ? 'list' : 'check')}</div><h2>${esc(rem ? t('laterLeft', rem) : t('allDone'))}</h2><p class="lead">${esc(rem ? t('laterLeftSub') : t('allDoneSub'))}</p></div>
+          ${rem ? `<button type="button" class="btn" id="s-again">${esc(t('sortAgain'))}</button><button type="button" class="btn ghost mt" data-act="closesheet">${esc(t('close'))}</button>` : `<button type="button" class="btn" data-act="closesheet">${esc(t('close'))}</button>`}`;
+        return;
+      }
+      const x = cur(); const left = unreadList().length;
+      const type = x.amt > 0 ? 'inc' : 'exp';
+      const cats = S.categories.filter(c => (c.type === type || c.type === 'xfer') && c.id !== 'uncat');
+      const a = acct(x.acct);
+      box.innerHTML = `
+        <div class="sorthead"><h2>${esc(t('sortTitle'))}</h2><span class="faint tnum">${esc(t('sortLeft', left))}</span></div>
+        <div class="meter" style="margin:6px 0 18px"><i style="width:${queue.length ? i / queue.length * 100 : 0}%"></i></div>
+        <div class="sortcard">
+          <div class="faint">${esc(dayLabel(x.date))}${a ? ' · ' + esc(a.name) : ''}</div>
+          <div class="sdesc">${esc(x.desc)}</div>
+          <div class="samt tnum ${x.amt > 0 ? 'pos' : ''}">${yen(x.amt, true)}</div>
+          ${x.memo ? `<div class="faint">${esc(x.memo)}</div>` : ''}
+          <div class="scur">${esc(t('current'))}：<b>${esc(catName(x.cat))}</b></div>
+        </div>
+        <h5>${esc(t('pickCat'))}</h5>
+        <div class="catgrid">${cats.map(c => `<button type="button" class="chipb" data-cat="${c.id}" aria-pressed="${c.id === x.cat}">${esc(L()==='en' ? c.en : c.ja)}</button>`).join('')}</div>
+        <label class="check" style="margin-top:16px"><input type="checkbox" id="s-rule" ${sorterRule ? 'checked' : ''}> ${esc(t('applySame'))}</label>
+        <div class="btnrow" style="margin-top:14px"><button type="button" class="btn ghost" id="s-later" style="flex:1">${esc(t('later'))}</button><button type="button" class="btn" id="s-ok" style="flex:2" ${x.cat === 'uncat' ? 'disabled' : ''}>${esc(x.cat === 'uncat' ? t('pickFirst') : t('keepOk'))}</button></div>
+        <button type="button" class="btn ghost mt" id="s-all" style="background:none;color:var(--fg-2);height:44px">${esc(t('markAllRead'))}</button>`;
+    };
+    const decide = (x, catId) => {
+      x.cat = catId; x.rev = true; let n = 0;
+      if (sorterRule && catId !== 'uncat' && x.desc) {
+        S.rules = S.rules.filter(r => r.kw !== x.desc); S.rules.unshift({ kw: x.desc, cat: catId });
+        S.tx.forEach(z => { if (z.rev === false && z.desc === x.desc) { z.cat = catId; z.rev = true; n++; } });
+      }
+      persist(); render(); i++; next(); if (n) toast(t('appliedSame', n));
+    };
+    box.addEventListener('change', e => { if (e.target.id === 's-rule') sorterRule = e.target.checked; });
+    box.addEventListener('click', e => {
+      if (e.target.closest('#s-again')) { queue = unreadList().map(x => x.id); i = 0; next(); return; }
+      const x = cur(); if (!x) return;
+      const c = e.target.closest('[data-cat]'); if (c) { decide(x, c.dataset.cat); return; }
+      if (e.target.closest('#s-ok')) { decide(x, x.cat); return; }
+      if (e.target.closest('#s-later')) { i++; next(); return; }
+      const all = e.target.closest('#s-all');
+      if (all) { if (!all.dataset.arm) { all.dataset.arm = 1; all.textContent = t('markAllConfirm'); return; }
+        S.tx.forEach(z => { if (z.rev === false) z.rev = true; }); persist(); render(); i = queue.length; draw(); }
+    });
+    next();
+  });
+}
+function openMonthPicker(){
+  const counts = {}; txIn(S.activeBook).forEach(x => { const k = mk(x.date); (counts[k] ||= { n:0, out:0 }); counts[k].n++; if (isExp(x)) counts[k].out -= x.amt; });
+  const keys = Object.keys(counts).sort().reverse();
+  openSheet(`<h2>${esc(t('pickMonth'))}</h2><p class="lead">${esc(t(S.activeBook))}</p>${keys.length ? `<div class="list">${keys.map(k => `<button class="row" data-act="gomonth" data-arg="${k}"><span class="main"><span class="t1">${esc(monthLabel(k))}</span><span class="t2">${esc(t('nItems', counts[k].n))}</span></span><span class="amt tnum">${yen(-counts[k].out)}</span>${k === UI.month ? `<span class="pos">${ic('check','style="width:18px;height:18px"')}</span>` : ''}</button>`).join('')}</div>` : `<p class="muted">${esc(t('noMonths'))}</p>`}`);
 }
 function bookSwitch(){ return `<button class="booksw" data-act="books">${esc(t(S.activeBook))}${ic('down')}</button>`; }
 function viewTx(){
@@ -836,14 +932,17 @@ function viewTx(){
   if (UI.filter === 'inc') list = list.filter(isInc);
   if (UI.filter === 'xfer') list = list.filter(isXfer);
   if (UI.filter === 'uncat') list = list.filter(x => x.cat === 'uncat');
+  if (UI.filter === 'unread') list = list.filter(x => x.rev === false);
   if (q) list = list.filter(x => (x.desc + ' ' + catName(x.cat) + ' ' + (x.memo||'')).toLowerCase().includes(q));
   list.sort((a,b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
   const groups = []; list.forEach(x => { const g = groups[groups.length-1]; if (g && g.d === x.date) g.items.push(x); else groups.push({ d:x.date, items:[x] }); });
   const uncatN = txIn(S.activeBook).filter(x => x.cat === 'uncat').length;
-  const chips = [['all',t('all')],['exp',t('expense')],['inc',t('income')],['xfer',t('transfer')],['uncat',t('uncategorized') + (uncatN ? ` ${uncatN}` : '')]];
+  const unreadN = txIn(S.activeBook).filter(x => x.rev === false).length;
+  const chips = [['all',t('all')],['unread',t('unread') + (unreadN ? ` ${unreadN}` : '')],['exp',t('expense')],['inc',t('income')],['xfer',t('transfer')],['uncat',t('uncategorized') + (uncatN ? ` ${uncatN}` : '')]];
   return `<h1 class="pg">${esc(t('tx'))}</h1>
   <div class="pgsub">${bookSwitch()}${q ? '' : monthSwitch()}</div>
   <label class="field">${ic('search')}<input id="q" type="search" placeholder="${esc(t('searchPh'))}" value="${esc(UI.q)}" autocomplete="off"></label>
+  ${unreadN ? `<button class="btn mt" style="margin:0 0 14px" data-act="sort">${esc(t('sortNow'))} · ${unreadN}</button>` : ''}
   <div class="chips">${chips.map(([k,l]) => `<button class="chipb" data-act="filter" data-arg="${k}" aria-pressed="${UI.filter === k}">${esc(l)}</button>`).join('')}</div>
   <div class="card">${groups.length ? groups.map(g => `<div class="daygrp"><span>${esc(dayLabel(g.d))}</span><span class="tnum">${yen(sum(g.items.filter(x => !isXfer(x)), x => x.amt), true)}</span></div><div class="rows">${g.items.map(txRow).join('')}</div>`).join('') : `<p class="muted" style="margin:6px 0">${esc(t('noTx'))}</p>`}</div>`;
 }
@@ -941,7 +1040,7 @@ function viewAssets(){
   const nw = netWorth(S);
   const hist = [...S.history, { m: mk(iso(today0())), v: nw }];
   const mShort = k => L()==='en' ? new Date(+k.slice(0,4), +k.slice(5)-1, 1).toLocaleDateString('en-GB',{month:'short'}) : `${+k.slice(5)}月`;
-  const chart = lineChart('nwchart', { labels: hist.map(h => h.m), series: [{ name:t('netWorth'), values: hist.map(h => h.v), color:'#9c8bff', area:true }], minZero:false, height:200,
+  const chart = hist.length < 2 ? `<p class="muted" style="margin:0">${esc(t('trendEmpty'))}</p>` : lineChart('nwchart', { labels: hist.map(h => h.m), series: [{ name:t('netWorth'), values: hist.map(h => h.v), color:'#9c8bff', area:true }], minZero:false, height:200,
     fmtX: (m, i, long) => long ? monthLabel(m) : mShort(m), fmtV: v => L()==='en' ? '¥' + (v/1e6).toFixed(2) + 'M' : '¥' + Math.round(v/10000).toLocaleString('ja-JP') + '万' });
   const order = ['bank','cash','emoney','invest','pension','card','points','miles'];
   const groups = order.map(tp => ({ tp, items: liveAccts().filter(a => a.type === tp) })).filter(g => g.items.length);
@@ -1003,6 +1102,7 @@ function viewSettings(){
       ${setRow('upload', t('importTitle'), '', 'import')}
       ${setRow('save', t('backup'), '', 'backup')}
       ${setRow('restore', t('restore'), '', 'restore')}
+      ${S.sample ? setRow('refresh', t('fresh'), '', 'fresh') : ''}
       ${setRow('refresh', t('resetSample'), '', 'reset')}
     </div></div></div>
     <div><h5 class="eyebrow" style="margin:0 0 8px 4px">${esc(t('secApp'))}</h5><div class="card" style="padding:4px 18px"><div class="rows list" style="background:none;padding:0">
@@ -1057,7 +1157,7 @@ function openTx(id){
     sh.querySelector('#txf').addEventListener('submit', e => { e.preventDefault();
       const v = +amt.value.replace(/[^\d]/g,''); if (!v) { amt.focus(); return; }
       const c = catSel.value; const d = desc.value.trim() || catName(c);
-      const rec = { id: x ? x.id : uid(), date: sh.querySelector('#f-date').value || iso(today0()), desc: d, amt: type === 'inc' ? v : -v, cat: c, book, memo: sh.querySelector('#f-memo').value.trim(), src: x ? x.src : 'manual' };
+      const rec = { id: x ? x.id : uid(), date: sh.querySelector('#f-date').value || iso(today0()), desc: d, amt: type === 'inc' ? v : -v, cat: c, book, memo: sh.querySelector('#f-memo').value.trim(), src: x ? x.src : 'manual', rev: true };
       if (shared) { rec.payer = sh.querySelector('#f-payer').value; rec.acct = null; } else rec.acct = sh.querySelector('#f-acct').value;
       if (x) Object.assign(x, rec); else S.tx.push(rec);
       if (sh.querySelector('#f-rule').checked && desc.value.trim()) { S.rules = S.rules.filter(r => r.kw !== desc.value.trim()); S.rules.unshift({ kw: desc.value.trim(), cat: c }); }
@@ -1152,6 +1252,7 @@ function buildImport(text, target, posIsExp){
       out.push({ id:uid(), date, desc, amt, cat:c, book:'personal', acct:target, src:'csv' });
     }
   }
+  out.forEach(x => { x.rev = false; });
   return { isMF, out, dupes };
 }
 function openImport(){
@@ -1160,7 +1261,7 @@ function openImport(){
     <div class="form">
       <label>${esc(t('target'))}<select class="inp" id="i-acct"><option value="">${esc(t('autoDetect'))}</option>${opts}</select></label>
       <label class="check"><input type="checkbox" id="i-pos" checked> ${esc(t('positiveIsExpense'))}</label>
-      <label class="btn ghost" style="flex-direction:row;color:var(--fg);font-size:15px">${ic('upload','style="width:18px;height:18px"')} ${esc(t('chooseFile'))}<input type="file" id="i-file" accept=".csv,text/csv" hidden></label>
+      <label class="btn ghost" style="flex-direction:row;color:var(--fg);font-size:15px">${ic('upload','style="width:18px;height:18px"')} ${esc(t('chooseFile'))}<input type="file" id="i-file" hidden></label>
       <div id="i-res"></div>
     </div>`, sh => {
     let result = null, fileText = null;
@@ -1178,7 +1279,10 @@ function openImport(){
         result.out.forEach(x => { if (!x.acct && x.acctName) { let a = S.accounts.find(z => z.name === x.acctName); if (!a) { a = { id:'a' + uid(), name:x.acctName, type:'bank', balance:0, unit:null, rate:null, payDay:null }; S.accounts.push(a); } x.acct = a.id; } delete x.acctName; });
         S.tx.push(...result.out);
         new Set(result.out.map(x => x.acct)).forEach(id => { if (id) S.lastImport[id] = new Date().toISOString(); });
-        persist(); closeSheet(); UI.bannerHidden = true; render(); toast(t('imported', result.out.length));
+        const ds = result.out.map(x => x.date).sort(); const first = ds[0], last = ds[ds.length - 1];
+        persist(); closeSheet(); UI.bannerHidden = true; UI.tab = 'tx'; UI.filter = 'all'; UI.q = ''; S.activeBook = 'personal'; UI.month = mk(last); render(); scrollTo(0,0);
+        toast(t('importedRange', result.out.length, monthLabel(mk(first)), monthLabel(mk(last))));
+        if (result.out.length) setTimeout(openSorter, 450);
       });
     };
     sh.querySelector('#i-file').addEventListener('change', async e => { const f = e.target.files[0]; if (!f) return; fileText = decodeFile(await f.arrayBuffer()); run(); });
@@ -1357,6 +1461,18 @@ function openRestore(){
     });
   });
 }
+function snapshotHistory(){
+  if (!S) return; const cur = mk(iso(today0())), prev = addMonths(cur, -1);
+  const last = S.history.length ? S.history[S.history.length - 1].m : null;
+  if ((last === null && !S.sample) || (last && last < prev)) { S.history.push({ m: prev, v: Math.round(netWorth(S)) }); if (S.history.length > 120) S.history.shift(); persist(); }
+}
+function openFresh(){
+  openSheet(`<h2>${esc(t('fresh'))}</h2><p class="lead">${esc(t('freshLead'))}</p><button class="btn danger" id="f-go">${esc(t('fresh'))}</button>`, sh => {
+    const b = sh.querySelector('#f-go'); b.addEventListener('click', () => { if (!b.dataset.arm) { b.dataset.arm = 1; b.textContent = t('freshConfirm'); return; }
+      S.tx = S.tx.filter(x => x.src !== 'sample'); S.accounts.forEach(a => { a.balance = 0; }); S.history = []; S.lastImport = {}; S.sample = false;
+      S.lastReview = new Date().toISOString(); UI.bannerHidden = false; persist(); closeSheet(); UI.tab = 'assets'; render(); toast(t('freshDone')); });
+  });
+}
 function openReset(){
   openSheet(`<h2>${esc(t('resetSample'))}</h2><p class="lead">${esc(t('resetLead'))}</p><button class="btn danger" id="z-go">${esc(t('resetSample'))}</button>`, sh => {
     const b = sh.querySelector('#z-go'); b.addEventListener('click', () => { if (!b.dataset.arm) { b.dataset.arm = 1; b.textContent = t('resetConfirm'); return; }
@@ -1425,6 +1541,9 @@ document.addEventListener('click', e => {
     case 'setbook': S.activeBook = arg; persist(); closeSheet(); if (UI.tab === 'assets' && arg !== 'personal') UI.tab = 'home'; render(); break;
     case 'search': UI.tab = 'tx'; render(); setTimeout(() => $('#q')?.focus(), 30); break;
     case 'month': UI.month = addMonths(UI.month, +arg); render(); break;
+    case 'pickmonth': openMonthPicker(); break;
+    case 'sort': openSorter(); break;
+    case 'gomonth': UI.month = arg; closeSheet(); render(); scrollTo(0,0); break;
     case 'filter': UI.filter = arg; render(); break;
     case 'hidebanner': UI.bannerHidden = true; render(); break;
     case 'lang': S.lang = arg; writeMeta({ lang:arg }); persist(); render(); break;
@@ -1445,6 +1564,7 @@ document.addEventListener('click', e => {
     case 'backup': openBackup(); break;
     case 'restore': openRestore(); break;
     case 'reset': openReset(); break;
+    case 'fresh': openFresh(); break;
     case 'changelog': openChangelog(false); break;
     case 'update': openUpdate(); break;
     case 'sampleinfo': openSampleInfo(); break;
