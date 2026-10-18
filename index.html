@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Kura 家計簿</title>
-<meta name="theme-color" content="#130f1b">
+<meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,9 +13,17 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/1125x2436.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/1170x2532.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/1179x2556.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/1206x2622.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/1284x2778.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/1290x2796.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="splash/1320x2868.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="splash/828x1792.png">
 <style>
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-body{margin:0} img{max-width:100%} [hidden]{display:none!important}
+html,body{background:#000} body{margin:0} img{max-width:100%} [hidden]{display:none!important}
 .upd{position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));z-index:70;display:flex;gap:12px;align-items:center;background:#f6f3fa;color:#141019;padding:10px 10px 10px 18px;border-radius:999px;font:500 14px "Onest","Zen Kaku Gothic New",system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.35);white-space:nowrap}
 .upd button{background:#141019;color:#f6f3fa;border:0;border-radius:999px;padding:8px 14px;font:inherit;cursor:pointer}
 </style>
@@ -53,23 +61,34 @@ body[data-tab="tx"]{--b1:#6b2bd9;--b2:#d23cf2;--b3:#f6a33a}
 body[data-tab="insights"]{--b1:#3b2bd8;--b2:#b89c1b;--b3:#e0577b}
 body[data-tab="assets"]{--b1:#4a32e0;--b2:#1db58e;--b3:#f2c230}
 body[data-tab="settings"]{--b1:#40306e;--b2:#6a5ab0;--b3:#a2557a}
-body.locked{--b1:#5a2cf0;--b2:#f2c230;--b3:#ff6f91}
+body.locked{--b1:#b8962a;--b2:#c9a92e;--b3:#c2543f}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;background:none;border:0;padding:0}
 :focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:12px}
 .tnum{font-variant-numeric:tabular-nums}
 
 /* colour field */
-.mesh{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:var(--bg)}
-.blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.95;transition:background-color 1.2s ease}
-.blob.a{width:85vmax;height:60vmax;left:-35vmax;top:-26vmax;background:var(--b1);animation:drift1 26s ease-in-out infinite alternate}
-.blob.b{width:62vmax;height:52vmax;right:-22vmax;top:-18vmax;background:var(--b2);animation:drift2 32s ease-in-out infinite alternate}
-.blob.c{width:46vmax;height:40vmax;left:8vmax;top:4vmax;background:var(--b3);opacity:.55;animation:drift3 22s ease-in-out infinite alternate}
-.mesh::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(19,15,27,0) 0%,rgba(19,15,27,.35) 26%,var(--bg) 58%,var(--bg-deep) 100%)}
-@keyframes drift1{to{transform:translate(8vmax,6vmax) scale(1.08)}}
-@keyframes drift2{to{transform:translate(-10vmax,8vmax) scale(.94)}}
-@keyframes drift3{to{transform:translate(12vmax,-4vmax) scale(1.15)}}
-@media (prefers-reduced-motion:reduce){.blob{animation:none}*{transition:none!important}}
+.mesh{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:var(--bg);transition:background-color 1.2s ease}
+.blob{position:absolute;border-radius:50%;filter:blur(64px);opacity:.95;transition:background-color 1.2s ease;will-change:transform}
+.blob.a{width:85vmax;height:66vmax;left:-34vmax;top:-26vmax;background:var(--b1);animation:drift1 16s ease-in-out infinite alternate}
+.blob.b{width:66vmax;height:56vmax;right:-24vmax;top:-16vmax;background:var(--b2);animation:drift2 19s ease-in-out infinite alternate}
+.blob.c{width:50vmax;height:44vmax;left:4vmax;top:10vmax;background:var(--b3);opacity:.6;animation:drift3 13s ease-in-out infinite alternate}
+.blob.d{width:60vmax;height:54vmax;right:-26vmax;bottom:-22vmax;background:var(--b2);opacity:.45;animation:drift4 22s ease-in-out infinite alternate}
+.mesh::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(19,15,27,0) 0%,rgba(19,15,27,.3) 28%,rgba(19,15,27,.82) 60%,rgba(13,10,19,.9) 100%);transition:opacity 1s ease}
+body.locked .mesh{background:#2b176c}
+body.locked .mesh::after{opacity:0}
+body.locked .blob.c{opacity:.3}
+body.locked .blob.d{opacity:.7}
+@keyframes drift1{0%{transform:translate(0,0) scale(1)}50%{transform:translate(16vmax,12vmax) scale(1.14)}100%{transform:translate(4vmax,26vmax) scale(.94)}}
+@keyframes drift2{0%{transform:translate(0,0) scale(1)}50%{transform:translate(-18vmax,14vmax) scale(.9)}100%{transform:translate(-6vmax,30vmax) scale(1.1)}}
+@keyframes drift3{0%{transform:translate(0,0) scale(1)}50%{transform:translate(20vmax,-6vmax) scale(1.2)}100%{transform:translate(-8vmax,16vmax) scale(.9)}}
+@keyframes drift4{0%{transform:translate(0,0) scale(1)}50%{transform:translate(-14vmax,-18vmax) scale(1.12)}100%{transform:translate(-26vmax,-6vmax) scale(.96)}}
+@media (prefers-reduced-motion:reduce){.blob{animation-duration:60s}*{transition:none!important}}
+#splash{position:fixed;inset:0;z-index:100;background:#000;display:grid;place-items:center;transition:opacity .7s ease}
+#splash .word{font:700 54px/1 var(--font);letter-spacing:-.045em;color:#fff;animation:splashIn .8s cubic-bezier(.2,.7,.2,1) both}
+#splash .word span{color:var(--accent)}
+#splash.out{opacity:0;pointer-events:none}
+@keyframes splashIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
 
 /* shell */
 #app{position:relative;z-index:1;max-width:520px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 120px;min-height:100%}
@@ -145,6 +164,7 @@ h1.pg{font-size:36px;font-weight:700;letter-spacing:-.025em;margin:18px 0 6px;te
 .av{width:46px;height:46px;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:15px;background:rgba(255,255,255,.11);position:relative;font-family:var(--jp)}
 .av .badge{position:absolute;right:-3px;bottom:-3px;width:20px;height:20px;border-radius:50%;font-size:9.5px;display:grid;place-items:center;font-family:var(--font);font-weight:700;box-shadow:0 0 0 2px var(--bg);color:#fff}
 .row .main{flex:1;min-width:0}
+.row .t1,.row .t2{display:block}
 .row .t1{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .row .t2{font-size:13.5px;color:var(--fg-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .row .amt{font-weight:600;text-align:right;white-space:nowrap}
@@ -267,6 +287,16 @@ textarea.inp{height:110px;padding:12px 14px;font-size:12px;font-family:ui-monosp
 
 /* lock */
 .lock{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:max(24px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.lock .greet{display:flex;flex-direction:column;align-items:center;gap:14px;animation:greetIn 1s cubic-bezier(.2,.7,.2,1) .2s both}
+@keyframes greetIn{from{opacity:0;transform:translateY(16px) scale(.95);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
+.avatar{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;font-size:36px;font-weight:600;letter-spacing:-.02em;color:rgba(255,255,255,.88);background:rgba(255,255,255,.2);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 0 0 1.5px rgba(245,232,120,.8);font-family:var(--font)}
+.avatar.scan{animation:scan 1.6s ease-in-out infinite}
+@keyframes scan{0%,100%{box-shadow:inset 0 0 0 1.5px rgba(245,232,120,.8),0 0 0 0 rgba(245,232,120,.0)}50%{box-shadow:inset 0 0 0 1.5px rgba(245,232,120,1),0 0 0 10px rgba(245,232,120,.12)}}
+.lock .hi{font-size:22px;font-weight:700;letter-spacing:-.01em;text-align:center}
+.pinpane{display:flex;flex-direction:column;align-items:center;margin-top:18px;animation:greetIn .5s ease both}
+.lockfoot{position:absolute;left:0;right:0;bottom:calc(26px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;gap:10px;animation:greetIn .8s ease .6s both}
+.lockfoot button{padding:10px 18px;border-radius:999px;background:rgba(255,255,255,.14);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-weight:500;font-size:14.5px;display:inline-flex;align-items:center;gap:8px}
+.lockfoot svg{width:18px;height:18px}
 .lock .mark{font-size:40px;font-weight:700;letter-spacing:-.04em}
 .lock .mark span{color:var(--accent)}
 .lock .msg{color:var(--fg-2);min-height:24px;font-size:15px;text-align:center}
@@ -289,7 +319,8 @@ textarea.inp{height:110px;padding:12px 14px;font-size:12px;font-family:ui-monosp
 </style>
 </head>
 <body>
-<div class="mesh" aria-hidden="true"><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div></div>
+<div id="splash" aria-hidden="true"><div class="word">Kura<span>.</span></div></div>
+<div class="mesh" aria-hidden="true"><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div><div class="blob d"></div></div>
 <main id="app" aria-live="polite"></main>
 <nav class="nav" id="nav" hidden></nav>
 <div class="toast" id="toast" role="status"></div>
@@ -301,13 +332,22 @@ textarea.inp{height:110px;padding:12px 14px;font-size:12px;font-family:ui-monosp
    - data is encrypted at rest (AES-256-GCM, key from PIN via PBKDF2)
    - schema migrations run on unlock so updates never break data
    ========================================================= */
-const VERSION = '0.3.0';
-const SCHEMA = 2;
+const VERSION = '0.5.0';
+const SCHEMA = 3;
 const DEMO_PIN = '1234';
 const VAULT = 'kura.vault.v1';
 const META = 'kura.meta.v1';
 
 const CHANGELOG = [
+  { v: '0.5.0', date: '2026-10-18',
+    ja: ['起動時に黒い画面でKuraのロゴを表示', 'ロック画面を刷新：名前とアイコンがふわっと表示され、Face IDが自動で起動', 'すべての画面で背景の色がゆっくり動き続けるように', '設定に「表示名」を追加'],
+    en: ['Black launch screen with the Kura wordmark', 'New lock screen: your name and avatar fade in and Face ID starts automatically', 'The background colours now keep moving on every screen', 'Added Display name to Settings'] },
+  { v: '0.4.1', date: '2026-10-18',
+    ja: ['パスキーを複数登録できるように（iCloudキーチェーンとGoogleアカウントの併用など）', '別の端末で作った保存済みのパスキーを追加できるように', 'パスキーごとに名前を付けて、個別に削除できるように'],
+    en: ['Register several passkeys (for example iCloud Keychain and your Google account)', 'Add a passkey you already saved on another device', 'Name each passkey and remove them one by one'] },
+  { v: '0.4.0', date: '2026-10-18',
+    ja: ['Face ID / Touch ID とパスキーでロック解除できるように（iCloudキーチェーンに保存）', 'データの鍵の仕組みを更新（PINとFace IDのどちらでも開ける形に自動移行）', '最初から入っていた例の金額・予算・残高をすべて0に', 'サンプルの入出金を削除し、口座とカテゴリだけの状態から始まるように'],
+    en: ['Unlock with Face ID / Touch ID and a passkey (saved in iCloud Keychain)', 'Updated how the data key is stored so either PIN or Face ID can open it (migrated automatically)', 'All example amounts, budgets and balances are now 0', 'Sample transactions removed; the app starts with just accounts and categories'] },
   { v: '0.3.0', date: '2026-10-18',
     ja: ['取り込んだ入出金を1件ずつ確認する「仕分け」画面を追加', '確認が済んだものは既読になり、赤い丸が消えるように', '同じお店は一度決めれば、残りもまとめて同じカテゴリに', '入出金の画面に「未確認」の絞り込みを追加', 'データ形式をv2に自動移行（取り込み済みの入出金は未確認として扱います）'],
     en: ['New Sort screen to review imported transactions one by one', 'Reviewed items are marked read and the red dot disappears', 'Pick a category once and other entries from the same shop follow', 'Added an Unreviewed filter to Activity', 'Data upgraded to format v2 automatically (already-imported entries start as unreviewed)'] },
@@ -339,7 +379,7 @@ const I = {
     importNow:'CSVを取り込む', reviewDue:'今週の振り返り', reviewDueSub:'10分で先週の支出を確認しましょう', startReview:'振り返りを始める',
     monthBudget:'今月の予算', left:'残り', perDay:d=>`1日あたり ${d}`, daysLeft:n=>`あと${n}日`, over:'超過',
     recent:'最近の入出金', seeAll:'すべて', all:'すべて', expense:'支出', income:'収入', transfer:'振替', uncategorized:'未分類',
-    noTx:'この月の入出金はまだありません', searchPh:'お店や内容で検索',
+    noTx:'この月の入出金はまだありません', noTxYet:'まだ入出金がありません。「入力」か「取込」から始めましょう。', searchPh:'お店や内容で検索',
     spent:'支出', thisMonth:'今月', lastMonth:'先月', net:'収支', byCategory:'カテゴリ別', vsBudget:'予算比',
     total:'合計', assetTrend:'純資産の推移', breakdown:'内訳', liabilities:'カード未払い', upcoming:'引き落とし予定',
     subs:'サブスク（自動検出）', perMonth:'月額', estimated:'確定前', points:'ポイント・マイル', notCounted:'総資産に含めない',
@@ -347,12 +387,22 @@ const I = {
     secLang:'言語', secSecurity:'セキュリティ', secData:'データ', secApp:'アプリ',
     language:'表示言語', changePin:'PINを変更', autoLock:'自動ロック', lockNow:'今すぐロック', biometric:'Face ID / Touch ID',
     encryption:'暗号化の状態', categories:'カテゴリと予算', rules:'自動分類ルール', backup:'暗号化バックアップ', restore:'バックアップから復元',
-    resetSample:'サンプルに戻す', version:'バージョン', changelog:'変更履歴', checkUpdate:'アップデートを確認', secPlan:'セキュリティ構成',
+    resetSample:'初期状態に戻す', version:'バージョン', changelog:'変更履歴', checkUpdate:'アップデートを確認', secPlan:'セキュリティ構成',
     min:n=>`${n}分`, save:'保存', cancel:'キャンセル', del:'削除', delConfirm:'もう一度押すと削除', close:'閉じる',
     amount:'金額', desc:'内容', date:'日付', category:'カテゴリ', account:'口座', payer:'支払った人', memo:'メモ',
     learnRule:'この内容を次回から自動で分類する', newTx:'入出金を追加', editTx:'入出金を編集', saved:'保存しました', deleted:'削除しました',
-    pinEnter:'PINを入力', pinWrong:n=>`PINが違います（あと${n}回）`, pinLocked:s=>`${s}秒後にもう一度お試しください`, pinHint:'試作版のPINは 1234 です',
-    bioProto:'Face ID は本番版（パスキー対応）で使えます', unlocking:'復号しています…',
+    pinEnter:'PINを入力', pinWrong:n=>`PINが違います（あと${n}回）`, pinLocked:s=>`${s}秒後にもう一度お試しください`, pinHint:'最初のPINは 1234 です。設定から変更してください',
+    usePin:'PINで開く', secProfile:'プロフィール', displayName:'表示名', notSet:'未設定', nameLead:'ロック画面のあいさつとアイコンに使います。ロックを解除する前に表示するため、この名前だけは暗号化せずに保存します。', bioProto:'', bioOn:'オン', bioOff:'オフ', pkCount:n=>`${n}件`, bioListTitle:'登録済みのパスキー', pkDefault:'パスキー', pkAddedOn:d=>`${d}に追加`, pkAddMore:'パスキーを追加', pkLabel:'名前（あとで見分けるため）', pkLabelPh:'例：iPhone（iCloud）、Googleアカウント',
+    pkNew:'新しいパスキーを作る', pkExisting:'保存済みのパスキーを使う', pkAdded:'パスキーを追加しました。次からFace IDで開けます', pkDup:'このパスキーはすでに登録されています', pkRemoved:'パスキーを削除しました',
+    googleTitle:'Googleアカウント（Chrome）に保存するには', googleSteps:['iPhone：設定 → 一般 → 自動入力とパスワード で「Chrome」をオンにします（iOS 17以降）', '「新しいパスキーを作る」を押し、保存先を選ぶ画面が出たら Chrome（Google パスワード マネージャー）を選びます', '初めてのときは、Google パスワード マネージャーのPINを作るよう求められます', 'Mac・WindowsのChromeでKuraを開いた場合は、「新しいパスキーを作る」でそのままGoogleアカウントに保存されます', '別の端末でGoogleに保存したKuraのパスキーがあるときは、「保存済みのパスキーを使う」から選びます', 'Googleのパスキーがデータの鍵の取り出しに対応していない場合は、その旨が表示されます。そのときはiCloudキーチェーンのパスキーを使ってください'], bioOpen:'Face IDで開く',
+    bioLead:'設定すると、PINの代わりにFace ID（MacではTouch ID）でKuraを開けます。「Kura」のパスキーがiCloudキーチェーンかGoogle パスワード マネージャーに保存され、Face IDが通ったときだけ、データの鍵が取り出されます。複数登録でき、どれか1つで開けます。PINは予備としてそのまま使えます。',
+    bioReq:'必要なもの', bioReqItems:['iPhone：iOS 18.4以降、Face IDがオン', 'Mac：macOS 15以降のSafari（Touch ID）', '設定 → パスワード（または iCloud）→ パスワードとキーチェーン がオン', 'ホーム画面に追加したKura（missy-95.github.io/Kura）から設定すること'],
+    bioSetup:'Face ID / パスキーを設定する', bioSetting:'Face IDを確認しています…', bioDone:'Face IDを設定しました。次からFace IDで開けます',
+    bioOffBtn:'Face IDをオフにする', bioOffDone:'Face IDをオフにしました', bioOffNote:'Kuraから削除しても、パスキー自体は「パスワード」アプリやGoogle パスワード マネージャーに残ります。使わない場合は、そちらでも削除してください。',
+    bioStatusOn:d=>`オン（${d}に設定）。次にKuraを開くと、Face IDの確認が自動で出ます。`, bioNotSet:'Face IDはまだ設定されていません。設定 → Face ID / Touch ID から設定できます',
+    bioFail:'Face IDで開けませんでした。PINを入力してください', bioCancel:'キャンセルされたか、時間切れになりました。もう一度お試しください',
+    bioNoPrf:'この端末かブラウザは、Face IDでのデータ解除に対応していません。iPhoneはiOS 18.4以降、MacはmacOS 15以降が必要です。パスワード管理にiCloudキーチェーン以外のアプリを使っている場合も動かないことがあります。',
+    bioNoHere:'この画面では設定できません。iPhoneのホーム画面に追加したKura（https://missy-95.github.io/Kura/）で設定してください。', bioUnavailable:'この端末ではFace ID / Touch IDがオフになっているか、使えない設定です。', unlocking:'復号しています…',
     week:'今週', weekAvg:'過去8週の平均', topCats:'今週の多いカテゴリ', toCategorize:n=>`未分類が${n}件あります`, categorizeNow:'分類する',
     importStatus:'取り込み状況', daysAgo:n=>n===0?'今日':`${n}日前`, markDone:'振り返りを完了', reviewDone:'お疲れさまでした。また来週',
     importTitle:'CSVを取り込む', importLead:'Money Forward の書き出しCSV、または銀行・カードの明細CSVを選んでください。文字コード（Shift_JIS / UTF-8）は自動で判定します。',
@@ -367,7 +417,7 @@ const I = {
     backupLead:'データ全体をパスフレーズで暗号化した文字列にします。メモアプリやパスワード管理アプリに貼り付けて保管してください。',
     passphrase:'パスフレーズ（8文字以上）', makeBackup:'バックアップを作成', copy:'コピー', copied:'コピーしました', copyFail:'自動でコピーできませんでした。文字列を選択してコピーしてください',
     restoreLead:'バックアップの文字列とパスフレーズを入力してください。今のデータは置き換わります。', doRestore:'復元する', restored:'復元しました', restoreErr:'復元できませんでした。文字列かパスフレーズを確認してください',
-    resetLead:'入力したデータを消して、サンプルデータに戻します。', resetConfirm:'もう一度押すとリセット', resetDone:'サンプルに戻しました',
+    resetLead:'入力した入出金・残高・予算をすべて消して、口座とカテゴリだけの最初の状態（金額はすべて0）に戻します。', resetConfirm:'もう一度押すとリセット', resetDone:'最初の状態に戻しました',
     pinLead:'4〜6桁の数字。変更すると、新しいPINでデータを暗号化し直します。', curPin:'今のPIN', newPin:'新しいPIN', newPin2:'新しいPIN（確認）', pinChanged:'PINを変更しました',
     pinMismatch:'新しいPINが一致しません', pinBad:'今のPINが違います', pinFormat:'4〜6桁の数字で入力してください',
     upToDate:v=>`最新版です（v${v}）`, updateLead:'本番版では、新しいバージョンが公開されると起動時に知らせて、変更点を表示します。データ形式の変更は自動で移行し、移行前に自動バックアップを取ります。',
@@ -396,7 +446,7 @@ const I = {
     importNow:'Import CSV', reviewDue:'Weekly review', reviewDueSub:'Ten minutes to check last week', startReview:'Start review',
     monthBudget:'Budget this month', left:'left', perDay:d=>`${d} per day`, daysLeft:n=>`${n} days left`, over:'Over',
     recent:'Recent activity', seeAll:'See all', all:'All', expense:'Expense', income:'Income', transfer:'Transfer', uncategorized:'Uncategorized',
-    noTx:'Nothing recorded this month yet', searchPh:'Search shops or notes',
+    noTx:'Nothing recorded this month yet', noTxYet:'No transactions yet. Start with Add or Import.', searchPh:'Search shops or notes',
     spent:'Spent', thisMonth:'This month', lastMonth:'Last month', net:'Net cashflow', byCategory:'By category', vsBudget:'vs budget',
     total:'Total', assetTrend:'Net worth over time', breakdown:'Breakdown', liabilities:'Card balance', upcoming:'Upcoming payments',
     subs:'Subscriptions (detected)', perMonth:'per month', estimated:'pending', points:'Points & miles', notCounted:'Not in net worth',
@@ -404,12 +454,22 @@ const I = {
     secLang:'Language', secSecurity:'Security', secData:'Data', secApp:'App',
     language:'Language', changePin:'Change PIN', autoLock:'Auto-lock', lockNow:'Lock now', biometric:'Face ID / Touch ID',
     encryption:'Encryption status', categories:'Categories & budgets', rules:'Auto-categorize rules', backup:'Encrypted backup', restore:'Restore from backup',
-    resetSample:'Reset to sample', version:'Version', changelog:'Changelog', checkUpdate:'Check for updates', secPlan:'Security layers',
+    resetSample:'Reset to start', version:'Version', changelog:'Changelog', checkUpdate:'Check for updates', secPlan:'Security layers',
     min:n=>`${n} min`, save:'Save', cancel:'Cancel', del:'Delete', delConfirm:'Tap again to delete', close:'Close',
     amount:'Amount', desc:'Description', date:'Date', category:'Category', account:'Account', payer:'Paid by', memo:'Note',
     learnRule:'Categorize this automatically next time', newTx:'Add transaction', editTx:'Edit transaction', saved:'Saved', deleted:'Deleted',
-    pinEnter:'Enter PIN', pinWrong:n=>`Wrong PIN (${n} tries left)`, pinLocked:s=>`Try again in ${s}s`, pinHint:'Prototype PIN is 1234',
-    bioProto:'Face ID arrives with passkeys in the full version', unlocking:'Decrypting…',
+    pinEnter:'Enter PIN', pinWrong:n=>`Wrong PIN (${n} tries left)`, pinLocked:s=>`Try again in ${s}s`, pinHint:'The starting PIN is 1234. Change it in Settings',
+    usePin:'Use PIN', secProfile:'Profile', displayName:'Display name', notSet:'Not set', nameLead:'Used for the greeting and avatar on the lock screen. Because it shows before unlocking, this name alone is stored unencrypted.', bioProto:'', bioOn:'On', bioOff:'Off', pkCount:n=>`${n}`, bioListTitle:'Registered passkeys', pkDefault:'Passkey', pkAddedOn:d=>`Added ${d}`, pkAddMore:'Add a passkey', pkLabel:'Name (to tell them apart)', pkLabelPh:'e.g. iPhone (iCloud), Google account',
+    pkNew:'Create a new passkey', pkExisting:'Use a saved passkey', pkAdded:'Passkey added. Next time, open Kura with Face ID', pkDup:'This passkey is already registered', pkRemoved:'Passkey removed',
+    googleTitle:'Saving to your Google account (Chrome)', googleSteps:['iPhone: Settings → General → AutoFill & Passwords, turn on Chrome (iOS 17+)', 'Tap Create a new passkey and, when asked where to save it, choose Chrome (Google Password Manager)', 'The first time, you will be asked to create a Google Password Manager PIN', 'In Chrome on Mac or Windows, Create a new passkey saves straight to your Google account', 'If you already saved a Kura passkey to Google on another device, use "Use a saved passkey"', 'If Google passkeys cannot release the data key, Kura will tell you. Use an iCloud Keychain passkey instead'], bioOpen:'Open with Face ID',
+    bioLead:'Open Kura with Face ID (Touch ID on Mac) instead of your PIN. A "Kura" passkey is saved in iCloud Keychain or Google Password Manager, and the data key is released only when Face ID succeeds. You can register several; any one opens Kura. Your PIN still works as a backup.',
+    bioReq:'What you need', bioReqItems:['iPhone: iOS 18.4 or later with Face ID on', 'Mac: Safari on macOS 15 or later (Touch ID)', 'Settings → Passwords (or iCloud) → Passwords & Keychain turned on', 'Set it up from Kura added to your Home Screen (missy-95.github.io/Kura)'],
+    bioSetup:'Set up Face ID / passkey', bioSetting:'Checking Face ID…', bioDone:'Face ID is set up. Next time, open Kura with Face ID',
+    bioOffBtn:'Turn off Face ID', bioOffDone:'Face ID turned off', bioOffNote:'Removing a passkey here does not delete it from the Passwords app or Google Password Manager. Delete it there too if you no longer need it.',
+    bioStatusOn:d=>`On (set up ${d}). Face ID will appear automatically when you open Kura.`, bioNotSet:'Face ID is not set up yet. Go to Settings → Face ID / Touch ID',
+    bioFail:'Could not open with Face ID. Enter your PIN', bioCancel:'Cancelled or timed out. Please try again',
+    bioNoPrf:'This device or browser cannot unlock data with Face ID. iPhone needs iOS 18.4+, Mac needs macOS 15+. It may also fail if you use a password manager other than iCloud Keychain.',
+    bioNoHere:'Cannot be set up here. Use Kura added to your iPhone Home Screen (https://missy-95.github.io/Kura/).', bioUnavailable:'Face ID / Touch ID is turned off or unavailable on this device.', unlocking:'Decrypting…',
     week:'This week', weekAvg:'8-week average', topCats:'Top categories this week', toCategorize:n=>`${n} uncategorized`, categorizeNow:'Categorize',
     importStatus:'Import status', daysAgo:n=>n===0?'today':`${n}d ago`, markDone:'Finish review', reviewDone:'Done. See you next week',
     importTitle:'Import CSV', importLead:'Pick a Money Forward export, or a statement CSV from your bank or card. Shift_JIS and UTF-8 are detected automatically.',
@@ -424,7 +484,7 @@ const I = {
     backupLead:'Turns all your data into a text block encrypted with a passphrase. Keep it in your notes or password manager.',
     passphrase:'Passphrase (8+ characters)', makeBackup:'Create backup', copy:'Copy', copied:'Copied', copyFail:'Could not copy automatically. Select the text and copy it',
     restoreLead:'Paste the backup text and its passphrase. Your current data will be replaced.', doRestore:'Restore', restored:'Restored', restoreErr:'Could not restore. Check the text and the passphrase',
-    resetLead:'Erase your entries and go back to the sample data.', resetConfirm:'Tap again to reset', resetDone:'Reset to sample data',
+    resetLead:'Erase all transactions, balances and budgets and go back to the starting state: accounts and categories only, every amount 0.', resetConfirm:'Tap again to reset', resetDone:'Back to the starting state',
     pinLead:'4 to 6 digits. Your data is re-encrypted with the new PIN.', curPin:'Current PIN', newPin:'New PIN', newPin2:'Confirm new PIN', pinChanged:'PIN changed',
     pinMismatch:'New PINs do not match', pinBad:'Current PIN is wrong', pinFormat:'Use 4 to 6 digits',
     upToDate:v=>`You are up to date (v${v})`, updateLead:'In the full version, the app tells you when a new version is out and shows what changed. Data format changes migrate automatically, with a backup taken first.',
@@ -535,18 +595,109 @@ async function deriveKey(pass, salt){
 async function seal(key, obj){ const iv = crypto.getRandomValues(new Uint8Array(12)); const ct = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, TE.encode(JSON.stringify(obj))); return { iv:b64e(iv), ct:b64e(new Uint8Array(ct)) }; }
 async function unseal(key, box){ const pt = await crypto.subtle.decrypt({ name:'AES-GCM', iv:b64d(box.iv) }, key, b64d(box.ct)); return JSON.parse(TD.decode(pt)); }
 
+/* Vault v2: the data is encrypted with a random data key (DEK).
+   The DEK is stored twice: wrapped by a key from the PIN, and (optionally) by a key that only a
+   Face ID / Touch ID passkey can produce (WebAuthn PRF). Neither the DEK nor the PIN is ever stored in plain form. */
+let DEKRAW = null, WRAP = { pin:null, prfSalt:null, pks:[] };
+const hasPasskey = v => !!(v && v.v === 2 && ((v.pks && v.pks.length) || v.pk));
+function wrapsFrom(v){
+  const pks = v.pks ? v.pks.slice() : (v.pk ? [{ cred:v.pk.cred, iv:v.pk.iv, ct:v.pk.ct, at:v.pk.at, label:'' }] : []);
+  return { pin:v.pin, prfSalt: v.prfSalt || (v.pk && v.pk.prfSalt) || null, pks };
+}
+const aesKey = raw => crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt','decrypt']);
+async function sealBytes(key, u8){ const iv = crypto.getRandomValues(new Uint8Array(12)); const ct = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, u8); return { iv:b64e(iv), ct:b64e(new Uint8Array(ct)) }; }
+async function openBytes(key, box){ return new Uint8Array(await crypto.subtle.decrypt({ name:'AES-GCM', iv:b64d(box.iv) }, key, b64d(box.ct))); }
+async function newDek(){ DEKRAW = crypto.getRandomValues(new Uint8Array(32)); KEY = await aesKey(DEKRAW); }
+async function wrapWithPin(pin){ const salt = crypto.getRandomValues(new Uint8Array(16)); const k = await deriveKey(pin, salt); WRAP.pin = { salt:b64e(salt), ...(await sealBytes(k, DEKRAW)) }; }
+function readVault(){ try { return JSON.parse(lsGet(VAULT) || 'null'); } catch(e){ return null; } }
 let saveTimer = null;
 function persist(){ clearTimeout(saveTimer); saveTimer = setTimeout(persistNow, 250); }
 async function persistNow(){
-  if (!S || !KEY || noCrypto) return;
-  try { const box = await seal(KEY, S); lsSet(VAULT, JSON.stringify({ v:1, salt:b64e(SALT), ...box })); }
+  if (!S || !KEY || noCrypto || !WRAP.pin) return;
+  try { const data = await seal(KEY, S); lsSet(VAULT, JSON.stringify({ v:2, pin:WRAP.pin, prfSalt:WRAP.prfSalt, pks:WRAP.pks, data })); }
   catch(e){ console.warn('save failed', e); }
+}
+
+/* ---------- Face ID / Touch ID via passkey (WebAuthn PRF) ---------- */
+const inFrame = (() => { try { return window.top !== window.self; } catch(e){ return true; } })();
+async function prfKey(out){
+  const base = await crypto.subtle.importKey('raw', out, 'HKDF', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name:'HKDF', hash:'SHA-256', salt:TE.encode('kura-vault-v2'), info:TE.encode('dek-wrap') }, base, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']);
+}
+async function prfGet(ids, salt){
+  const opts = { challenge:crypto.getRandomValues(new Uint8Array(32)), userVerification:'required', timeout:60000, extensions:{ prf:{ eval:{ first:salt } } } };
+  if (ids && ids.length) opts.allowCredentials = ids.map(id => ({ type:'public-key', id:b64d(id) }));
+  const a = await navigator.credentials.get({ publicKey:opts });
+  const r = a.getClientExtensionResults().prf?.results?.first; if (!r) throw Object.assign(new Error('noprf'), { name:'NoPRF' });
+  return { out:new Uint8Array(r), id:b64e(new Uint8Array(a.rawId)) };
+}
+async function bioRegister(mode, label){
+  if (!window.PublicKeyCredential || !navigator.credentials || inFrame) throw Object.assign(new Error('here'), { name:'NotHere' });
+  if (!WRAP.prfSalt) WRAP.prfSalt = b64e(crypto.getRandomValues(new Uint8Array(32)));
+  const salt = b64d(WRAP.prfSalt);
+  let credId, out;
+  if (mode === 'existing') {
+    const r = await prfGet(null, salt); credId = r.id; out = r.out;
+  } else {
+    const cred = await navigator.credentials.create({ publicKey:{
+      rp:{ name:'Kura' }, user:{ id:crypto.getRandomValues(new Uint8Array(16)), name:'kura', displayName:'Kura 家計簿' },
+      challenge:crypto.getRandomValues(new Uint8Array(32)), pubKeyCredParams:[{ type:'public-key', alg:-7 }, { type:'public-key', alg:-257 }],
+      excludeCredentials: WRAP.pks.map(p => ({ type:'public-key', id:b64d(p.cred) })),
+      authenticatorSelection:{ residentKey:'required', userVerification:'required' }, timeout:60000,
+      extensions:{ prf:{ eval:{ first:salt } } } } });
+    credId = b64e(new Uint8Array(cred.rawId));
+    const ext = cred.getClientExtensionResults().prf || {};
+    out = ext.results?.first ? new Uint8Array(ext.results.first) : null;
+    if (!out) { if (ext.enabled === false) throw Object.assign(new Error('noprf'), { name:'NoPRF' }); out = (await prfGet([credId], salt)).out; }
+  }
+  if (WRAP.pks.some(p => p.cred === credId)) throw Object.assign(new Error('dup'), { name:'Dup' });
+  WRAP.pks.push({ cred:credId, label:(label || '').trim(), at:new Date().toISOString(), ...(await sealBytes(await prfKey(out), DEKRAW)) });
+  await persistNow();
+}
+function bioErrorText(e){
+  if (e && e.name === 'NotHere') return t('bioNoHere');
+  if (e && e.name === 'NoPRF') return t('bioNoPrf');
+  if (e && e.name === 'Dup') return t('pkDup');
+  if (e && e.name === 'InvalidStateError') return t('pkDup');
+  if (e && (e.name === 'NotAllowedError' || e.name === 'AbortError')) return t('bioCancel');
+  if (e && e.name === 'SecurityError') return t('bioNoHere');
+  return t('bioNoPrf');
+}
+async function bioUnlock(auto){
+  const v = readVault(); if (!hasPasskey(v)) { if (!auto) toast(t('bioNotSet')); return; }
+  const m = $('#lockmsg');
+  try {
+    if (!auto && m) { m.classList.remove('err'); m.textContent = ''; }
+    $('#avatar')?.classList.add('scan');
+    const w = wrapsFrom(v);
+    const r = await prfGet(w.pks.map(p => p.cred), b64d(w.prfSalt));
+    const pk = w.pks.find(p => p.cred === r.id); if (!pk) throw new Error('unknown');
+    DEKRAW = await openBytes(await prfKey(r.out), pk); KEY = await aesKey(DEKRAW); WRAP = w;
+    S = migrate(await unseal(KEY, v.data)); persist();
+    afterUnlock();
+  } catch(e) {
+    DEKRAW = null; KEY = null; S = null;
+    $('#avatar')?.classList.remove('scan');
+    if (m) { if (auto) m.textContent = ''; else { m.classList.add('err'); m.textContent = e && e.name === 'NotAllowedError' ? t('bioCancel') : t('bioFail'); revealPin(); } }
+  }
 }
 
 /* ---------- migrations: each step upgrades the data one schema version ---------- */
 const MIGRATIONS = {
   // v1 → v2: add the read flag. Entries that came from a CSV start as unreviewed.
-  1: s => { s.tx.forEach(x => { if (x.rev === undefined) x.rev = !(x.src === 'mf' || x.src === 'csv'); }); return s; }
+  1: s => { s.tx.forEach(x => { if (x.rev === undefined) x.rev = !(x.src === 'mf' || x.src === 'csv'); }); return s; },
+  // v2 → v3: example amounts become 0. Only values still equal to the old examples are touched, so real entries stay.
+  2: s => {
+    const BUD = { food:48000, daily:8000, home:115000, util:12000, phone:8000, transit:10000, social:20000, outdoor:18000, beauty:12000, health:5000, learn:5000, subs:4000, travel:25000, other:8000 };
+    const BAL = { smbc:1284300, rakutenbank:412880, cash:23400, paypay:8210, suica:4560, sbi:1620000, rakutensec:540000, dc1:2130000, dc2:860000, amazonpt:1240, rakutenpt:8930, jcbpt:412, ana:23400, jal:8800 };
+    s.categories.forEach(c => { if (BUD[c.id] !== undefined && c.budget === BUD[c.id]) c.budget = 0; });
+    s.accounts.forEach(a => { if (BAL[a.id] !== undefined && a.balance === BAL[a.id]) a.balance = 0; });
+    const hadSample = s.tx.some(x => x.src === 'sample');
+    s.tx = s.tx.filter(x => x.src !== 'sample');
+    if (s.sample || hadSample) { s.history = []; s.lastImport = Object.fromEntries(Object.entries(s.lastImport || {}).filter(([id]) => s.tx.some(x => x.acct === id && x.src !== 'sample'))); }
+    s.sample = false;
+    return s;
+  }
 };
 function migrate(s){
   let from = s.schema || 1;
@@ -558,93 +709,32 @@ function migrate(s){
 /* ---------- sample data ---------- */
 function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let x = Math.imul(seed ^ seed >>> 15, 1 | seed); x = x + Math.imul(x ^ x >>> 7, 61 | x) ^ x; return ((x ^ x >>> 14) >>> 0) / 4294967296; }; }
 function makeSample(lang){
-  const r = rng(20261018);
-  const R = (a,b) => Math.round((a + r()*(b-a)) / 10) * 10;
-  const pick = a => a[Math.floor(r()*a.length)];
-  const td = today0();
+  // Initial state: the user's institutions and categories, every amount 0, no transactions.
   const categories = [
-    ['food','食費','Food',48000,'exp'],['daily','日用品','Household',8000,'exp'],['home','住まい','Housing',115000,'exp'],
-    ['util','水道・光熱','Utilities',12000,'exp'],['phone','通信','Phone & internet',8000,'exp'],['transit','交通','Transport',10000,'exp'],
-    ['social','外食・交際','Eating out & social',20000,'exp'],['outdoor','趣味・アウトドア','Hobbies & outdoors',18000,'exp'],
-    ['beauty','美容・衣服','Beauty & clothes',12000,'exp'],['health','健康・医療','Health',5000,'exp'],['learn','学び','Learning',5000,'exp'],
-    ['subs','サブスク','Subscriptions',4000,'exp'],['travel','旅行','Travel',25000,'exp'],['other','その他','Other',8000,'exp'],
-    ['uncat','未分類','Uncategorized',0,'exp'],
-    ['salary','給与','Salary',0,'inc'],['side','副収入','Side income',0,'inc'],['incother','その他収入','Other income',0,'inc'],
-    ['transfer','振替','Transfer',0,'xfer']
-  ].map(([id,ja,en,budget,type]) => ({ id, ja, en, budget, type }));
+    ['food','食費','Food'],['daily','日用品','Household'],['home','住まい','Housing'],['util','水道・光熱','Utilities'],['phone','通信','Phone & internet'],
+    ['transit','交通','Transport'],['social','外食・交際','Eating out & social'],['outdoor','趣味・アウトドア','Hobbies & outdoors'],['beauty','美容・衣服','Beauty & clothes'],
+    ['health','健康・医療','Health'],['learn','学び','Learning'],['subs','サブスク','Subscriptions'],['travel','旅行','Travel'],['other','その他','Other'],['uncat','未分類','Uncategorized']
+  ].map(([id,ja,en]) => ({ id, ja, en, budget:0, type:'exp' })).concat(
+    [['salary','給与','Salary'],['side','副収入','Side income'],['incother','その他収入','Other income']].map(([id,ja,en]) => ({ id, ja, en, budget:0, type:'inc' })),
+    [{ id:'transfer', ja:'振替', en:'Transfer', budget:0, type:'xfer' }]);
   const accounts = [
-    ['smbc','三井住友銀行（Olive）','bank',1284300],['rakutenbank','楽天銀行','bank',412880],['cash','現金','cash',23400],
-    ['olivecard','Oliveクレジット','card',0,null,null,26],['rakutencard','楽天カード','card',0,null,null,27],
-    ['paypay','PayPay','emoney',8210],['suica','Suica','emoney',4560],
-    ['sbi','SBI証券（NISA）','invest',1620000],['rakutensec','楽天証券（金）','invest',540000],
-    ['dc1','確定拠出年金（NRK）','pension',2130000],['dc2','確定拠出年金（JIS&T）','pension',860000],
-    ['amazonpt','Amazonポイント','points',1240,'pt',1],['rakutenpt','楽天ポイント','points',8930,'pt',1],['jcbpt','JCBポイント','points',412,'pt',0],
-    ['ana','ANAマイレージ','miles',23400,'mi',0],['jal','JALマイレージ','miles',8800,'mi',0]
-  ].map(([id,name,type,balance,unit,rate,payDay]) => ({ id, name, type, balance, unit:unit||null, rate:rate??null, payDay:payDay||null }));
-
-  const FOOD = ['セブン-イレブン','ファミリーマート','成城石井','ライフ','まいばすけっと','スターバックス','ドトール','ベーカリー','ローソン'];
-  const DINE = ['焼き鳥 とり平','イタリアン ルッチョラ','タイ料理 バーンタイ','回転寿司','韓国料理 ソウル','ラーメン 一心'];
-  const DAILY = ['マツモトキヨシ','無印良品','ダイソー','ニトリ','ウエルシア'];
-  const tx = []; let n = 0; const cardSpend = {};
-  const add = (d, desc, amt, acctId, catId, extra = {}) => tx.push({ id:'s'+(n++), date:iso(d), desc, amt, acct:acctId, cat:catId, book:'personal', src:'sample', ...extra });
-  for (let k = 125; k >= 0; k--) {
-    const d = new Date(td); d.setDate(td.getDate() - k);
-    const dd = d.getDate(), key = mk(iso(d));
-    const spend = (desc, amt, a, c) => { add(d, desc, -amt, a, c); if (a === 'olivecard' || a === 'rakutencard') cardSpend[a+'|'+key] = (cardSpend[a+'|'+key]||0) + amt; };
-    if (r() < .72) spend(pick(FOOD), R(280,2400), pick(['olivecard','olivecard','paypay','cash','rakutencard']), 'food');
-    if (r() < .12) spend(pick(DINE), R(2800,7600), 'olivecard', 'social');
-    if (r() < .13) spend(pick(DAILY), R(380,3200), pick(['olivecard','paypay']), 'daily');
-    if (k % 9 === 0) spend('Suica チャージ', 3000, 'olivecard', 'transit');
-    if (dd === 1) { spend('フィットネスジム 月会費', 7700, 'olivecard', 'outdoor'); add(d, 'PayPay チャージ', -10000, 'smbc', 'transfer'); }
-    if (dd === 3) spend('Spotify', 1080, 'rakutencard', 'subs');
-    if (dd === 8) spend('Netflix', 1590, 'olivecard', 'subs');
-    if (dd === 20) spend('iCloud+', 400, 'olivecard', 'subs');
-    if (dd === 5) spend('東京電力', R(5200,8400), 'olivecard', 'util');
-    if (dd === 11) spend('東京ガス', R(2800,4200), 'olivecard', 'util');
-    if (dd === 22 && d.getMonth() % 2 === 0) add(d, '水道局', -4620, 'smbc', 'util');
-    if (dd === 15) spend('楽天モバイル', 3278, 'rakutencard', 'phone');
-    if (dd === 18) spend('光回線', 4180, 'olivecard', 'phone');
-    if (dd === 14) spend('Kindle本', 1210, 'rakutencard', 'learn');
-    if (dd === 10) add(d, 'NISA 積立（SBI証券）', -33333, 'smbc', 'transfer');
-    if (dd === 25) add(d, '給与', 312000, 'smbc', 'salary');
-    if (dd === 27) add(d, '家賃', -112000, 'smbc', 'home');
-    if (dd === 26) add(d, 'Oliveクレジット 引き落とし', -(cardSpend['olivecard|'+addMonths(key,-1)] || 71200), 'smbc', 'transfer');
-    if (dd === 27) add(d, '楽天カード 引き落とし', -(cardSpend['rakutencard|'+addMonths(key,-1)] || 18400), 'rakutenbank', 'transfer');
-    if (dd === 7 || dd === 23) spend(pick(['ヘアサロン','UNIQLO','ZARA','コスメ']), R(2900,6600), 'olivecard', 'beauty');
-    if (dd === 12 && r() < .6) spend('モンベル', R(3000,12000), 'olivecard', 'outdoor');
-    if (dd === 17 && r() < .4) spend('クリニック', 2640, 'cash', 'health');
-    if (k === 48) spend('JAL 国内線', 24800, 'olivecard', 'travel');
-    if (k === 40) spend('旅館 ひなた', 33000, 'olivecard', 'travel');
-    if (k === 39) spend('レンタカー', 9900, 'olivecard', 'travel');
-    if (k === 30) add(d, 'メルカリ 売上', 4200, 'rakutenbank', 'incother');
-    if (k === 2) spend('AMAZON.CO.JP', 2980, 'rakutencard', 'uncat');
-    if (k === 4) spend('SQ*COFFEE STAND', 1450, 'olivecard', 'uncat');
-    if (k === 9) spend('PAYPAY*ヤマダ', 3300, 'paypay', 'uncat');
-    // shared books
-    if (r() < .27) { const it = pick([['スーパー','food',1800,6200],['外食','social',4000,12000],['映画','outdoor',3800,3800],['日用品','daily',800,3000],['週末のドライブ','travel',3000,9000]]);
-      add(d, it[0], -R(it[2],it[3]), null, it[1], { book:'couple', payer: r() < .55 ? 'me' : 'p' }); }
-    if (r() < .09) { const it = pick([['帰省の交通費','transit',8000,16000],['家族の食事会','social',9000,18000],['実家の日用品','daily',1500,4000],['誕生日プレゼント','other',3000,8000]]);
-      add(d, it[0], -R(it[2],it[3]), null, it[1], { book:'family', payer: pick(['me','mom','dad']) }); }
-  }
-  // net worth history (12 months), ending at the live value
-  const hist = []; let v = 0; const r2 = rng(7);
-  for (let i = 11; i >= 1; i--) { hist.push({ m: addMonths(mk(iso(td)), -i), v: null }); }
-  const draft = { categories, accounts, tx };
-  const now = netWorth(draft);
-  v = now; for (let i = hist.length - 1; i >= 0; i--) { v = v - (52000 + (r2() - .45) * 90000); hist[i].v = Math.round(v / 1000) * 1000; }
-  tx.forEach(x => { x.rev = x.cat !== 'uncat'; });
-  const ago = n => { const d = new Date(td); d.setDate(td.getDate() - n); return d.toISOString(); };
+    ['smbc','三井住友銀行（Olive）','bank'],['rakutenbank','楽天銀行','bank'],['cash','現金','cash'],
+    ['olivecard','Oliveクレジット','card',null,null,26],['rakutencard','楽天カード','card',null,null,27],
+    ['paypay','PayPay','emoney'],['suica','Suica','emoney'],['sbi','SBI証券（NISA）','invest'],['rakutensec','楽天証券（金）','invest'],
+    ['dc1','確定拠出年金（NRK）','pension'],['dc2','確定拠出年金（JIS&T）','pension'],
+    ['amazonpt','Amazonポイント','points','pt',1],['rakutenpt','楽天ポイント','points','pt',1],['jcbpt','JCBポイント','points','pt',0],
+    ['ana','ANAマイレージ','miles','mi',0],['jal','JALマイレージ','miles','mi',0]
+  ].map(([id,name,type,unit,rate,payDay]) => ({ id, name, type, balance:0, unit:unit||null, rate:rate??null, payDay:payDay||null }));
   return {
-    schema: SCHEMA, appVersion: VERSION, lang: lang || 'ja', lockMin: 5, sample: true,
+    schema: SCHEMA, appVersion: VERSION, lang: lang || 'ja', lockMin: 5, sample: false,
     books: {
       personal: { members: [] },
       couple: { members: [{ id:'me', ja:'わたし', en:'Me' }, { id:'p', ja:'パートナー', en:'Partner' }] },
       family: { members: [{ id:'me', ja:'わたし', en:'Me' }, { id:'mom', ja:'母', en:'Mum' }, { id:'dad', ja:'父', en:'Dad' }] }
     },
-    activeBook: 'personal', categories, accounts, tx, history: hist,
+    activeBook: 'personal', categories, accounts, tx: [], history: [],
     rules: [ { kw:'AMAZON', cat:'daily' }, { kw:'セブン', cat:'food' }, { kw:'Suica', cat:'transit' }, { kw:'Netflix', cat:'subs' } ],
-    lastImport: { olivecard: ago(9), rakutencard: ago(9), smbc: ago(3), rakutenbank: ago(3), paypay: ago(3), suica: ago(12), sbi: ago(20), rakutensec: ago(20) },
-    lastReview: ago(8)
+    lastImport: {}, lastReview: new Date().toISOString()
   };
 }
 
@@ -665,27 +755,47 @@ function budgetTotal(){ return sum(S.categories.filter(c => c.type === 'exp'), c
 
 /* ---------- lock screen ---------- */
 let pinBuf = '';
-function showLock(msg){
+function initials(name){
+  name = (name || '').trim(); if (!name) return 'K';
+  if (/^[\x00-\x7F]+$/.test(name)) return name.split(/\s+/).slice(0,2).map(w => w[0]).join('').toUpperCase();
+  return name.slice(0,1);
+}
+function greeting(name){
+  const h = new Date().getHours(); name = (name || '').trim();
+  if (L() === 'en') return name ? `Hi, ${name}` : 'Hi';
+  const g = h >= 5 && h < 11 ? 'おはようございます' : h >= 11 && h < 18 ? 'こんにちは' : 'こんばんは';
+  return name ? `${g}、${name}さん` : g;
+}
+function showLock(msg, forcePin){
   document.body.classList.add('locked'); document.body.dataset.tab = 'home';
   $('#nav').hidden = true; $('#app').innerHTML = ''; closeSheet(true);
-  const meta = readMeta(); const len = meta.pinLen || 4;
+  const meta = readMeta(); const len = meta.pinLen || 4; const pk = hasPasskey(readVault());
+  const showPin = forcePin || !pk || pinBuf.length > 0;
   let el = $('#lock'); if (!el) { el = document.createElement('section'); el.id = 'lock'; el.className = 'lock'; document.body.appendChild(el); }
   el.innerHTML = `
     <button class="langs" data-act="locklang">${L()==='ja' ? 'English' : '日本語'}</button>
-    <div class="mark">Kura<span>.</span></div>
-    <div class="msg ${msg && msg.err ? 'err' : ''}" id="lockmsg">${esc(msg ? msg.text : t('pinEnter'))}</div>
-    <div class="dots" id="dots">${Array.from({length:len}, (_,i) => `<i class="${i < pinBuf.length ? 'on' : ''}"></i>`).join('')}</div>
-    <div class="keypad">
-      ${[1,2,3,4,5,6,7,8,9].map(n => `<button data-key="${n}" aria-label="${n}">${n}</button>`).join('')}
-      <button class="plain" data-act="bio" aria-label="${esc(t('biometric'))}">${ic('face')}</button>
-      <button data-key="0" aria-label="0">0</button>
-      <button class="plain" data-key="del" aria-label="Delete">${ic('back')}</button>
+    <div class="greet">
+      <div class="avatar" id="avatar">${esc(initials(meta.name))}</div>
+      <div class="hi">${esc(greeting(meta.name))}</div>
+      <div class="msg ${msg && msg.err ? 'err' : ''}" id="lockmsg">${esc(msg ? msg.text : (showPin ? t('pinEnter') : ''))}</div>
     </div>
-    <div class="hint">${esc(t('pinHint'))}</div>`;
+    <div class="pinpane" id="pinpane" ${showPin ? '' : 'hidden'}>
+      <div class="dots" id="dots">${Array.from({length:len}, (_,i) => `<i class="${i < pinBuf.length ? 'on' : ''}"></i>`).join('')}</div>
+      <div class="keypad">
+        ${[1,2,3,4,5,6,7,8,9].map(n => `<button data-key="${n}" aria-label="${n}">${n}</button>`).join('')}
+        <button class="plain" data-act="bio" aria-label="${esc(t('biometric'))}">${pk ? ic('face') : ''}</button>
+        <button data-key="0" aria-label="0">0</button>
+        <button class="plain" data-key="del" aria-label="Delete">${ic('back')}</button>
+      </div>
+      ${meta.pinChanged ? '' : `<div class="hint">${esc(t('pinHint'))}</div>`}
+    </div>
+    ${pk && !showPin ? `<div class="lockfoot"><button data-act="bio">${ic('face')} ${esc(t('bioOpen'))}</button><button data-act="showpin">${esc(t('usePin'))}</button></div>` : ''}`;
   el.hidden = false;
 }
+function revealPin(){ const pp = $('#pinpane'); if (pp && pp.hidden) { pp.hidden = false; $('.lockfoot')?.remove(); const m = $('#lockmsg'); if (m && !m.textContent) m.textContent = t('pinEnter'); } }
 function updateDots(){ const len = readMeta().pinLen || 4; $('#dots').innerHTML = Array.from({length:len}, (_,i) => `<i class="${i < pinBuf.length ? 'on' : ''}"></i>`).join(''); }
 async function pressKey(k){
+  revealPin();
   const meta = readMeta();
   if (meta.lockUntil && Date.now() < meta.lockUntil) { $('#lockmsg').textContent = t('pinLocked', Math.ceil((meta.lockUntil - Date.now())/1000)); return; }
   if (k === 'del') { pinBuf = pinBuf.slice(0,-1); updateDots(); return; }
@@ -696,27 +806,26 @@ async function pressKey(k){
 }
 async function tryUnlock(pin){
   $('#lockmsg').textContent = t('unlocking'); $('#lockmsg').classList.remove('err');
-  const raw = lsGet(VAULT);
+  const v = readVault();
   try {
     if (noCrypto) { if (pin !== DEMO_PIN) throw new Error('pin'); S = migrate(makeSample(readMeta().lang)); }
-    else if (!raw) {
+    else if (!v) {
       if (pin !== DEMO_PIN) throw new Error('pin');
-      SALT = crypto.getRandomValues(new Uint8Array(16)); KEY = await deriveKey(pin, SALT);
+      await newDek(); WRAP = { pin:null, prfSalt:null, pks:[] }; await wrapWithPin(pin);
       S = makeSample(readMeta().lang); await persistNow(); writeMeta({ pinLen:4 });
+    } else if (v.v === 2) {
+      const k = await deriveKey(pin, b64d(v.pin.salt));
+      DEKRAW = await openBytes(k, v.pin); KEY = await aesKey(DEKRAW); WRAP = wrapsFrom(v);
+      S = migrate(await unseal(KEY, v.data)); persist();
     } else {
-      const v = JSON.parse(raw); SALT = b64d(v.salt); KEY = await deriveKey(pin, SALT);
-      S = migrate(await unseal(KEY, v)); persist();
+      // vault v1 (key from PIN only) → v2
+      const k = await deriveKey(pin, b64d(v.salt));
+      S = migrate(await unseal(k, v));
+      await newDek(); WRAP = { pin:null, prfSalt:null, pks:[] }; await wrapWithPin(pin); await persistNow();
     }
-    writeMeta({ fails:0, lockUntil:0, lang:S.lang });
-    pinBuf = ''; lastAct = Date.now();
-    const el = $('#lock'); if (el) el.hidden = true;
-    document.body.classList.remove('locked');
-    UI.month = mk(iso(today0()));
-    snapshotHistory();
-    render();
-    if (S.whatsNew) { S.whatsNew = false; persist(); openChangelog(true); }
+    afterUnlock();
   } catch(e) {
-    KEY = null; S = null; pinBuf = '';
+    KEY = null; DEKRAW = null; S = null; pinBuf = '';
     const fails = (readMeta().fails || 0) + 1;
     const lockUntil = fails >= 5 ? Date.now() + 30000 * Math.pow(2, fails - 5) : 0;
     writeMeta({ fails, lockUntil });
@@ -725,7 +834,17 @@ async function tryUnlock(pin){
     m.textContent = lockUntil ? t('pinLocked', Math.ceil((lockUntil - Date.now())/1000)) : t('pinWrong', 5 - fails);
   }
 }
-function lockApp(){ persistNow(); S = null; KEY = null; pinBuf = ''; showLock({ text:t('lockedOut') }); }
+function afterUnlock(){
+  writeMeta({ fails:0, lockUntil:0, lang:S.lang });
+  pinBuf = ''; lastAct = Date.now();
+  const el = $('#lock'); if (el) el.hidden = true;
+  document.body.classList.remove('locked');
+  UI.month = mk(iso(today0()));
+  snapshotHistory();
+  render();
+  if (S.whatsNew) { S.whatsNew = false; persist(); openChangelog(true); }
+}
+function lockApp(){ persistNow(); S = null; KEY = null; DEKRAW = null; pinBuf = ''; showLock({ text:t('lockedOut') }); }
 ['pointerdown','keydown','scroll','touchstart'].forEach(ev => addEventListener(ev, () => { lastAct = Date.now(); }, { passive:true }));
 setInterval(() => { if (S && Date.now() - lastAct > (S.lockMin || 5) * 60000) lockApp(); }, 10000);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S && Date.now() - lastAct > (S.lockMin || 5) * 60000) lockApp(); });
@@ -813,7 +932,7 @@ function viewHome(){
     </div>
     <div class="card">
       <div class="ctitle"><h3>${esc(t('recent'))}</h3><button class="more" data-act="tab" data-arg="tx">${esc(t('seeAll'))}</button></div>
-      <div class="rows">${recent.map(txRow).join('')}</div>
+      <div class="rows">${recent.length ? recent.map(txRow).join('') : `<p class="muted" style="margin:4px 0">${esc(t('noTxYet'))}</p>`}</div>
     </div>
   </div>`;
 }
@@ -852,7 +971,7 @@ function viewHomeShared(){
     </div>
     <div class="card">
       <div class="ctitle"><h3>${esc(t('recent'))}</h3><button class="more" data-act="tab" data-arg="tx">${esc(t('seeAll'))}</button></div>
-      <div class="rows">${recent.map(txRow).join('')}</div>
+      <div class="rows">${recent.length ? recent.map(txRow).join('') : `<p class="muted" style="margin:4px 0">${esc(t('noTxYet'))}</p>`}</div>
     </div>
   </div>`;
 }
@@ -1055,6 +1174,8 @@ function viewAssets(){
   });
   const subsMap = {}; S.tx.filter(x => x.cat === 'subs' && x.book === 'personal').forEach(x => { (subsMap[x.desc] ||= []).push(x); });
   const subs = Object.entries(subsMap).filter(([,l]) => new Set(l.map(x => mk(x.date))).size >= 2).map(([d,l]) => { l.sort((a,b) => b.date.localeCompare(a.date)); return { d, amt:-l[0].amt, acct:l[0].acct, last:l[0].date }; });
+  const subsCard = subs.length ? `<div class="card"><div class="ctitle"><h3>${esc(t('subs'))}</h3><span class="tnum muted">${yen(sum(subs, s => s.amt))} / ${esc(t('perMonth'))}</span></div>
+      <div class="rows">${subs.map(s => `<div class="row"><span class="av">${esc(s.d.slice(0,1))}</span><span class="main"><span class="t1">${esc(s.d)}</span><span class="t2">${esc(acct(s.acct)?.name || '')}</span></span><span class="amt tnum">${yen(s.amt)}</span></div>`).join('')}</div></div>` : '';
   const lastImp = id => S.lastImport[id] ? t('daysAgo', daysBetween(new Date(S.lastImport[id]), new Date())) : t('notImported');
   return `<h1 class="pg">${esc(t('assets'))}</h1>
   <div class="pgsub"><span class="booksw" style="font-size:16px">${esc(t('personal'))}</span><button class="btn sm ghost" data-act="addacct">${ic('plus','style="width:16px;height:16px"')} ${esc(t('addAcct'))}</button></div>
@@ -1073,8 +1194,7 @@ function viewAssets(){
         const val = ['points','miles'].includes(a.type) ? `${a.balance.toLocaleString('ja-JP')} ${a.unit}` : yen(acctValue(S, a));
         const sub = ['points','miles'].includes(a.type) ? (a.rate ? `≈ ${yen(a.balance * a.rate)}` : t('notCounted')) : `${t('lastImport')} ${lastImp(a.id)}`;
         return `<button class="row" data-act="acct" data-arg="${a.id}"><span class="av">${esc(a.name.slice(0,1))}</span><span class="main"><span class="t1">${esc(a.name)}</span><span class="t2">${esc(sub)}</span></span><span class="amt tnum">${esc(val)}</span>${ic('chev','class="chev"')}</button>`; }).join('')}</div></div>`).join('')}
-    <div class="card"><div class="ctitle"><h3>${esc(t('subs'))}</h3><span class="tnum muted">${yen(sum(subs, s => s.amt))} / ${esc(t('perMonth'))}</span></div>
-      <div class="rows">${subs.map(s => `<div class="row"><span class="av">${esc(s.d.slice(0,1))}</span><span class="main"><span class="t1">${esc(s.d)}</span><span class="t2">${esc(acct(s.acct)?.name || '')}</span></span><span class="amt tnum">${yen(s.amt)}</span></div>`).join('')}</div></div>
+    ${subsCard}
     <button class="btn ghost" data-act="addacct">${ic('plus','style="width:18px;height:18px"')} ${esc(t('addAcct'))}</button>
     ${S.accounts.some(a => a.hidden) ? `<button class="btn ghost" style="background:none;color:var(--fg-2)" data-act="hiddenaccts">${esc(t('hiddenAccts', S.accounts.filter(a => a.hidden).length))}</button>` : ''}
   </div>`;
@@ -1085,12 +1205,15 @@ function setRow(icon, label, value, act, arg){ return `<button class="row setrow
 function viewSettings(){
   return `<h1 class="pg">${esc(t('settings'))}</h1>
   <div class="stack" style="margin-top:14px">
+    <div><h5 class="eyebrow" style="margin:0 0 8px 4px">${esc(t('secProfile'))}</h5><div class="card" style="padding:4px 18px"><div class="rows list" style="background:none;padding:0">
+      <button class="row setrow" data-act="name"><span class="av" style="border-radius:50%;font-family:var(--font)">${esc(initials(readMeta().name))}</span><span class="main"><span class="t1">${esc(t('displayName'))}</span></span><span class="t2 muted">${esc(readMeta().name || t('notSet'))}</span>${ic('chev','class="chev"')}</button>
+    </div></div></div>
     <div><h5 class="eyebrow" style="margin:0 0 8px 4px">${esc(t('secLang'))}</h5><div class="card" style="padding:14px"><div class="seg"><button data-act="lang" data-arg="ja" aria-pressed="${L()==='ja'}">日本語</button><button data-act="lang" data-arg="en" aria-pressed="${L()==='en'}">English</button></div></div></div>
     <div><h5 class="eyebrow" style="margin:0 0 8px 4px">${esc(t('secSecurity'))}</h5><div class="card" style="padding:4px 18px"><div class="rows list" style="background:none;padding:0">
       ${setRow('shield', t('secPlan'), '', 'secplan')}
       ${setRow('key', t('changePin'), '', 'pin')}
       ${setRow('timer', t('autoLock'), t('min', S.lockMin), 'autolock')}
-      ${setRow('face', t('biometric'), L()==='en' ? 'Full version' : '本番版で対応', 'bio')}
+      ${setRow('face', t('biometric'), WRAP.pks.length ? t('pkCount', WRAP.pks.length) : t('bioOff'), 'bioset')}
       ${setRow('lock', t('encryption'), noCrypto ? '—' : 'AES-256', 'enc')}
       ${setRow('lock', t('lockNow'), '', 'lock')}
     </div></div></div>
@@ -1421,6 +1544,40 @@ function openHidden(){
   openSheet(`<h2>${esc(t('hiddenAccts', list.length))}</h2><div class="list">${list.map(a => `<div class="row"><span class="av">${esc(a.name.slice(0,1))}</span><span class="main"><span class="t1">${esc(a.name)}</span><span class="t2">${esc(TYPE_LABEL[L()][a.type])}</span></span><button class="btn sm ghost" data-act="unhide" data-arg="${a.id}">${esc(t('unhide'))}</button></div>`).join('')}</div>`);
 }
 
+function openBio(){
+  const list = WRAP.pks;
+  const fmt = d => new Date(d).toLocaleDateString(L()==='en' ? 'en-GB' : 'ja-JP');
+  openSheet(`<h2>${esc(t('biometric'))}</h2><p class="lead">${esc(t('bioLead'))}</p>
+    ${list.length ? `<h5>${esc(t('bioListTitle'))}</h5><div class="list">${list.map((p, i) => `<div class="row"><span class="av" style="border-radius:12px">${ic('key','style="width:18px;height:18px"')}</span><span class="main"><span class="t1">${esc(p.label || t('pkDefault') + ' ' + (i + 1))}</span><span class="t2">${esc(t('pkAddedOn', fmt(p.at)))}</span></span><button class="btn sm ghost" data-pkdel="${i}">${esc(t('del'))}</button></div>`).join('')}</div>` : ''}
+    <h5>${esc(list.length ? t('pkAddMore') : t('bioReq'))}</h5>
+    ${list.length ? '' : `<div class="list">${t('bioReqItems').map(x => `<div class="row"><span class="main"><span class="t1" style="white-space:normal">${esc(x)}</span></span></div>`).join('')}</div>`}
+    <div class="form mt"><label>${esc(t('pkLabel'))}<input class="inp" id="pk-label" placeholder="${esc(t('pkLabelPh'))}" autocomplete="off"></label></div>
+    <div id="bio-msg" class="mt"></div>
+    <button class="btn mt" id="bio-new">${ic('face','style="width:20px;height:20px"')} ${esc(t('pkNew'))}</button>
+    <button class="btn ghost mt" id="bio-existing">${ic('key','style="width:20px;height:20px"')} ${esc(t('pkExisting'))}</button>
+    <h5>${esc(t('googleTitle'))}</h5><div class="list">${t('googleSteps').map(x => `<div class="row"><span class="main"><span class="t1" style="white-space:normal;font-size:14px">${esc(x)}</span></span></div>`).join('')}</div>
+    ${list.length ? `<p class="note">${esc(t('bioOffNote'))}</p>` : ''}`, sh => {
+    const msg = (text, ok) => { const b = sh.querySelector('#bio-msg'); if (b) b.innerHTML = `<div class="okbox ${ok ? '' : 'warnbox'}">${ic(ok ? 'check' : 'alert')}<span>${esc(text)}</span></div>`; };
+    if (inFrame || !window.PublicKeyCredential) msg(t('bioNoHere'), false);
+    const run = async (btn, mode) => {
+      const html = btn.innerHTML; btn.disabled = true; btn.textContent = t('bioSetting');
+      try { await bioRegister(mode, sh.querySelector('#pk-label').value); closeSheet(); render(); toast(t('pkAdded')); }
+      catch(e) { msg(bioErrorText(e), false); btn.disabled = false; btn.innerHTML = html; }
+    };
+    sh.querySelector('#bio-new').addEventListener('click', e => run(e.currentTarget, 'new'));
+    sh.querySelector('#bio-existing').addEventListener('click', e => run(e.currentTarget, 'existing'));
+    sh.addEventListener('click', async e => { const d = e.target.closest('[data-pkdel]'); if (!d) return;
+      if (!d.dataset.arm) { d.dataset.arm = 1; d.textContent = t('delConfirm'); return; }
+      WRAP.pks.splice(+d.dataset.pkdel, 1); await persistNow(); closeSheet(); render(); toast(t('pkRemoved')); });
+  });
+}
+function openName(){
+  openSheet(`<h2>${esc(t('displayName'))}</h2><p class="lead">${esc(t('nameLead'))}</p>
+    <form class="form" id="nmf"><label>${esc(t('name'))}<input class="inp" id="nm" value="${esc(readMeta().name || '')}" maxlength="20" autocomplete="nickname"></label><button class="btn">${esc(t('save'))}</button></form>`, sh => {
+    setTimeout(() => sh.querySelector('#nm').focus(), 250);
+    sh.querySelector('#nmf').addEventListener('submit', e => { e.preventDefault(); writeMeta({ name: sh.querySelector('#nm').value.trim() }); closeSheet(); render(); toast(t('saved')); });
+  });
+}
 function openPin(){
   openSheet(`<h2>${esc(t('changePin'))}</h2><p class="lead">${esc(t('pinLead'))}</p>
     <form class="form" id="pf"><label>${esc(t('curPin'))}<input class="inp" id="p0" type="password" inputmode="numeric" autocomplete="current-password" maxlength="6"></label>
@@ -1430,8 +1587,8 @@ function openPin(){
     sh.querySelector('#pf').addEventListener('submit', async e => { e.preventDefault();
       const [p0,p1,p2] = ['#p0','#p1','#p2'].map(s => sh.querySelector(s).value); const err = m => sh.querySelector('#p-err').innerHTML = `<div class="okbox warnbox">${ic('alert')}<span>${esc(m)}</span></div>`;
       if (!/^\d{4,6}$/.test(p1)) return err(t('pinFormat')); if (p1 !== p2) return err(t('pinMismatch'));
-      try { const raw = JSON.parse(lsGet(VAULT)); const k = await deriveKey(p0, b64d(raw.salt)); await unseal(k, raw); } catch(x) { return err(t('pinBad')); }
-      SALT = crypto.getRandomValues(new Uint8Array(16)); KEY = await deriveKey(p1, SALT); await persistNow(); writeMeta({ pinLen:p1.length });
+      try { await openBytes(await deriveKey(p0, b64d(WRAP.pin.salt)), WRAP.pin); } catch(x) { return err(t('pinBad')); }
+      await wrapWithPin(p1); await persistNow(); writeMeta({ pinLen:p1.length, pinChanged:true });
       closeSheet(); toast(t('pinChanged')); });
   });
 }
@@ -1492,7 +1649,8 @@ function openSecPlan(){
     ['now','端末内の暗号化','データはAES-256-GCMで暗号化して保存。鍵はPINから毎回作り、保存しません。'],
     ['now','暗号化バックアップ','パスフレーズで暗号化した文字列として書き出し・復元できます。'],
     ['now','外部への送信なし','試作版は通信をしません。銀行のIDやパスワードは一切扱いません。'],
-    ['prod','ログイン：パスキー＋Face ID','パスワードを使わないログイン。端末を失くしても他人は開けません。'],
+    ['now','Face ID / Touch ID（パスキー）','iCloudキーチェーンの「Kura」パスキーで、Face IDが通ったときだけデータの鍵を取り出します。サーバーは使いません。'],
+    ['prod','同期用のログインもパスキーで','端末をまたいで同期するときのログインも、パスワードなしのパスキーにします。'],
     ['prod','データベースの行レベル保護','自分（と共有相手）の行しか読み書きできない設定をDB側で強制します。'],
     ['prod','通信と保存の二重暗号化','HTTPS（TLS）に加え、重要な項目は端末側で暗号化してから送ります。'],
     ['prod','ファイアウォールの多層化','①CDNのWAF ②API の流量制限とIP制限 ③DBは外部から直接つながらない設定 ④管理画面は2段階認証のみ。'],
@@ -1503,7 +1661,8 @@ function openSecPlan(){
     ['now','On-device encryption','Data is stored with AES-256-GCM. The key comes from your PIN each time and is never saved.'],
     ['now','Encrypted backup','Export and restore as passphrase-encrypted text.'],
     ['now','Nothing leaves the device','The prototype makes no network calls and never handles bank logins.'],
-    ['prod','Sign-in with passkeys + Face ID','No passwords. A lost phone cannot be opened by someone else.'],
+    ['now','Face ID / Touch ID (passkey)','A "Kura" passkey in iCloud Keychain releases the data key only after Face ID succeeds. No server involved.'],
+    ['prod','Passkey sign-in for sync too','Signing in to sync across devices will also use a passwordless passkey.'],
     ['prod','Row-level security','The database itself only lets you (and people you share with) read your rows.'],
     ['prod','Encrypted twice','TLS in transit, plus sensitive fields encrypted on the device before upload.'],
     ['prod','Layered firewalls','1) CDN web firewall 2) API rate and IP limits 3) database unreachable from the internet 4) admin only with 2FA.'],
@@ -1547,8 +1706,11 @@ document.addEventListener('click', e => {
     case 'filter': UI.filter = arg; render(); break;
     case 'hidebanner': UI.bannerHidden = true; render(); break;
     case 'lang': S.lang = arg; writeMeta({ lang:arg }); persist(); render(); break;
-    case 'locklang': writeMeta({ lang: L() === 'ja' ? 'en' : 'ja' }); showLock(); break;
-    case 'bio': toast(t('bioProto')); break;
+    case 'locklang': writeMeta({ lang: L() === 'ja' ? 'en' : 'ja' }); showLock(null, !$('#pinpane')?.hidden); break;
+    case 'showpin': revealPin(); break;
+    case 'name': openName(); break;
+    case 'bio': bioUnlock(false); break;
+    case 'bioset': openBio(); break;
     case 'lock': lockApp(); break;
     case 'pin': openPin(); break;
     case 'autolock': openAutoLock(); break;
@@ -1578,6 +1740,8 @@ document.addEventListener('keydown', e => {
 });
 
 showLock();
+setTimeout(() => { const sp = $('#splash'); if (sp) { sp.classList.add('out'); setTimeout(() => sp.remove(), 800); } }, 1100);
+if (hasPasskey(readVault())) setTimeout(() => bioUnlock(true), 1500);
 </script>
 
 <script>
