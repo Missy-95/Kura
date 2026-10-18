@@ -1,5 +1,5 @@
 // Kura service worker. Bump VERSION on every release.
-const VERSION = '0.7.3';
+const VERSION = '0.7.4';
 const CACHE = 'kura-' + VERSION;
 const FONT_CACHE = 'kura-fonts';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png'];
