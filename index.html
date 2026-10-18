@@ -379,7 +379,7 @@ body.ready .lockfoot{animation:greetIn 1s cubic-bezier(.22,.8,.24,1) 1.1s both}
    - data is encrypted at rest (AES-256-GCM, key from PIN via PBKDF2)
    - schema migrations run on unlock so updates never break data
    ========================================================= */
-const VERSION = '0.7.9';
+const VERSION = '0.8.1';
 const SCHEMA = 4;
 const DEMO_PIN = '12345678';
 const PIN_LEN = 8;   // every new PIN is 8 digits
@@ -388,6 +388,12 @@ const VAULT = 'kura.vault.v1';
 const META = 'kura.meta.v1';
 
 const CHANGELOG = [
+  { v: '0.8.1', date: '2026-10-18',
+    ja: ['アプリのアイコンを、左上のセージグリーンからやわらかいブルーグレーへ流れるグラデーションに（白いKと淡いグリーンのドット）'],
+    en: ['App icon now flows from sage green at the top-left into a soft blue-grey, with a white K and a pale green dot'] },
+  { v: '0.8.0', date: '2026-10-18',
+    ja: ['アプリのアイコンをライムグリーンに（エレクトリックブルーの光と、白いKに青いドット）'],
+    en: ['New lime-green app icon with an electric-blue glow, a white K and a blue dot'] },
   { v: '0.7.9', date: '2026-10-18',
     ja: ['背景の色を一新：ホームはライム×エレクトリックブルー、入出金はウルトラマリン×アンバー、分析はマゼンタ×アクア、資産はコバルト×ライム、設定はディープブルー×シアン（オレンジ〜ピンクのグラデーションはやめました）', '画面下の暗くなる部分も、それぞれの背景色に合わせた暗さに', 'カードは背景の色になじむスモークガラスに'],
     en: ['New background colours: lime × electric blue (Home), ultramarine × amber (Activity), magenta × aqua (Insights), cobalt × lime (Assets), deep blue × cyan (Settings); the orange-pink gradients are gone', 'The darker area at the bottom now matches each background colour', 'Cards use a neutral smoked glass that suits every colour'] },
