@@ -85,6 +85,23 @@ body.locked .mesh::after{opacity:.35}
 #splash.out{opacity:0;pointer-events:none}
 @keyframes splashIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
 
+/* comparison */
+.cmpchips{margin:0 0 14px}
+.cmpbar{position:relative;height:14px;display:flex;flex-direction:column;gap:3px;margin-top:6px}
+.cmpbar i{display:block;height:5px;border-radius:99px;background:var(--accent);min-width:2px}
+.cmpbar i.was{background:rgba(246,243,250,.32)}
+.remrow .main .t2{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}
+.remrow .sw{width:44px;height:26px;border-radius:99px;background:rgba(255,255,255,.18);position:relative;flex:none;transition:background .25s}
+.remrow .sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .3s cubic-bezier(.3,1.5,.5,1)}
+.remrow .sw.on{background:var(--good)}
+.remrow .sw.on::after{transform:translateX(18px)}
+.duecard .drow{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.duecard .ctitle + .drow{border-top:0}
+.duecard .drow .main{flex:1;min-width:0}
+.duecard .drow .t1{font-weight:600}
+.duecard .drow .t2{font-size:12.5px;color:var(--fg-3)}
+.stat3{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
 /* press: iOS-style liquid glass highlight */
 kura-glass{display:block;max-height:none!important;position:absolute!important;inset:0;margin:0;padding:0;animation:none!important;border-radius:inherit;pointer-events:none;overflow:hidden;z-index:3;opacity:0;
   background:radial-gradient(120px 120px at var(--gx,50%) var(--gy,50%),rgba(255,255,255,.30),rgba(255,255,255,.12) 45%,rgba(255,255,255,.05) 80%);
@@ -357,13 +374,19 @@ body.ready .lockfoot{animation:greetIn 1s cubic-bezier(.22,.8,.24,1) 1.1s both}
    - data is encrypted at rest (AES-256-GCM, key from PIN via PBKDF2)
    - schema migrations run on unlock so updates never break data
    ========================================================= */
-const VERSION = '0.7.4';
-const SCHEMA = 3;
+const VERSION = '0.7.6';
+const SCHEMA = 4;
 const DEMO_PIN = '1234';
 const VAULT = 'kura.vault.v1';
 const META = 'kura.meta.v1';
 
 const CHANGELOG = [
+  { v: '0.7.6', date: '2026-10-18',
+    ja: ['分析の比較を追加：先週・先月・昨年・3年前・5年前から選べます（同じ時点での差、カテゴリ別の比較、3年・5年は月ごとの推移と年ごとの合計も）', '通知・リマインダーを追加：「振り返りの時間」「取り込みの時間」「戦略を見直す時間」や自由なリマインダーを、毎日／毎週／毎月／3ヶ月ごと／毎年で自分で設定できます', '時間になったものはホームの「お知らせ」に出て、アイコンのバッジ・通知でもお知らせ。「カレンダーに追加」でアプリを閉じていても時間ぴったりにiPhoneが通知', '「戦略の見直し」画面を追加：直近3ヶ月の平均支出・貯蓄率を見て、次の3ヶ月の方針をメモに残せます'],
+    en: ['New comparisons in Insights: last week, last month, last year, 3 years or 5 years (same-point difference, category comparison, and monthly trend plus yearly totals for 3 and 5 years)', 'Notifications & reminders: set your own "Time to review", "Time to import", "Time to rethink" or custom reminders, daily / weekly / monthly / every 3 months / yearly', 'Due reminders appear on Home and as a badge and notification; "Add to Calendar" makes your iPhone alert you on time even while Kura is closed', 'New Strategy check: see the last three months\' average spend and savings rate, and note your plan for the next three'] },
+  { v: '0.7.5', date: '2026-10-18',
+    ja: ['仕分け画面：カテゴリをタップしてもすぐには決まらず、選んだあとに「保存」か「キャンセル」を選べるように（選び直しもOK）'],
+    en: ['Sorting: tapping a category no longer commits it right away; pick one, then choose Save or Cancel (you can change your pick first)'] },
   { v: '0.7.4', date: '2026-10-18',
     ja: ['ボタンを押すと、もっと「ぷくっ」とふくらむように（小さいボタンほど大きく、離すとぷるんと弾んで戻る）', '下のバーのタブを押したときも、ボタンがふくらんでから切り替わるように', '画面の切り替えをふわっと：今の画面がそっと消えてから、次の画面が浮かび上がるように', '入力や設定のシートは、下からすーっと上がってやわらかく止まるように'],
     en: ['Buttons now puff up more when pressed (smaller buttons swell more) and bounce back on release', 'Tabs in the bottom bar puff up too before switching', 'Softer screen changes: the current screen fades away, then the next one floats in', 'Sheets now glide up from the bottom and settle gently'] },
@@ -483,7 +506,7 @@ const I = {
     importStatus:'取り込み状況', daysAgo:n=>n===0?'今日':`${n}日前`, markDone:'振り返りを完了', reviewDone:'お疲れさまでした。また来週',
     importTitle:'CSVを取り込む', importLead:'Money Forward の書き出しCSV、または銀行・カードの明細CSVを選んでください。文字コード（Shift_JIS / UTF-8）は自動で判定します。',
     chooseFile:'CSVファイルを選ぶ', target:'取り込み先の口座', autoDetect:'自動（Money Forward形式）', positiveIsExpense:'プラスの金額を支出として扱う（カード明細向け）',
-    found:n=>`${n}件を読み込みました`, dupes:n=>`重複 ${n}件はスキップします`, uncatN:n=>`未分類 ${n}件（あとで分類できます）`, doImport:n=>`${n}件を取り込む`, imported:n=>`${n}件を取り込みました`, importedRange:(n,a,b)=>`${n}件を取り込みました（${a}〜${b}）`, pickMonth:'月を選ぶ', sortTitle:'仕分け', sortLeft:n=>`残り ${n}件`, current:'今のカテゴリ', pickCat:'カテゴリを選ぶ（タップで決定）', keepOk:'このカテゴリでOK', pickFirst:'カテゴリを選んでください', later:'あとで', applySame:'同じお店は残りもまとめて、次からも自動で分類', appliedSame:n=>`同じお店の${n}件にも適用しました`, markAllRead:'残りをすべて既読にする', markAllConfirm:'もう一度押すと、残りを全部既読にします', allDone:'すべて確認しました', allDoneSub:'新しく取り込んだら、またここに並びます。', laterLeft:n=>`あとで回した${n}件が残っています`, laterLeftSub:'今続けるか、あとで入出金の画面から再開できます。', sortAgain:'続けて仕分けする', unreadBanner:n=>`確認待ちの入出金が${n}件あります`, unreadSub:'カテゴリを確認して既読にしましょう', sortNow:'仕分けする', unread:'未確認', nItems:n=>`${n}件`, noMonths:'まだ入出金がありません',
+    found:n=>`${n}件を読み込みました`, dupes:n=>`重複 ${n}件はスキップします`, uncatN:n=>`未分類 ${n}件（あとで分類できます）`, doImport:n=>`${n}件を取り込む`, imported:n=>`${n}件を取り込みました`, importedRange:(n,a,b)=>`${n}件を取り込みました（${a}〜${b}）`, pickMonth:'月を選ぶ', sortTitle:'仕分け', sortLeft:n=>`残り ${n}件`, current:'今のカテゴリ',selCat:'選んだカテゴリ', pickCat:'カテゴリを選んで「保存」', keepOk:'このカテゴリでOK', pickFirst:'カテゴリを選んでください', later:'あとで', applySame:'同じお店は残りもまとめて、次からも自動で分類', appliedSame:n=>`同じお店の${n}件にも適用しました`, markAllRead:'残りをすべて既読にする', markAllConfirm:'もう一度押すと、残りを全部既読にします', allDone:'すべて確認しました', allDoneSub:'新しく取り込んだら、またここに並びます。', laterLeft:n=>`あとで回した${n}件が残っています`, laterLeftSub:'今続けるか、あとで入出金の画面から再開できます。', sortAgain:'続けて仕分けする', unreadBanner:n=>`確認待ちの入出金が${n}件あります`, unreadSub:'カテゴリを確認して既読にしましょう', sortNow:'仕分けする', unread:'未確認', nItems:n=>`${n}件`, noMonths:'まだ入出金がありません',
     csvErr:'列を見つけられませんでした。日付・内容・金額の列がある明細か確認してください。', mfDetected:'Money Forward 形式を検出しました',
     booksTitle:'ブック', booksLead:'家計を分けて記録します。ふたり・家族のブックでは、誰が払ったかを記録して精算額を出します。',
     personalD:'自分だけの家計と資産', coupleD:'パートナーとの共有支出', familyD:'家族との共有支出', inviteNote:'本番版ではメンバーを招待リンクで追加し、各自のスマホから入力できます。',
@@ -550,7 +573,7 @@ const I = {
     importStatus:'Import status', daysAgo:n=>n===0?'today':`${n}d ago`, markDone:'Finish review', reviewDone:'Done. See you next week',
     importTitle:'Import CSV', importLead:'Pick a Money Forward export, or a statement CSV from your bank or card. Shift_JIS and UTF-8 are detected automatically.',
     chooseFile:'Choose CSV file', target:'Import into', autoDetect:'Automatic (Money Forward)', positiveIsExpense:'Treat positive amounts as spending (card statements)',
-    found:n=>`Read ${n} rows`, dupes:n=>`${n} duplicates will be skipped`, uncatN:n=>`${n} uncategorized (sort later)`, doImport:n=>`Import ${n}`, imported:n=>`Imported ${n}`, importedRange:(n,a,b)=>`Imported ${n} (${a} to ${b})`, pickMonth:'Choose a month', sortTitle:'Sort', sortLeft:n=>`${n} left`, current:'Current category', pickCat:'Pick a category (tap to confirm)', keepOk:'Keep this category', pickFirst:'Pick a category', later:'Later', applySame:'Apply to other entries from this shop, and next time too', appliedSame:n=>`Also applied to ${n} entries from the same shop`, markAllRead:'Mark the rest as read', markAllConfirm:'Tap again to mark everything as read', allDone:'All reviewed', allDoneSub:'New imports will show up here.', laterLeft:n=>`${n} left for later`, laterLeftSub:'Continue now, or resume from Activity anytime.', sortAgain:'Keep sorting', unreadBanner:n=>`${n} transactions to review`, unreadSub:'Check their categories to mark them read', sortNow:'Sort now', unread:'Unreviewed', nItems:n=>`${n} entries`, noMonths:'No transactions yet',
+    found:n=>`Read ${n} rows`, dupes:n=>`${n} duplicates will be skipped`, uncatN:n=>`${n} uncategorized (sort later)`, doImport:n=>`Import ${n}`, imported:n=>`Imported ${n}`, importedRange:(n,a,b)=>`Imported ${n} (${a} to ${b})`, pickMonth:'Choose a month', sortTitle:'Sort', sortLeft:n=>`${n} left`, current:'Current category',selCat:'Selected', pickCat:'Pick a category, then Save', keepOk:'Keep this category', pickFirst:'Pick a category', later:'Later', applySame:'Apply to other entries from this shop, and next time too', appliedSame:n=>`Also applied to ${n} entries from the same shop`, markAllRead:'Mark the rest as read', markAllConfirm:'Tap again to mark everything as read', allDone:'All reviewed', allDoneSub:'New imports will show up here.', laterLeft:n=>`${n} left for later`, laterLeftSub:'Continue now, or resume from Activity anytime.', sortAgain:'Keep sorting', unreadBanner:n=>`${n} transactions to review`, unreadSub:'Check their categories to mark them read', sortNow:'Sort now', unread:'Unreviewed', nItems:n=>`${n} entries`, noMonths:'No transactions yet',
     csvErr:'Could not find date, description and amount columns in this file.', mfDetected:'Money Forward format detected',
     booksTitle:'Books', booksLead:'Keep money separate. Shared books record who paid and work out who owes what.',
     personalD:'Your own budget and assets', coupleD:'Shared spending with your partner', familyD:'Shared spending with family', inviteNote:'In the full version, members join by invite link and add entries from their own phones.',
@@ -647,6 +670,176 @@ const Mesh = (() => {
   return { init, set };
 })();
 
+/* ---------- comparisons & reminders (v0.7.6) ---------- */
+Object.assign(I.ja, {
+  cmpWith:'比較', cmp_week:'先週', cmp_month:'先月', cmp_year:'昨年', cmp_y3:'3年前', cmp_y5:'5年前',
+  thisWeek:'今週', lastWeekL:'先週', thisYear:'今年', lastYearL:'昨年', last12:'直近12ヶ月', nYearsAgo:n => `${n}年前の12ヶ月`, monthlyL:'月ごと', avg12:'12ヶ月平均',
+  vsPoint:l => `${l}の同じ時点と比べて`, vsSpan:l => `${l}と比べて`, catCmp:'カテゴリ別の比較', noDataYet:'比べるデータがまだありません', yearsTable:'年ごとの合計', yrExp:'支出', yrInc:'収入', yrNet:'収支',
+  secNotif:'通知', remTitle:'通知・リマインダー', remLead:'振り返り・取り込み・戦略の見直しなど、来てほしいタイミングを自分で決められます。',
+  rk_review:'振り返りの時間', rk_import:'取り込みの時間', rk_rethink:'戦略を見直す時間', rk_custom:'自由なリマインダー',
+  rf_day:'毎日', rf_week:'毎週', rf_month:'毎月', rf_quarter:'3ヶ月ごと', rf_year:'毎年',
+  remNext:'次回', remOff:'オフ', remAdd:'リマインダーを追加', remEdit:'リマインダーを編集', remName:'名前', remKind:'種類', remFreq:'くり返し', remDow:'曜日', remDom:'日にち', remMon:'月', remTime:'時刻', remOnL:'この通知をオンにする',
+  remDel:'このリマインダーを削除', remDelConfirm:'もう一度押すと削除', remCal:'iPhoneのカレンダーに追加', remCalAll:'すべてカレンダーに追加', remAllow:'このiPhoneで通知を許可',
+  remAllowed:'このiPhoneでの通知は許可されています', remDenied:'通知がブロックされています。iPhoneの「設定 → 通知 → Kura」でオンにできます', remUnsupported:'この開き方では通知が使えません。ホーム画面に追加したKuraから開くと使えます',
+  remHow:'通知のしくみ', remNote:'Kuraを開いたとき・開いている間に、時間になったものをお知らせします。アプリを閉じていても時間ぴったりに鳴らしたいものは「カレンダーに追加」を押してください。iPhoneのカレンダーがその時間に通知してくれます。',
+  dueTitle:'お知らせ', go_review:'振り返る', go_import:'取り込む', go_rethink:'見直す', go_custom:'完了', snooze:'あとで', remSaved:'保存しました', calMade:'カレンダーのファイルを作りました',
+  quarterNote:'1・4・7・10月', dowNames:['日曜','月曜','火曜','水曜','木曜','金曜','土曜'],
+  rethinkTitle:'戦略の見直し', rethinkLead:'直近3ヶ月の流れを見て、次の3ヶ月の方針を決めましょう。', r3avg:'直近3ヶ月の平均支出', p3avg:'その前の3ヶ月', saveRate:'貯蓄率（直近3ヶ月）',
+  stepsL:'見直すポイント', stepBudget:'予算を見直す', stepAssets:'資産の配分を確認', stepTrend:'3年・5年の傾向を見る', stepSubs:'サブスク・固定費を確認',
+  planLabel:'次の3ヶ月の方針（メモ）', planPh:'例：外食は月2万円まで。積立を少し増やす', pastPlans:'これまでの方針', rethinkDone:'見直しを完了', rethinkSaved:'方針を保存しました'
+});
+Object.assign(I.en, {
+  cmpWith:'Compare with', cmp_week:'Last week', cmp_month:'Last month', cmp_year:'Last year', cmp_y3:'3 years', cmp_y5:'5 years',
+  thisWeek:'This week', lastWeekL:'Last week', thisYear:'This year', lastYearL:'Last year', last12:'Last 12 months', nYearsAgo:n => `12 months, ${n} yrs ago`, monthlyL:'Monthly', avg12:'12-mo average',
+  vsPoint:l => `vs ${l.toLowerCase()} at the same point`, vsSpan:l => `vs ${l.toLowerCase()}`, catCmp:'By category', noDataYet:'Not enough data to compare yet', yearsTable:'Totals by year', yrExp:'Spent', yrInc:'Income', yrNet:'Net',
+  secNotif:'Notifications', remTitle:'Notifications & reminders', remLead:'Choose when you want a nudge to review, import, or rethink your strategy.',
+  rk_review:'Time to review', rk_import:'Time to import', rk_rethink:'Time to rethink', rk_custom:'Custom reminder',
+  rf_day:'Daily', rf_week:'Weekly', rf_month:'Monthly', rf_quarter:'Every 3 months', rf_year:'Yearly',
+  remNext:'Next', remOff:'Off', remAdd:'Add reminder', remEdit:'Edit reminder', remName:'Name', remKind:'Type', remFreq:'Repeat', remDow:'Weekday', remDom:'Day', remMon:'Month', remTime:'Time', remOnL:'Turn this reminder on',
+  remDel:'Delete this reminder', remDelConfirm:'Tap again to delete', remCal:'Add to iPhone Calendar', remCalAll:'Add all to Calendar', remAllow:'Allow notifications on this iPhone',
+  remAllowed:'Notifications are allowed on this iPhone', remDenied:'Notifications are blocked. Turn them on in iPhone Settings → Notifications → Kura', remUnsupported:'Notifications need Kura opened from your Home Screen',
+  remHow:'How notifications work', remNote:'Kura tells you when you open it, and while it is open, about anything that is due. For an alert exactly on time even when Kura is closed, tap "Add to Calendar": your iPhone Calendar will notify you.',
+  dueTitle:'Reminders', go_review:'Review', go_import:'Import', go_rethink:'Rethink', go_custom:'Done', snooze:'Later', remSaved:'Saved', calMade:'Calendar file created',
+  quarterNote:'Jan · Apr · Jul · Oct', dowNames:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+  rethinkTitle:'Strategy check', rethinkLead:'Look at the last three months and set the plan for the next three.', r3avg:'Avg spend, last 3 months', p3avg:'3 months before', saveRate:'Savings rate (3 months)',
+  stepsL:'What to look at', stepBudget:'Revisit budgets', stepAssets:'Check how assets are spread', stepTrend:'See 3- and 5-year trends', stepSubs:'Check subscriptions and fixed costs',
+  planLabel:'Plan for the next 3 months (note)', planPh:'e.g. Eating out under ¥20,000 a month; invest a little more', pastPlans:'Past plans', rethinkDone:'Finish the check', rethinkSaved:'Plan saved'
+});
+
+function defaultReminders(){
+  const now = new Date().toISOString();
+  return [
+    { id:'r-review',  kind:'review',  name:'', freq:'week',    dow:0, dom:1, mon:1, time:'20:00', on:true, created:now, done:now },
+    { id:'r-import',  kind:'import',  name:'', freq:'week',    dow:6, dom:1, mon:1, time:'10:00', on:true, created:now, done:now },
+    { id:'r-rethink', kind:'rethink', name:'', freq:'quarter', dow:0, dom:1, mon:1, time:'20:00', on:true, created:now, done:now }
+  ];
+}
+const Remind = (() => {
+  const at = (d, time) => { const [h, m] = (time || '09:00').split(':').map(Number); const z = new Date(d); z.setHours(h || 0, m || 0, 0, 0); return z; };
+  const clampDay = (y, mo, d) => new Date(y, mo, Math.min(d, new Date(y, mo + 1, 0).getDate()));
+  // latest scheduled moment at or before `now`
+  function prev(r, now = new Date()){
+    const td = new Date(now); td.setHours(0,0,0,0);
+    if (r.freq === 'day') { let c = at(td, r.time); if (c > now) c.setDate(c.getDate() - 1); return c; }
+    if (r.freq === 'week') { const d = new Date(td); d.setDate(d.getDate() - ((d.getDay() - r.dow + 7) % 7)); let c = at(d, r.time); if (c > now) c.setDate(c.getDate() - 7); return c; }
+    const step = r.freq === 'month' ? 1 : r.freq === 'quarter' ? 3 : 12;
+    let y = now.getFullYear(), mo = r.freq === 'year' ? (r.mon - 1) : r.freq === 'quarter' ? now.getMonth() - now.getMonth() % 3 : now.getMonth();
+    if (r.freq === 'year' && mo > now.getMonth()) y--;
+    for (let k = 0; k < 4; k++) { const c = at(clampDay(y, mo, r.dom), r.time); if (c <= now) return c; mo -= step; if (mo < 0) { mo += 12; y--; } }
+    return at(clampDay(y, mo, r.dom), r.time);
+  }
+  function next(r, now = new Date()){
+    const p = prev(r, now), c = new Date(p);
+    if (r.freq === 'day') c.setDate(c.getDate() + 1);
+    else if (r.freq === 'week') c.setDate(c.getDate() + 7);
+    else { const step = r.freq === 'month' ? 1 : r.freq === 'quarter' ? 3 : 12; return at(clampDay(p.getFullYear(), p.getMonth() + step, r.dom), r.time); }
+    return c;
+  }
+  const isDue = (r, now = new Date()) => r.on && prev(r, now) > new Date(r.done || r.created || 0) && (!r.snooze || now >= new Date(r.snooze));
+  const due = () => (S && Array.isArray(S.reminders) ? S.reminders.filter(r => isDue(r)) : []);
+  const title = r => r.kind === 'custom' ? (r.name || t('rk_custom')) : t('rk_' + r.kind);
+  function sched(r){
+    const tm = r.time, dn = t('dowNames');
+    if (r.freq === 'day') return `${t('rf_day')} ${tm}`;
+    if (r.freq === 'week') return `${t('rf_week')} ${dn[r.dow]} ${tm}`;
+    const day = L() === 'en' ? `day ${r.dom}` : `${r.dom}日`;
+    if (r.freq === 'month') return `${t('rf_month')} ${day} ${tm}`;
+    if (r.freq === 'quarter') return `${t('rf_quarter')}（${t('quarterNote')}）${day} ${tm}`;
+    return L() === 'en' ? `${t('rf_year')} ${new Date(2000, r.mon - 1, 1).toLocaleDateString('en-GB',{month:'short'})} ${r.dom} ${tm}` : `${t('rf_year')} ${r.mon}月${r.dom}日 ${tm}`;
+  }
+  const whenLabel = d => `${dayLabel(iso(d))} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  function done(id){ const r = S.reminders.find(z => z.id === id); if (!r) return; r.done = new Date().toISOString(); delete r.snooze; persist(); badge(); }
+  function later(id){ const r = S.reminders.find(z => z.id === id); if (!r) return; const z = new Date(); z.setDate(z.getDate() + 1); r.snooze = at(z, r.time).toISOString(); persist(); badge(); }
+  function badge(){ try { const n = due().length; if (navigator.setAppBadge) n ? navigator.setAppBadge(n) : navigator.clearAppBadge(); } catch(e) {} }
+  async function notify(){
+    if (!S) return; badge();
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    const list = due().filter(r => r.notified !== prev(r).toISOString()); if (!list.length) return;
+    const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration().catch(() => null);
+    for (const r of list) {
+      r.notified = prev(r).toISOString();
+      const body = L() === 'en' ? 'Open Kura to get it done.' : 'Kuraを開いて、さっと済ませましょう。';
+      try { if (reg && reg.showNotification) await reg.showNotification('Kura · ' + title(r), { body, tag:r.id, icon:'icons/icon-192.png', badge:'icons/icon-192.png' }); else new Notification('Kura · ' + title(r), { body, tag:r.id }); } catch(e) {}
+    }
+    persist();
+  }
+  async function allow(){
+    if (!('Notification' in window)) { toast(t('remUnsupported')); return 'unsupported'; }
+    try { const p = await Notification.requestPermission(); if (p === 'granted') notify(); return p; } catch(e) { return 'denied'; }
+  }
+  const perm = () => !('Notification' in window) ? 'unsupported' : Notification.permission;
+  // .ics so the iPhone Calendar can alert on time even while Kura is closed
+  function ics(list){
+    const stamp = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+    const BY = ['SU','MO','TU','WE','TH','FR','SA'];
+    const url = location.href.split('#')[0].split('?')[0];
+    const escI = v => String(v).replace(/[\\,;]/g, m => '\\' + m).replace(/\n/g, '\\n');
+    const ev = list.map(r => {
+      const st = next(r); const rule = r.freq === 'day' ? 'FREQ=DAILY' : r.freq === 'week' ? `FREQ=WEEKLY;BYDAY=${BY[r.dow]}` : r.freq === 'month' ? `FREQ=MONTHLY;BYMONTHDAY=${r.dom}` : r.freq === 'quarter' ? `FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY=${r.dom}` : `FREQ=YEARLY;BYMONTH=${r.mon};BYMONTHDAY=${r.dom}`;
+      const nm = 'Kura · ' + title(r);
+      return ['BEGIN:VEVENT', `UID:${r.id}-${Date.now()}@kura`, `DTSTAMP:${stamp(new Date())}`, `DTSTART:${stamp(st)}`, 'DURATION:PT15M', `RRULE:${rule}`, `SUMMARY:${escI(nm)}`, `DESCRIPTION:${escI(url)}`, `URL:${url}`,
+        'BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${escI(nm)}`, 'TRIGGER:PT0M', 'END:VALARM', 'END:VEVENT'].join('\r\n');
+    });
+    return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Kura//Reminders//JA', 'CALSCALE:GREGORIAN', ...ev, 'END:VCALENDAR'].join('\r\n') + '\r\n';
+  }
+  function toCalendar(list){
+    const blob = new Blob([ics(list)], { type:'text/calendar;charset=utf-8' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = list.length === 1 ? `kura-${list[0].kind}.ics` : 'kura-reminders.ics';
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000); toast(t('calMade'));
+  }
+  setInterval(() => { if (S && !document.hidden) { notify(); if (UI.tab === 'home' && !$('#scrim') && due().length !== (+document.body.dataset.due || 0)) render(); } }, 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && S) notify(); });
+  return { prev, next, isDue, due, title, sched, whenLabel, done, later, notify, allow, perm, toCalendar, badge };
+})();
+
+/* comparison windows for Insights */
+function cmpData(b, mode){
+  const key = UI.month, cur = mk(iso(today0())) === key;
+  const E = cur ? today0() : pd(`${key}-${pad(daysIn(key))}`);
+  const D = (d, n) => { const z = new Date(d); z.setDate(z.getDate() + n); return z; };
+  const Y = (d, n) => { const z = new Date(d); z.setFullYear(z.getFullYear() + n); return z; };
+  const exps = S.tx.filter(x => x.book === b && isExp(x));
+  const expR = (s, e) => -sum(exps.filter(x => x.date >= s && x.date <= e), x => x.amt);
+  const catsR = (s, e) => { const o = {}; exps.filter(x => x.date >= s && x.date <= e).forEach(x => o[x.cat] = (o[x.cat] || 0) - x.amt); return o; };
+  const mLab = (k, long) => long ? monthLabel(k) : (L()==='en' ? new Date(+k.slice(0,4), +k.slice(5)-1, 1).toLocaleDateString('en-GB',{month:'short', year:'2-digit'}) : `${k.slice(2,4)}年${+k.slice(5)}月`);
+  let A, B, labelA, labelB, labels, va, vb, fmtX, point = true, nameA, nameB;
+  if (mode === 'week') {
+    const st = D(E, -((E.getDay() + 6) % 7)), ps = D(st, -7), len = daysBetween(st, E);
+    A = [iso(st), iso(E)]; B = [iso(ps), iso(D(ps, len))];
+    const cumW = (s0, upto) => { let acc = 0; return Array.from({length:7}, (_, i) => { const d = iso(D(s0, i)); acc += expR(d, d); return i <= upto ? acc : null; }); };
+    labels = Array.from({length:7}, (_, i) => iso(D(st, i))); va = cumW(st, len); vb = cumW(ps, 6);
+    const wd = L()==='en' ? ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] : ['月','火','水','木','金','土','日'];
+    fmtX = (l, i, long) => long ? `${wd[i]}` : wd[i];
+    labelA = nameA = t('thisWeek'); labelB = nameB = t('lastWeekL');
+  } else if (mode === 'month') {
+    const st = pd(key + '-01'), pk = addMonths(key, -1), upto = E.getDate();
+    A = [iso(st), iso(E)]; B = [pk + '-01', `${pk}-${pad(Math.min(upto, daysIn(pk)))}`];
+    const cumM = (k, u) => { let acc = 0; return Array.from({length:daysIn(k)}, (_, i) => { const d = `${k}-${pad(i+1)}`; acc += expR(d, d); return i + 1 <= u ? acc : null; }); };
+    va = cumM(key, upto); vb = cumM(pk, daysIn(pk)); const n = Math.max(va.length, vb.length); while (va.length < n) va.push(null); while (vb.length < n) vb.push(null);
+    labels = Array.from({length:n}, (_, i) => i + 1); fmtX = (l, i, long) => L()==='en' ? `${long ? 'Day ' : ''}${l}` : `${l}日`;
+    labelA = nameA = cur ? t('thisMonth') : monthLabel(key); labelB = nameB = t('lastMonth');
+  } else if (mode === 'year') {
+    const yr = E.getFullYear();
+    A = [`${yr}-01-01`, iso(E)]; B = [`${yr-1}-01-01`, iso(Y(E, -1))];
+    const cumY = (y, uptoM, lastDay) => { let acc = 0; return Array.from({length:12}, (_, m) => { if (m > uptoM) return null; const k = `${y}-${pad(m+1)}`; acc += expR(k + '-01', m === uptoM && lastDay ? lastDay : `${k}-${pad(daysIn(k))}`); return acc; }); };
+    va = cumY(yr, E.getMonth(), iso(E)); vb = cumY(yr - 1, 11);
+    labels = Array.from({length:12}, (_, m) => `${yr}-${pad(m+1)}`); fmtX = (l, i, long) => long ? (L()==='en' ? new Date(2000, i, 1).toLocaleDateString('en-GB',{month:'long'}) : `${i+1}月`) : (L()==='en' ? new Date(2000, i, 1).toLocaleDateString('en-GB',{month:'short'}) : `${i+1}月`);
+    labelA = nameA = t('thisYear'); labelB = nameB = t('lastYearL');
+  } else {
+    const N = mode === 'y3' ? 3 : 5, st = D(Y(E, -1), 1);
+    A = [iso(st), iso(E)]; B = [iso(Y(st, -N)), iso(Y(E, -N))]; point = false;
+    const m0 = addMonths(mk(iso(E)), -(N * 12)); labels = Array.from({length:N * 12 + 1}, (_, i) => addMonths(m0, i));
+    va = labels.map(k => expR(k + '-01', `${k}-${pad(daysIn(k))}`));
+    vb = va.map((_, i) => i < 11 ? null : sum(va.slice(i - 11, i + 1)) / 12);
+    fmtX = (l, i, long) => mLab(l, long);
+    labelA = t('last12'); labelB = t('nYearsAgo', N); nameA = t('monthlyL'); nameB = t('avg12');
+  }
+  const a = expR(...A), bb = expR(...B);
+  const ya = mode === 'y3' || mode === 'y5' ? Array.from({length:(mode === 'y3' ? 3 : 5) + 1}, (_, i) => E.getFullYear() - i).map(y => {
+    const inc = sum(S.tx.filter(x => x.book === b && isInc(x) && x.date.startsWith(y + '-')), x => x.amt), ex = expR(`${y}-01-01`, `${y}-12-31`); return { y, inc, ex, net: inc - ex }; }) : null;
+  return { mode, A, B, a, b: bb, ca: catsR(...A), cb: catsR(...B), labels, va, vb, fmtX, labelA, labelB, nameA, nameB, point, years: ya };
+}
+
 /* ---------- state ---------- */
 let S = null, KEY = null, SALT = null;
 let noStore = false, noCrypto = !(window.crypto && crypto.subtle);
@@ -719,6 +912,8 @@ const ICON = {
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
   users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/>'
 };
+ICON.bell = '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>';
+ICON.trend = '<path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/>';
 const ic = (n, extra='') => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${ICON[n]||''}</svg>`;
 
 /* ---------- crypto ---------- */
@@ -834,7 +1029,9 @@ const MIGRATIONS = {
     if (s.sample || hadSample) { s.history = []; s.lastImport = Object.fromEntries(Object.entries(s.lastImport || {}).filter(([id]) => s.tx.some(x => x.acct === id && x.src !== 'sample'))); }
     s.sample = false;
     return s;
-  }
+  },
+  // v3 → v4: reminders (review / import / strategy) and strategy notes
+  3: s => { if (!Array.isArray(s.reminders)) s.reminders = defaultReminders(); if (!Array.isArray(s.stratNotes)) s.stratNotes = []; return s; }
 };
 function migrate(s){
   let from = s.schema || 1;
@@ -871,7 +1068,8 @@ function makeSample(lang){
     },
     activeBook: 'personal', categories, accounts, tx: [], history: [],
     rules: [ { kw:'AMAZON', cat:'daily' }, { kw:'セブン', cat:'food' }, { kw:'Suica', cat:'transit' }, { kw:'Netflix', cat:'subs' } ],
-    lastImport: {}, lastReview: new Date().toISOString()
+    lastImport: {}, lastReview: new Date().toISOString(),
+    reminders: defaultReminders(), stratNotes: []
   };
 }
 
@@ -975,7 +1173,8 @@ function afterUnlock(){
   writeMeta({ fails:0, lockUntil:0, lang:S.lang });
   pinBuf = ''; lastAct = Date.now();
   UI.month = mk(iso(today0())); UI.tab = 'home';
-  snapshotHistory();
+  if (!Array.isArray(S.reminders)) S.reminders = defaultReminders(); if (!Array.isArray(S.stratNotes)) S.stratNotes = [];
+  snapshotHistory(); setTimeout(() => Remind.notify(), 2500);
   const app = $('#app'), nav = $('#nav');
   app.classList.add('entering'); nav.classList.add('entering');
   render();
@@ -1175,10 +1374,13 @@ function viewHome(){
     banner = `<div class="card"><div class="banner"><span class="ic" style="position:relative">${ic('list')}<span class="udot" style="left:2px;top:2px"></span></span><div><h4>${esc(t('unreadBanner', unreadN))}</h4><p>${esc(t('unreadSub'))}</p></div></div><button class="btn mt" data-act="sort">${esc(t('sortNow'))}</button></div>`;
   } else if (!UI.bannerHidden && late.length) {
     banner = `<div class="card"><div class="banner"><span class="ic">${ic('alert')}</span><div><h4>${esc(t('importLate', late[0].d))}</h4><p>${esc(t('importLateSub', late.map(o => acct(o.id).name).join('、')))}</p></div><button class="x" data-act="hidebanner" aria-label="${esc(t('close'))}">${ic('x')}</button></div><button class="btn mt" data-act="import">${esc(t('importNow'))}</button></div>`;
-  } else if (!UI.bannerHidden && daysBetween(new Date(S.lastReview), new Date()) >= 7) {
+  } else if (!UI.bannerHidden && !(S.reminders || []).some(r => r.kind === 'review' && r.on) && daysBetween(new Date(S.lastReview), new Date()) >= 7) {
     banner = `<div class="card"><div class="banner"><span class="ic">${ic('cal')}</span><div><h4>${esc(t('reviewDue'))}</h4><p>${esc(t('reviewDueSub'))}</p></div><button class="x" data-act="hidebanner" aria-label="${esc(t('close'))}">${ic('x')}</button></div><button class="btn mt" data-act="review">${esc(t('startReview'))}</button></div>`;
   }
   const pct = bt ? Math.min(100, spent / bt * 100) : 0;
+  const dueR = Remind.due(); document.body.dataset.due = dueR.length;
+  const dueCard = dueR.length ? `<div class="card duecard"><div class="ctitle" style="margin-bottom:4px"><h3 style="display:flex;align-items:center;gap:8px"><span style="width:18px;height:18px;display:inline-flex;color:var(--accent)">${ic('bell')}</span>${esc(t('dueTitle'))}</h3></div>
+    ${dueR.map(r => `<div class="drow"><div class="main"><div class="t1">${esc(Remind.title(r))}</div><div class="t2">${esc(Remind.sched(r))}</div></div><button class="btn sm ghost" data-act="remlater" data-arg="${r.id}">${esc(t('snooze'))}</button><button class="btn sm" data-act="remgo" data-arg="${r.id}">${esc(t('go_' + r.kind))}</button></div>`).join('')}</div>` : '';
   return `
   <section class="hero">
     <div class="lbl">${esc(t('personal'))} · ${esc(t('netWorth'))}</div>
@@ -1193,6 +1395,7 @@ function viewHome(){
     <button class="act" data-act="tab" data-arg="insights"><span>${ic('pie')}</span><span>${esc(t('budget'))}</span></button>
   </div>
   <div class="stack">
+    ${dueCard}
     ${banner}
     <div class="card">
       <div class="ctitle"><h3>${esc(t('monthBudget'))}</h3><span class="faint">${esc(t('daysLeft', dl))}</span></div>
@@ -1256,11 +1459,11 @@ function monthSwitch(){
 const unreadList = () => S.tx.filter(x => x.rev === false).sort((a,b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
 let sorterRule = true;
 function openSorter(){
-  let queue = unreadList().map(x => x.id), i = 0;
+  let queue = unreadList().map(x => x.id), i = 0, sel = null;   // sel: category tapped but not saved yet
   openSheet(`<div id="sorter"></div>`, sh => {
     const box = sh.querySelector('#sorter');
     const cur = () => S.tx.find(z => z.id === queue[i]);
-    const next = () => { while (i < queue.length && cur()?.rev !== false) i++; draw(); };
+    const next = () => { sel = null; while (i < queue.length && cur()?.rev !== false) i++; draw(); };
     const draw = () => {
       if (i >= queue.length) {
         const rem = unreadList().length;
@@ -1280,13 +1483,25 @@ function openSorter(){
           <div class="sdesc">${esc(x.desc)}</div>
           <div class="samt tnum ${x.amt > 0 ? 'pos' : ''}">${yen(x.amt, true)}</div>
           ${x.memo ? `<div class="faint">${esc(x.memo)}</div>` : ''}
-          <div class="scur">${esc(t('current'))}：<b>${esc(catName(x.cat))}</b></div>
+          <div class="scur" id="s-cur"></div>
         </div>
         <h5>${esc(t('pickCat'))}</h5>
         <div class="catgrid">${cats.map(c => `<button type="button" class="chipb" data-cat="${c.id}" aria-pressed="${c.id === x.cat}">${esc(L()==='en' ? c.en : c.ja)}</button>`).join('')}</div>
         <label class="check" style="margin-top:16px"><input type="checkbox" id="s-rule" ${sorterRule ? 'checked' : ''}> ${esc(t('applySame'))}</label>
-        <div class="btnrow" style="margin-top:14px"><button type="button" class="btn ghost" id="s-later" style="flex:1">${esc(t('later'))}</button><button type="button" class="btn" id="s-ok" style="flex:2" ${x.cat === 'uncat' ? 'disabled' : ''}>${esc(x.cat === 'uncat' ? t('pickFirst') : t('keepOk'))}</button></div>
+        <div class="btnrow" style="margin-top:14px" id="s-btns"></div>
         <button type="button" class="btn ghost mt" id="s-all" style="background:none;color:var(--fg-2);height:44px">${esc(t('markAllRead'))}</button>`;
+      paint();
+    };
+    // tapping a category only selects it; Save commits it, Cancel puts the selection back
+    const paint = () => {
+      const x = cur(); if (!x) return; const pick = sel || x.cat;
+      box.querySelectorAll('[data-cat]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.cat === pick)));
+      box.querySelector('#s-cur').innerHTML = sel && sel !== x.cat
+        ? `${esc(t('current'))}：<s style="opacity:.6">${esc(catName(x.cat))}</s> → <b style="color:var(--accent)">${esc(catName(sel))}</b>`
+        : `${esc(t('current'))}：<b>${esc(catName(x.cat))}</b>`;
+      box.querySelector('#s-btns').innerHTML = sel && sel !== x.cat
+        ? `<button type="button" class="btn ghost" id="s-cancel" style="flex:1">${esc(t('cancel'))}</button><button type="button" class="btn" id="s-save" style="flex:2">${esc(t('save'))}</button>`
+        : `<button type="button" class="btn ghost" id="s-later" style="flex:1">${esc(t('later'))}</button><button type="button" class="btn" id="s-ok" style="flex:2" ${x.cat === 'uncat' ? 'disabled' : ''}>${esc(x.cat === 'uncat' ? t('pickFirst') : t('keepOk'))}</button>`;
     };
     const decide = (x, catId) => {
       x.cat = catId; x.rev = true; let n = 0;
@@ -1300,7 +1515,9 @@ function openSorter(){
     box.addEventListener('click', e => {
       if (e.target.closest('#s-again')) { queue = unreadList().map(x => x.id); i = 0; next(); return; }
       const x = cur(); if (!x) return;
-      const c = e.target.closest('[data-cat]'); if (c) { decide(x, c.dataset.cat); return; }
+      const c = e.target.closest('[data-cat]'); if (c) { sel = c.dataset.cat === x.cat ? null : c.dataset.cat; paint(); return; }
+      if (e.target.closest('#s-save')) { const v = sel; sel = null; decide(x, v); return; }
+      if (e.target.closest('#s-cancel')) { sel = null; paint(); return; }
       if (e.target.closest('#s-ok')) { decide(x, x.cat); return; }
       if (e.target.closest('#s-later')) { i++; next(); return; }
       const all = e.target.closest('#s-all');
@@ -1308,6 +1525,104 @@ function openSorter(){
         S.tx.forEach(z => { if (z.rev === false) z.rev = true; }); persist(); render(); i = queue.length; draw(); }
     });
     next();
+  });
+}
+function openReminders(){
+  const permBox = () => { const p = Remind.perm();
+    if (p === 'granted') return `<div class="okbox mt">${ic('check')}<span>${esc(t('remAllowed'))}</span></div>`;
+    if (p === 'denied') return `<div class="okbox warnbox mt">${ic('alert')}<span>${esc(t('remDenied'))}</span></div>`;
+    if (p === 'unsupported') return `<div class="okbox warnbox mt">${ic('alert')}<span>${esc(t('remUnsupported'))}</span></div>`;
+    return `<button class="btn mt" id="rm-allow">${esc(t('remAllow'))}</button>`; };
+  const draw = sh => {
+    sh.querySelector('#rm-body').innerHTML = `<div class="list">${S.reminders.map(r => { const nx = Remind.next(r);
+      return `<div class="row remrow" data-rid="${r.id}" role="button" tabindex="0"><span class="av">${ic(r.kind === 'review' ? 'check' : r.kind === 'import' ? 'upload' : r.kind === 'rethink' ? 'trend' : 'bell')}</span>
+        <span class="main"><span class="t1">${esc(Remind.title(r))}</span><span class="t2">${esc(Remind.sched(r))}${r.on ? ` · ${esc(t('remNext'))} ${esc(Remind.whenLabel(nx))}` : ` · ${esc(t('remOff'))}`}</span></span>
+        <span class="sw ${r.on ? 'on' : ''}" data-tog="${r.id}" role="switch" aria-checked="${r.on}"></span></div>`; }).join('')}</div>
+      <button class="btn ghost mt" id="rm-add">${esc(t('remAdd'))}</button>
+      ${permBox()}
+      <button class="btn ghost mt" id="rm-cal">${esc(t('remCalAll'))}</button>
+      <h5>${esc(t('remHow'))}</h5><p class="note" style="margin:0">${esc(t('remNote'))}</p>`;
+  };
+  openSheet(`<h2>${esc(t('remTitle'))}</h2><p class="lead">${esc(t('remLead'))}</p><div id="rm-body"></div>`, sh => {
+    draw(sh);
+    sh.addEventListener('click', async e => {
+      const tg = e.target.closest('[data-tog]'); if (tg) { const r = S.reminders.find(z => z.id === tg.dataset.tog); r.on = !r.on; if (r.on) r.done = new Date().toISOString(); persist(); draw(sh); render(); return; }
+      const row = e.target.closest('[data-rid]'); if (row) { openRemEdit(row.dataset.rid); return; }
+      if (e.target.closest('#rm-add')) { openRemEdit(null); return; }
+      if (e.target.closest('#rm-allow')) { await Remind.allow(); draw(sh); return; }
+      if (e.target.closest('#rm-cal')) { const on = S.reminders.filter(r => r.on); if (on.length) Remind.toCalendar(on); }
+    });
+  });
+}
+function openRemEdit(id){
+  const orig = id ? S.reminders.find(z => z.id === id) : null;
+  const r = orig ? { ...orig } : { id:'r-' + Date.now().toString(36), kind:'custom', name:'', freq:'week', dow:1, dom:1, mon:1, time:'09:00', on:true };
+  const opt = (v, cur, label) => `<option value="${v}" ${String(v) === String(cur) ? 'selected' : ''}>${esc(label)}</option>`;
+  openSheet(`<h2>${esc(t(orig ? 'remEdit' : 'remAdd'))}</h2><div class="form" id="re-form" style="margin-top:14px"></div>`, sh => {
+    const f = sh.querySelector('#re-form');
+    const draw = () => {
+      f.innerHTML = `<label>${esc(t('remKind'))}<select class="inp" id="re-kind">${['review','import','rethink','custom'].map(k => opt(k, r.kind, t('rk_' + k))).join('')}</select></label>
+        ${r.kind === 'custom' ? `<label>${esc(t('remName'))}<input class="inp" id="re-name" value="${esc(r.name)}" maxlength="40" autocomplete="off"></label>` : ''}
+        <label>${esc(t('remFreq'))}<select class="inp" id="re-freq">${['day','week','month','quarter','year'].map(k => opt(k, r.freq, t('rf_' + k))).join('')}</select></label>
+        <div class="two">
+          ${r.freq === 'week' ? `<label>${esc(t('remDow'))}<select class="inp" id="re-dow">${t('dowNames').map((n, i) => opt(i, r.dow, n)).join('')}</select></label>` : ''}
+          ${r.freq === 'year' ? `<label>${esc(t('remMon'))}<select class="inp" id="re-mon">${Array.from({length:12}, (_, i) => opt(i + 1, r.mon, L()==='en' ? new Date(2000, i, 1).toLocaleDateString('en-GB',{month:'long'}) : `${i+1}月`)).join('')}</select></label>` : ''}
+          ${['month','quarter','year'].includes(r.freq) ? `<label>${esc(t('remDom'))}<select class="inp" id="re-dom">${Array.from({length:28}, (_, i) => opt(i + 1, r.dom, L()==='en' ? String(i + 1) : `${i+1}日`)).join('')}</select></label>` : ''}
+          <label>${esc(t('remTime'))}<input class="inp" id="re-time" type="time" value="${esc(r.time)}"></label>
+        </div>
+        ${r.freq === 'quarter' ? `<p class="note" style="margin:-4px 0 0">${esc(t('quarterNote'))}</p>` : ''}
+        <label class="check"><input type="checkbox" id="re-on" ${r.on ? 'checked' : ''}> ${esc(t('remOnL'))}</label>
+        <div class="btnrow"><button type="button" class="btn ghost" id="re-cancel" style="flex:1">${esc(t('cancel'))}</button><button type="button" class="btn" id="re-save" style="flex:2">${esc(t('save'))}</button></div>
+        <button type="button" class="btn ghost" id="re-cal">${esc(t('remCal'))}</button>
+        ${orig ? `<button type="button" class="btn ghost" id="re-del" style="background:none;color:var(--bad)">${esc(t('remDel'))}</button>` : ''}`;
+    };
+    const read = () => { const v = id => f.querySelector(id); if (v('#re-kind')) r.kind = v('#re-kind').value; if (v('#re-name')) r.name = v('#re-name').value.trim();
+      if (v('#re-freq')) r.freq = v('#re-freq').value; if (v('#re-dow')) r.dow = +v('#re-dow').value; if (v('#re-mon')) r.mon = +v('#re-mon').value; if (v('#re-dom')) r.dom = +v('#re-dom').value;
+      if (v('#re-time') && v('#re-time').value) r.time = v('#re-time').value; if (v('#re-on')) r.on = v('#re-on').checked; };
+    draw();
+    f.addEventListener('change', e => { if (['re-kind','re-freq'].includes(e.target.id)) { read(); draw(); } });
+    f.addEventListener('click', e => {
+      if (e.target.closest('#re-cancel')) { openReminders(); return; }
+      if (e.target.closest('#re-save')) { read(); const now = new Date().toISOString(); r.created = r.created || now; r.done = now; delete r.snooze; delete r.notified;
+        if (orig) Object.assign(orig, r); else S.reminders.push(r); persist(); render(); toast(t('remSaved')); openReminders(); return; }
+      if (e.target.closest('#re-cal')) { read(); Remind.toCalendar([r]); return; }
+      const del = e.target.closest('#re-del');
+      if (del) { if (!del.dataset.arm) { del.dataset.arm = 1; del.textContent = t('remDelConfirm'); return; } S.reminders = S.reminders.filter(z => z.id !== id); persist(); render(); openReminders(); }
+    });
+  });
+}
+function openRethink(){
+  const b = 'personal', key = mk(iso(today0()));
+  const ms = n => Array.from({length:3}, (_, i) => addMonths(key, -(i + 1) - n));
+  const expM = k => -sum(txIn(b, k).filter(isExp), x => x.amt), incM = k => sum(txIn(b, k).filter(isInc), x => x.amt);
+  const r3 = ms(0), p3 = ms(3);
+  const avgR = sum(r3.map(expM)) / 3, avgP = sum(p3.map(expM)) / 3;
+  const inc3 = sum(r3.map(incM)), exp3 = sum(r3.map(expM)); const rate = inc3 ? Math.round((inc3 - exp3) / inc3 * 100) : null;
+  const notes = (S.stratNotes || []).slice(0, 4);
+  openSheet(`<h2>${esc(t('rethinkTitle'))}</h2><p class="lead">${esc(t('rethinkLead'))}</p>
+    <div class="stat3">
+      <div class="card" style="padding:16px"><div class="eyebrow">${esc(t('r3avg'))}</div><div class="val tnum" style="font-size:21px">${yen(avgR)}</div><div class="tnum ${avgR > avgP ? 'neg' : 'pos'}" style="font-size:12.5px">${esc(t('p3avg'))} ${yen(avgP)}</div></div>
+      <div class="card" style="padding:16px"><div class="eyebrow">${esc(t('saveRate'))}</div><div class="val tnum ${rate != null && rate < 0 ? 'neg' : ''}" style="font-size:21px">${rate == null ? '—' : rate + '%'}</div><div class="faint tnum" style="font-size:12.5px">${yen(inc3 - exp3, true)}</div></div>
+    </div>
+    <h5>${esc(t('stepsL'))}</h5>
+    <div class="list">
+      <button class="row" data-act="cats"><span class="av">${ic('tag')}</span><span class="main"><span class="t1">${esc(t('stepBudget'))}</span></span>${ic('chev','class="chev"')}</button>
+      <button class="row" id="rt-subs"><span class="av">${ic('refresh')}</span><span class="main"><span class="t1">${esc(t('stepSubs'))}</span></span>${ic('chev','class="chev"')}</button>
+      <button class="row" id="rt-assets"><span class="av">${ic('assets')}</span><span class="main"><span class="t1">${esc(t('stepAssets'))}</span></span>${ic('chev','class="chev"')}</button>
+      <button class="row" id="rt-trend"><span class="av">${ic('trend')}</span><span class="main"><span class="t1">${esc(t('stepTrend'))}</span></span>${ic('chev','class="chev"')}</button>
+    </div>
+    <div class="form" style="margin-top:16px"><label>${esc(t('planLabel'))}<textarea class="inp" id="rt-plan" rows="4" placeholder="${esc(t('planPh'))}"></textarea></label>
+      <button class="btn" id="rt-done">${esc(t('rethinkDone'))}</button></div>
+    ${notes.length ? `<h5>${esc(t('pastPlans'))}</h5><div class="list">${notes.map(n => `<div class="row" style="align-items:flex-start"><span class="main"><span class="t2">${esc(dayLabel(n.date))}</span><span class="t1" style="white-space:pre-wrap;font-weight:500">${esc(n.text)}</span></span></div>`).join('')}</div>` : ''}`, sh => {
+    sh.querySelector('#rt-subs').addEventListener('click', () => { closeSheet(true); UI.tab = 'tx'; UI.filter = 'all'; UI.q = L()==='en' ? 'subscription' : 'サブスク'; render(); scrollTo(0,0); softSwap(); });
+    sh.querySelector('#rt-assets').addEventListener('click', () => { closeSheet(true); S.activeBook = 'personal'; UI.tab = 'assets'; render(); scrollTo(0,0); softSwap(); });
+    sh.querySelector('#rt-trend').addEventListener('click', () => { closeSheet(true); UI.tab = 'insights'; UI.cmp = 'y3'; UI.month = key; render(); scrollTo(0,0); softSwap(); });
+    sh.querySelector('#rt-done').addEventListener('click', () => {
+      const text = sh.querySelector('#rt-plan').value.trim();
+      if (text) { S.stratNotes = [{ date: iso(today0()), text }, ...(S.stratNotes || [])].slice(0, 40); }
+      (S.reminders || []).filter(r => r.kind === 'rethink').forEach(r => { r.done = new Date().toISOString(); delete r.snooze; });
+      persist(); closeSheet(); render(); Remind.badge(); toast(t(text ? 'rethinkSaved' : 'remSaved'));
+    });
   });
 }
 function openMonthPicker(){
@@ -1397,20 +1712,33 @@ function viewInsights(){
   const byCat = {}; txIn(b, key).filter(isExp).forEach(x => byCat[x.cat] = (byCat[x.cat] || 0) - x.amt);
   const cats = S.categories.filter(c => c.type === 'exp' && (byCat[c.id] || (b === 'personal' && c.budget))).map(c => ({ c, v: byCat[c.id] || 0 })).sort((a,b2) => b2.v - a.v);
   const maxCat = Math.max(1, ...cats.map(o => Math.max(o.v, b === 'personal' ? o.c.budget || 0 : 0)));
+  const mode = UI.cmp || 'month', C = cmpData(b, mode);
   const chart = lineChart('spendchart', {
-    labels: Array.from({length:n}, (_,i) => i + 1),
-    series: [ { name:t('lastMonth'), values:lastArr, color:'rgba(246,243,250,.45)', dash:true }, { name: cur ? t('thisMonth') : mShort(key), values:thisArr, color:'#f4c542', area:true } ],
-    fmtX: (l, i, long) => L()==='en' ? `${long ? 'Day ' : ''}${l}` : `${l}日`
+    labels: C.labels,
+    series: [ { name:C.nameB, values:C.vb, color:'rgba(246,243,250,.45)', dash:true }, { name:C.nameA, values:C.va, color:'#f4c542', area:true } ],
+    fmtX: C.fmtX
   });
+  const cdiff = C.a - C.b, cpct = C.b ? Math.round(cdiff / C.b * 100) : null;
+  const cids = [...new Set([...Object.keys(C.ca), ...Object.keys(C.cb)])].map(id => ({ id, a: C.ca[id] || 0, b: C.cb[id] || 0 })).sort((x, y) => Math.max(y.a, y.b) - Math.max(x.a, x.b)).slice(0, 8);
+  const cmax = Math.max(1, ...cids.map(o => Math.max(o.a, o.b)));
+  const cmpChips = ['week','month','year','y3','y5'].map(m => `<button class="chipb" data-act="cmp" data-arg="${m}" aria-pressed="${m === mode}">${esc(t('cmp_' + m))}</button>`).join('');
   return `<h1 class="pg">${esc(t('insights'))}</h1>
   <div class="pgsub">${bookSwitch()}${monthSwitch()}</div>
   <div class="stack">
     <div class="card">
-      <div class="eyebrow">${esc(t('spent'))}</div>
-      <div class="val tnum">${yen(spent)}</div>
-      <div class="kv tnum" style="justify-content:flex-start;margin:2px 0 12px"><span>${esc(t('lastMonth'))}${L()==='en' ? ', same point: ' : '同日比 '}<b class="${diff > 0 ? 'neg' : 'pos'}">${yen(diff, true)}</b></span></div>
+      <div class="ctitle" style="margin-bottom:8px"><h3>${esc(t('cmpWith'))}</h3></div>
+      <div class="chips cmpchips">${cmpChips}</div>
+      <div class="eyebrow">${esc(C.labelA)} · ${esc(t('spent'))}</div>
+      <div class="val tnum">${yen(C.a)}</div>
+      <div class="kv tnum" style="justify-content:flex-start;flex-wrap:wrap;gap:4px 10px;margin:2px 0 12px"><span>${esc(C.point ? t('vsPoint', C.labelB) : t('vsSpan', C.labelB))} <b class="${cdiff > 0 ? 'neg' : 'pos'}">${yen(cdiff, true)}${cpct != null ? `（${cpct > 0 ? '+' : ''}${cpct}%）` : ''}</b></span><span class="faint">${esc(C.labelB)} ${yen(C.b)}</span></div>
       ${chart}
     </div>
+    <div class="card">
+      <div class="ctitle"><h3>${esc(t('catCmp'))}</h3><span class="faint">${esc(C.labelA)} / ${esc(C.labelB)}</span></div>
+      ${cids.length ? cids.map(o => { const d = o.a - o.b; return `<div class="catrow"><div class="top2"><span class="nm">${esc(catName(o.id))}</span><span class="amt tnum">${yen(o.a)}<small> / ${yen(o.b)}</small> <b class="${d > 0 ? 'neg' : d < 0 ? 'pos' : 'muted'}" style="font-size:12.5px;margin-left:4px">${d ? yen(d, true) : '±0'}</b></span></div>
+        <div class="cmpbar"><i style="width:${o.a / cmax * 100}%"></i><i class="was" style="width:${o.b / cmax * 100}%"></i></div></div>`; }).join('') : `<p class="muted" style="margin:6px 0 2px">${esc(t('noDataYet'))}</p>`}
+    </div>
+    ${C.years ? `<div class="card"><div class="ctitle"><h3>${esc(t('yearsTable'))}</h3></div><div class="list" style="background:none;padding:0">${C.years.map(y => `<div class="row" style="padding-inline:0"><span class="main"><span class="t1">${L()==='en' ? y.y : y.y + '年'}</span><span class="t2 tnum">${esc(t('yrInc'))} ${yen(y.inc)} · ${esc(t('yrExp'))} ${yen(y.ex)}</span></span><span class="amt tnum ${y.net >= 0 ? 'pos' : 'neg'}">${yen(y.net, true)}</span></div>`).join('')}</div></div>` : ''}
     <div class="grid2">
       <div class="card"><div class="eyebrow">${esc(t('income'))}</div><div class="val tnum" style="font-size:22px">${yen(incs[5])}</div>
         <div class="minibars">${incs.map((v,i) => `<div class="${i === 5 ? 'cur' : ''}" style="height:${Math.max(4, v / maxInc * 100)}%" data-tip="${esc(mShort(months[i]))} ${yen(v)}"></div>`).join('')}</div></div>
@@ -1481,6 +1809,10 @@ function viewSettings(){
       <button class="row setrow" data-act="name"><span class="av" style="border-radius:50%;font-family:var(--font)">${esc(initials(readMeta().name))}</span><span class="main"><span class="t1">${esc(t('displayName'))}</span></span><span class="t2 muted">${esc(readMeta().name || t('notSet'))}</span>${ic('chev','class="chev"')}</button>
     </div></div></div>
     <div><h5 class="eyebrow" style="margin:0 0 8px 4px">${esc(t('secLang'))}</h5><div class="card" style="padding:14px"><div class="seg"><button data-act="lang" data-arg="ja" aria-pressed="${L()==='ja'}">日本語</button><button data-act="lang" data-arg="en" aria-pressed="${L()==='en'}">English</button></div></div></div>
+    <div><h5 class="eyebrow" style="margin:0 0 8px 4px">${esc(t('secNotif'))}</h5><div class="card" style="padding:4px 18px"><div class="rows list" style="background:none;padding:0">
+      ${setRow('bell', t('remTitle'), String((S.reminders || []).filter(r => r.on).length), 'reminders')}
+      ${setRow('trend', t('rethinkTitle'), '', 'rethink')}
+    </div></div></div>
     <div><h5 class="eyebrow" style="margin:0 0 8px 4px">${esc(t('secSecurity'))}</h5><div class="card" style="padding:4px 18px"><div class="rows list" style="background:none;padding:0">
       ${setRow('shield', t('secPlan'), '', 'secplan')}
       ${setRow('key', t('changePin'), '', 'pin')}
@@ -1982,7 +2314,7 @@ function runAct(a, arg){
     case 'edit': openTx(arg); break;
     case 'import': openImport(); break;
     case 'review': openReview(); break;
-    case 'reviewdone': S.lastReview = new Date().toISOString(); persist(); closeSheet(); render(); toast(t('reviewDone')); break;
+    case 'reviewdone': S.lastReview = new Date().toISOString(); (S.reminders || []).filter(r => r.kind === 'review' && Remind.isDue(r)).forEach(r => Remind.done(r.id)); persist(); closeSheet(); render(); toast(t('reviewDone')); break;
     case 'gouncat': closeSheet(true); UI.tab = 'tx'; UI.filter = 'uncat'; UI.q = ''; render(); scrollTo(0,0); softSwap(); break;
     case 'books': openBooks(); break;
     case 'setbook': S.activeBook = arg; persist(); closeSheet(); setTimeout(softSwap, 0); if (UI.tab === 'assets' && arg !== 'personal') UI.tab = 'home'; render(); break;
@@ -2019,6 +2351,12 @@ function runAct(a, arg){
     case 'update': openUpdate(); break;
     case 'sampleinfo': openSampleInfo(); break;
     case 'closesheet': closeSheet(); break;
+    case 'cmp': UI.cmp = arg; render(); softSwap(); break;
+    case 'reminders': openReminders(); break;
+    case 'rethink': openRethink(); break;
+    case 'remlater': Remind.later(arg); render(); break;
+    case 'remgo': { const r = S.reminders.find(z => z.id === arg); if (!r) break; Remind.done(arg); render();
+      if (r.kind === 'review') openReview(); else if (r.kind === 'import') openImport(); else if (r.kind === 'rethink') openRethink(); else toast(t('remSaved')); break; }
   }
 }
 document.addEventListener('input', e => { if (e.target.id === 'q') { UI.q = e.target.value; const pos = e.target.selectionStart; render(); const q = $('#q'); q.focus(); try { q.setSelectionRange(pos, pos); } catch(x){} } });
