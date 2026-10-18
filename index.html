@@ -1,0 +1,1489 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kura 家計簿</title>
+<meta name="theme-color" content="#130f1b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kura">
+<meta name="referrer" content="no-referrer">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0} img{max-width:100%} [hidden]{display:none!important}
+.upd{position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));z-index:70;display:flex;gap:12px;align-items:center;background:#f6f3fa;color:#141019;padding:10px 10px 10px 18px;border-radius:999px;font:500 14px "Onest","Zen Kaku Gothic New",system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.35);white-space:nowrap}
+.upd button{background:#141019;color:#f6f3fa;border:0;border-radius:999px;padding:8px 14px;font:inherit;cursor:pointer}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: one phone-width column floating over a living colour field that shifts per tab; glass cards, floating pill nav. Dark by design. */
+:root{
+  color-scheme:dark;
+  --bg:#130f1b;
+  --bg-deep:#0d0a13;
+  --fg:#f6f3fa;
+  --fg-2:rgba(246,243,250,.70);
+  --fg-3:rgba(246,243,250,.46);
+  --glass:rgba(255,255,255,.075);
+  --glass-2:rgba(255,255,255,.13);
+  --glass-3:rgba(255,255,255,.2);
+  --line:rgba(255,255,255,.09);
+  --accent:#f4c542;
+  --violet:#9c8bff;
+  --good:#63d6a4;
+  --bad:#ff7c6e;
+  --warn:#f5a94a;
+  --ink:#141019;
+  --b1:#5a2cf0;--b2:#f2c230;--b3:#ff6f91;
+  --font:"Onest","Zen Kaku Gothic New",system-ui,-apple-system,"Hiragino Sans",sans-serif;
+  --jp:"Zen Kaku Gothic New","Onest",system-ui,"Hiragino Sans",sans-serif;
+  --r-xl:30px;--r-lg:22px;--r-md:16px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body[data-tab="tx"]{--b1:#6b2bd9;--b2:#d23cf2;--b3:#f6a33a}
+body[data-tab="insights"]{--b1:#3b2bd8;--b2:#b89c1b;--b3:#e0577b}
+body[data-tab="assets"]{--b1:#4a32e0;--b2:#1db58e;--b3:#f2c230}
+body[data-tab="settings"]{--b1:#40306e;--b2:#6a5ab0;--b3:#a2557a}
+body.locked{--b1:#5a2cf0;--b2:#f2c230;--b3:#ff6f91}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:12px}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* colour field */
+.mesh{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:var(--bg)}
+.blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.95;transition:background-color 1.2s ease}
+.blob.a{width:85vmax;height:60vmax;left:-35vmax;top:-26vmax;background:var(--b1);animation:drift1 26s ease-in-out infinite alternate}
+.blob.b{width:62vmax;height:52vmax;right:-22vmax;top:-18vmax;background:var(--b2);animation:drift2 32s ease-in-out infinite alternate}
+.blob.c{width:46vmax;height:40vmax;left:8vmax;top:4vmax;background:var(--b3);opacity:.55;animation:drift3 22s ease-in-out infinite alternate}
+.mesh::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(19,15,27,0) 0%,rgba(19,15,27,.35) 26%,var(--bg) 58%,var(--bg-deep) 100%)}
+@keyframes drift1{to{transform:translate(8vmax,6vmax) scale(1.08)}}
+@keyframes drift2{to{transform:translate(-10vmax,8vmax) scale(.94)}}
+@keyframes drift3{to{transform:translate(12vmax,-4vmax) scale(1.15)}}
+@media (prefers-reduced-motion:reduce){.blob{animation:none}*{transition:none!important}}
+
+/* shell */
+#app{position:relative;z-index:1;max-width:520px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 120px;min-height:100%}
+.top{display:flex;align-items:center;gap:10px;padding-block:6px 4px}
+.circle{width:46px;height:46px;flex:none;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.14);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);font-weight:600;font-size:15px}
+.circle svg{width:21px;height:21px}
+.circle.dot{position:relative}
+.circle.dot::after{content:"";position:absolute;top:2px;right:3px;width:8px;height:8px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 2px rgba(19,15,27,.4)}
+.search{flex:1;min-width:0;height:46px;border-radius:999px;display:flex;align-items:center;gap:9px;padding-inline:16px;background:rgba(255,255,255,.14);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);color:var(--fg-2);text-align:left}
+.search svg{width:19px;height:19px;flex:none}
+.sample{display:flex;justify-content:center;padding-top:10px}
+.pill{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.12);font-size:13px;color:var(--fg-2)}
+.pill i{width:7px;height:7px;border-radius:50%;background:var(--accent);display:block}
+
+.hero{text-align:center;padding-block:46px 22px}
+.hero .lbl{font-size:14px;color:var(--fg-2);letter-spacing:.02em}
+.hero .big{font-size:clamp(44px,13vw,60px);font-weight:700;letter-spacing:-.03em;line-height:1.08;margin-top:4px}
+.hero .big small{font-size:.5em;font-weight:600;opacity:.85;margin-right:2px}
+.hero .sub{margin-top:6px;font-size:14px;color:var(--fg-2)}
+.hero .sub b{font-weight:600}
+.hero .chip{margin-top:18px;display:inline-flex;padding:10px 20px;border-radius:999px;background:rgba(255,255,255,.16);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-weight:500}
+
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding-block:6px 22px}
+.act{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:13.5px;font-weight:500}
+.act span:first-child{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.14);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.act svg{width:24px;height:24px}
+
+.card{background:var(--glass);backdrop-filter:blur(26px) saturate(1.2);-webkit-backdrop-filter:blur(26px) saturate(1.2);border-radius:var(--r-xl);padding:20px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.05)}
+.stack{display:flex;flex-direction:column;gap:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ctitle{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+.ctitle h3{margin:0;font-size:15px;font-weight:600}
+.ctitle .more{font-size:14px;color:var(--violet);font-weight:500}
+.eyebrow{font-size:13px;color:var(--fg-2)}
+.val{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.muted{color:var(--fg-2)}
+.faint{color:var(--fg-3)}
+.pos{color:var(--good)}
+.neg{color:var(--bad)}
+h1.pg{font-size:36px;font-weight:700;letter-spacing:-.025em;margin:18px 0 6px;text-wrap:balance}
+.pgsub{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}
+.booksw{display:inline-flex;align-items:center;gap:6px;font-size:19px;font-weight:600}
+.booksw svg{width:18px;height:18px;opacity:.75}
+.monthsw{display:flex;align-items:center;gap:4px;color:var(--violet);font-weight:500;font-size:14.5px}
+.monthsw button{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:var(--fg-2)}
+.monthsw button:disabled{opacity:.3;cursor:default}
+.monthsw svg{width:16px;height:16px}
+
+/* banner */
+.banner{display:flex;gap:14px;align-items:flex-start}
+.banner .ic{width:52px;height:52px;flex:none;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.1)}
+.banner .ic svg{width:24px;height:24px;color:var(--warn)}
+.banner h4{margin:0;font-size:16px;font-weight:600}
+.banner p{margin:2px 0 0;color:var(--fg-2);font-size:14px}
+.banner .x{margin-left:auto;color:var(--fg-3);width:28px;height:28px;display:grid;place-items:center;flex:none}
+.banner .x svg{width:16px;height:16px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:52px;border-radius:999px;background:var(--fg);color:var(--ink);font-weight:600;font-size:15.5px;width:100%}
+.btn.ghost{background:rgba(255,255,255,.12);color:var(--fg)}
+.btn.danger{background:rgba(255,124,110,.16);color:var(--bad)}
+.btn.sm{height:40px;font-size:14px;width:auto;padding-inline:18px}
+.btn:disabled{opacity:.45;cursor:default}
+.mt{margin-top:16px}
+
+/* budget meter */
+.meter{height:8px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:12px}
+.meter i{display:block;height:100%;border-radius:99px;background:var(--accent)}
+.meter i.over{background:var(--bad)}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;color:var(--fg-2);margin-top:8px}
+
+/* rows */
+.rows{display:flex;flex-direction:column}
+.row{display:flex;align-items:center;gap:14px;padding:10px 0;width:100%;text-align:left}
+.av{width:46px;height:46px;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:15px;background:rgba(255,255,255,.11);position:relative;font-family:var(--jp)}
+.av .badge{position:absolute;right:-3px;bottom:-3px;width:20px;height:20px;border-radius:50%;font-size:9.5px;display:grid;place-items:center;font-family:var(--font);font-weight:700;box-shadow:0 0 0 2px var(--bg);color:#fff}
+.row .main{flex:1;min-width:0}
+.row .t1{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .t2{font-size:13.5px;color:var(--fg-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .amt{font-weight:600;text-align:right;white-space:nowrap}
+.row .amt small{display:block;font-size:12.5px;font-weight:400;color:var(--fg-3)}
+.row .chev{color:var(--fg-3);width:18px;height:18px;flex:none}
+.tag{display:inline-block;font-size:11.5px;padding:1px 7px;border-radius:99px;background:rgba(245,169,74,.18);color:var(--warn);font-weight:500;margin-left:6px;vertical-align:1px}
+.daygrp{font-size:13px;color:var(--fg-3);margin:16px 4px 2px;display:flex;justify-content:space-between}
+.daygrp:first-child{margin-top:0}
+
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.wrapchips{flex-wrap:wrap;overflow:visible;margin-bottom:0}
+.chipb[data-pre][aria-pressed="true"]{background:var(--accent);color:var(--ink)}
+.chipb{flex:none;padding:8px 15px;border-radius:999px;background:rgba(255,255,255,.1);font-size:14px;font-weight:500;color:var(--fg-2)}
+.chipb[aria-pressed="true"]{background:var(--fg);color:var(--ink)}
+.field{display:flex;align-items:center;gap:10px;height:48px;border-radius:999px;background:rgba(255,255,255,.1);padding-inline:16px;margin-bottom:12px}
+.field svg{width:18px;height:18px;color:var(--fg-3);flex:none}
+.field input{flex:1;min-width:0;background:none;border:0;outline:none;height:100%}
+
+/* charts */
+.chart{position:relative;touch-action:pan-y}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart text{fill:var(--fg-3);font-size:19px;font-family:var(--font)}
+.chart .lab{fill:var(--fg-2);font-size:19px;font-weight:500}
+.chart .grid{stroke:rgba(255,255,255,.07);stroke-width:1.5}
+.tip{position:absolute;top:0;pointer-events:none;background:rgba(20,16,28,.92);border-radius:12px;padding:8px 11px;font-size:12.5px;line-height:1.45;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.35),inset 0 0 0 1px rgba(255,255,255,.08);transform:translateX(-50%);opacity:0;transition:opacity .12s}
+.tip.on{opacity:1}
+.tip b{font-weight:600}
+.tip .sw{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.legend{display:flex;gap:16px;font-size:13px;color:var(--fg-2);margin-bottom:8px;flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:16px;height:3px;border-radius:2px;display:block}
+.legend i.dash{background:repeating-linear-gradient(90deg,var(--fg-3) 0 4px,transparent 4px 7px)}
+.minibars{display:flex;align-items:flex-end;gap:7px;height:84px;margin-top:16px}
+.minibars div{flex:1;border-radius:6px 6px 3px 3px;background:rgba(255,255,255,.18);position:relative;min-height:4px}
+.minibars div.cur{background:var(--accent)}
+.minibars div.negb{background:var(--bad)}
+.minibars div.posb{background:var(--good)}
+.minibars div:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:rgba(20,16,28,.95);padding:4px 8px;border-radius:8px;font-size:12px;white-space:nowrap;z-index:2}
+.catrow{padding:9px 0}
+.catrow .top2{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.catrow .nm{font-weight:500}
+.catrow .nm em{font-style:normal;font-size:12.5px;color:var(--bad);margin-left:6px;font-weight:500}
+.catrow .amt{font-weight:600;white-space:nowrap}
+.catrow .amt small{font-weight:400;color:var(--fg-3);font-size:12.5px}
+.catrow .meter{margin-top:7px;height:6px}
+
+/* nav */
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:20;width:min(488px,calc(100% - 2 * max(16px,env(safe-area-inset-left,0px))));display:grid;grid-template-columns:repeat(5,1fr);padding:6px;border-radius:999px;background:rgba(28,22,38,.72);backdrop-filter:blur(26px) saturate(1.3);-webkit-backdrop-filter:blur(26px) saturate(1.3);box-shadow:inset 0 0 0 1px rgba(255,255,255,.09),0 10px 30px rgba(0,0,0,.35)}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 2px 8px;border-radius:999px;font-size:11.5px;font-weight:500;color:var(--fg-2)}
+.nav button svg{width:23px;height:23px}
+.nav button[aria-current="page"]{background:rgba(255,255,255,.12);color:var(--fg)}
+
+/* sheet */
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(6,4,10,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;opacity:0;transition:opacity .2s}
+.scrim.on{opacity:1}
+.sheet{width:100%;max-width:520px;max-height:90%;overflow-y:auto;background:#1d1727;border-radius:30px 30px 0 0;padding:10px max(20px,env(safe-area-inset-left,0px)) calc(26px + env(safe-area-inset-bottom,0px));transform:translateY(30px);transition:transform .22s ease;box-shadow:0 -10px 40px rgba(0,0,0,.4)}
+.scrim.on .sheet{transform:none}
+.grab{width:42px;height:5px;border-radius:99px;background:rgba(255,255,255,.2);margin:0 auto 14px}
+.sheet h2{font-size:24px;font-weight:700;letter-spacing:-.02em;margin:4px 0 4px;text-wrap:balance}
+.sheet .lead{color:var(--fg-2);margin:0 0 18px;font-size:14.5px}
+.sheet h5{font-size:13px;color:var(--fg-3);font-weight:500;margin:20px 0 8px;letter-spacing:.03em}
+.form{display:flex;flex-direction:column;gap:12px}
+.form label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--fg-2)}
+.inp{height:50px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);padding-inline:14px;outline:none;width:100%;color:var(--fg)}
+.inp:focus{border-color:rgba(244,197,66,.6)}
+select.inp{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--fg-2) 50%),linear-gradient(135deg,var(--fg-2) 50%,transparent 50%);background-position:calc(100% - 20px) 22px,calc(100% - 15px) 22px;background-size:5px 5px;background-repeat:no-repeat;padding-right:36px}
+select.inp option{background:#1d1727}
+textarea.inp{height:110px;padding:12px 14px;font-size:12px;font-family:ui-monospace,Menlo,monospace;resize:vertical}
+.amtin{font-size:40px;font-weight:700;text-align:center;height:72px;letter-spacing:-.02em}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;border-radius:999px;background:rgba(255,255,255,.08)}
+.seg button{height:40px;border-radius:999px;font-weight:500;color:var(--fg-2);font-size:14px}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--ink)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.check{flex-direction:row!important;align-items:center;gap:10px!important;font-size:14px!important;color:var(--fg)!important}
+.check input{width:20px;height:20px;accent-color:var(--accent)}
+.btnrow{display:flex;gap:10px;margin-top:8px}
+.list{background:rgba(255,255,255,.05);border-radius:20px;padding:4px 16px}
+.list .row{border-bottom:1px solid var(--line)}
+.list .row:last-child{border-bottom:0}
+.setrow .av{width:38px;height:38px;border-radius:12px}
+.setrow .av svg{width:19px;height:19px}
+.edrow{display:grid;grid-template-columns:1fr 1fr 92px 36px;gap:6px;align-items:center;padding:6px 0}
+.edrow .inp{height:42px;border-radius:12px;font-size:14px;padding-inline:10px}
+.edrow .del{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--fg-3)}
+.edrow .del svg{width:16px;height:16px}
+.edrow.rule{grid-template-columns:1fr 1fr 36px}
+.edrow.inc{grid-template-columns:1fr 1fr 36px}
+.note{font-size:13px;color:var(--fg-3);margin-top:10px;line-height:1.55}
+.okbox{display:flex;gap:10px;align-items:flex-start;background:rgba(99,214,164,.1);border-radius:16px;padding:12px 14px;font-size:14px}
+.okbox svg{width:18px;height:18px;color:var(--good);flex:none;margin-top:2px}
+.warnbox{background:rgba(245,169,74,.12)}
+.warnbox svg{color:var(--warn)}
+.prev{font-size:13px}
+.prev .row{padding:7px 0}
+.changelog .ver{display:flex;justify-content:space-between;font-weight:600;margin-top:14px}
+.changelog ul{margin:6px 0 0;padding-left:18px;color:var(--fg-2);font-size:14px}
+.layers{display:flex;flex-direction:column;gap:8px}
+.layer{display:flex;gap:12px;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.05)}
+.layer .st{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:99px;height:fit-content;white-space:nowrap}
+.layer .st.now{background:rgba(99,214,164,.16);color:var(--good)}
+.layer .st.prod{background:rgba(156,139,255,.18);color:var(--violet)}
+.layer b{font-weight:600;font-size:14.5px}
+.layer p{margin:2px 0 0;font-size:13px;color:var(--fg-2)}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);z-index:60;background:var(--fg);color:var(--ink);padding:12px 18px;border-radius:999px;font-weight:500;font-size:14px;opacity:0;transition:.22s;pointer-events:none;max-width:calc(100% - 40px);text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* lock */
+.lock{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:max(24px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.lock .mark{font-size:40px;font-weight:700;letter-spacing:-.04em}
+.lock .mark span{color:var(--accent)}
+.lock .msg{color:var(--fg-2);min-height:24px;font-size:15px;text-align:center}
+.lock .msg.err{color:#ffd2cb}
+.dots{display:flex;gap:16px;margin:10px 0 26px}
+.dots i{width:14px;height:14px;border-radius:50%;box-shadow:inset 0 0 0 2px rgba(255,255,255,.55)}
+.dots i.on{background:var(--fg);box-shadow:none}
+.dots.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.keypad{display:grid;grid-template-columns:repeat(3,76px);gap:16px 26px}
+.keypad button{width:76px;height:76px;border-radius:50%;background:rgba(255,255,255,.13);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);font-size:28px;font-weight:500;display:grid;place-items:center}
+.keypad button.plain{background:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.keypad svg{width:28px;height:28px}
+.lock .hint{margin-top:22px;font-size:13px;color:var(--fg-3);text-align:center}
+.lock .langs{position:absolute;top:max(18px,env(safe-area-inset-top,0px));right:max(18px,env(safe-area-inset-right,0px));font-size:13.5px;color:var(--fg-2)}
+
+@media (min-width:900px){
+  #app{max-width:560px}
+}
+</style>
+</head>
+<body>
+<div class="mesh" aria-hidden="true"><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div></div>
+<main id="app" aria-live="polite"></main>
+<nav class="nav" id="nav" hidden></nav>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+'use strict';
+/* =========================================================
+   Kura 家計簿 — prototype v0.1.0
+   - data is encrypted at rest (AES-256-GCM, key from PIN via PBKDF2)
+   - schema migrations run on unlock so updates never break data
+   ========================================================= */
+const VERSION = '0.2.0';
+const SCHEMA = 1;
+const DEMO_PIN = '1234';
+const VAULT = 'kura.vault.v1';
+const META = 'kura.meta.v1';
+
+const CHANGELOG = [
+  { v: '0.2.0', date: '2026-10-18',
+    ja: ['口座・カード・電子マネー・証券・年金・ポイント・マイルを自分で追加できるように', 'よく使う金融機関の名前から選んで追加', '使わなくなった口座を削除、または記録を残して非表示に', 'カードの引き落とし日を編集できるように'],
+    en: ['Add your own banks, cards, e-money, securities, pensions, points and miles', 'Pick from common institution names when adding', 'Delete unused accounts, or hide them while keeping their history', 'Edit the payment day of a card'] },
+  { v: '0.1.0', date: '2026-10-18',
+    ja: ['試作版（サンプルデータ）を公開', 'ホーム・入出金・分析・資産・設定の5画面', '個人／ふたり／家族のブック切り替えと精算', 'PINロック、自動ロック、端末内の暗号化保存、暗号化バックアップ', 'Money Forward と銀行・カードのCSV取り込み（重複スキップ）', 'カテゴリ・予算・自動分類ルールの編集', '週1の振り返りと取り込み忘れのお知らせ', '日本語／英語の切り替え'],
+    en: ['Prototype released with sample data', 'Five screens: Home, Activity, Insights, Assets, Settings', 'Personal, couple and family books with settle-up', 'PIN lock, auto-lock, encrypted on-device storage, encrypted backup', 'CSV import from Money Forward, banks and cards (duplicates skipped)', 'Editable categories, budgets and auto-categorize rules', 'Weekly review and overdue-import reminder', 'Japanese / English switch'] }
+];
+
+/* ---------- i18n ---------- */
+const I = {
+  ja: {
+    home:'ホーム', tx:'入出金', insights:'分析', assets:'資産', settings:'設定',
+    search:'検索', sample:'サンプルデータで表示中', netWorth:'純資産', sharedSpend:'今月の共有支出',
+    accounts:'口座', add:'入力', import:'取込', review:'振り返り', budget:'予算',
+    personal:'個人', couple:'ふたり', family:'家族',
+    importLate:(d,n)=>`取り込みが${d}日止まっています`, importLateSub:n=>`${n}の明細がまだ反映されていません`,
+    importNow:'CSVを取り込む', reviewDue:'今週の振り返り', reviewDueSub:'10分で先週の支出を確認しましょう', startReview:'振り返りを始める',
+    monthBudget:'今月の予算', left:'残り', perDay:d=>`1日あたり ${d}`, daysLeft:n=>`あと${n}日`, over:'超過',
+    recent:'最近の入出金', seeAll:'すべて', all:'すべて', expense:'支出', income:'収入', transfer:'振替', uncategorized:'未分類',
+    noTx:'この月の入出金はまだありません', searchPh:'お店や内容で検索',
+    spent:'支出', thisMonth:'今月', lastMonth:'先月', net:'収支', byCategory:'カテゴリ別', vsBudget:'予算比',
+    total:'合計', assetTrend:'純資産の推移', breakdown:'内訳', liabilities:'カード未払い', upcoming:'引き落とし予定',
+    subs:'サブスク（自動検出）', perMonth:'月額', estimated:'確定前', points:'ポイント・マイル', notCounted:'総資産に含めない',
+    settle:'精算', paid:'支払った額', shouldPay:'負担額', settleMsg:(a,b,v)=>`${a}が${b}に ${v} 払うと精算できます`, even:'精算は不要です',
+    secLang:'言語', secSecurity:'セキュリティ', secData:'データ', secApp:'アプリ',
+    language:'表示言語', changePin:'PINを変更', autoLock:'自動ロック', lockNow:'今すぐロック', biometric:'Face ID / Touch ID',
+    encryption:'暗号化の状態', categories:'カテゴリと予算', rules:'自動分類ルール', backup:'暗号化バックアップ', restore:'バックアップから復元',
+    resetSample:'サンプルに戻す', version:'バージョン', changelog:'変更履歴', checkUpdate:'アップデートを確認', secPlan:'セキュリティ構成',
+    min:n=>`${n}分`, save:'保存', cancel:'キャンセル', del:'削除', delConfirm:'もう一度押すと削除', close:'閉じる',
+    amount:'金額', desc:'内容', date:'日付', category:'カテゴリ', account:'口座', payer:'支払った人', memo:'メモ',
+    learnRule:'この内容を次回から自動で分類する', newTx:'入出金を追加', editTx:'入出金を編集', saved:'保存しました', deleted:'削除しました',
+    pinEnter:'PINを入力', pinWrong:n=>`PINが違います（あと${n}回）`, pinLocked:s=>`${s}秒後にもう一度お試しください`, pinHint:'試作版のPINは 1234 です',
+    bioProto:'Face ID は本番版（パスキー対応）で使えます', unlocking:'復号しています…',
+    week:'今週', weekAvg:'過去8週の平均', topCats:'今週の多いカテゴリ', toCategorize:n=>`未分類が${n}件あります`, categorizeNow:'分類する',
+    importStatus:'取り込み状況', daysAgo:n=>n===0?'今日':`${n}日前`, markDone:'振り返りを完了', reviewDone:'お疲れさまでした。また来週',
+    importTitle:'CSVを取り込む', importLead:'Money Forward の書き出しCSV、または銀行・カードの明細CSVを選んでください。文字コード（Shift_JIS / UTF-8）は自動で判定します。',
+    chooseFile:'CSVファイルを選ぶ', target:'取り込み先の口座', autoDetect:'自動（Money Forward形式）', positiveIsExpense:'プラスの金額を支出として扱う（カード明細向け）',
+    found:n=>`${n}件を読み込みました`, dupes:n=>`重複 ${n}件はスキップします`, uncatN:n=>`未分類 ${n}件（あとで分類できます）`, doImport:n=>`${n}件を取り込む`, imported:n=>`${n}件を取り込みました`,
+    csvErr:'列を見つけられませんでした。日付・内容・金額の列がある明細か確認してください。', mfDetected:'Money Forward 形式を検出しました',
+    booksTitle:'ブック', booksLead:'家計を分けて記録します。ふたり・家族のブックでは、誰が払ったかを記録して精算額を出します。',
+    personalD:'自分だけの家計と資産', coupleD:'パートナーとの共有支出', familyD:'家族との共有支出', inviteNote:'本番版ではメンバーを招待リンクで追加し、各自のスマホから入力できます。',
+    catLead:'名前（日本語／英語）と月の予算を編集できます。削除したカテゴリの入出金は「未分類」に移ります。',
+    addCat:'カテゴリを追加', expenseCats:'支出カテゴリ', incomeCats:'収入カテゴリ', nameJa:'日本語', nameEn:'English', budgetYen:'予算（円）',
+    ruleLead:'内容にキーワードが含まれていたら、そのカテゴリに自動で分類します。取り込み時と入力時に使われます。', keyword:'キーワード', addRule:'ルールを追加',
+    backupLead:'データ全体をパスフレーズで暗号化した文字列にします。メモアプリやパスワード管理アプリに貼り付けて保管してください。',
+    passphrase:'パスフレーズ（8文字以上）', makeBackup:'バックアップを作成', copy:'コピー', copied:'コピーしました', copyFail:'自動でコピーできませんでした。文字列を選択してコピーしてください',
+    restoreLead:'バックアップの文字列とパスフレーズを入力してください。今のデータは置き換わります。', doRestore:'復元する', restored:'復元しました', restoreErr:'復元できませんでした。文字列かパスフレーズを確認してください',
+    resetLead:'入力したデータを消して、サンプルデータに戻します。', resetConfirm:'もう一度押すとリセット', resetDone:'サンプルに戻しました',
+    pinLead:'4〜6桁の数字。変更すると、新しいPINでデータを暗号化し直します。', curPin:'今のPIN', newPin:'新しいPIN', newPin2:'新しいPIN（確認）', pinChanged:'PINを変更しました',
+    pinMismatch:'新しいPINが一致しません', pinBad:'今のPINが違います', pinFormat:'4〜6桁の数字で入力してください',
+    upToDate:v=>`最新版です（v${v}）`, updateLead:'本番版では、新しいバージョンが公開されると起動時に知らせて、変更点を表示します。データ形式の変更は自動で移行し、移行前に自動バックアップを取ります。',
+    whatsNew:'新しくなったこと', encOk:'AES-256-GCMで暗号化して、この端末に保存しています。鍵はPINから毎回作り、どこにも保存しません。',
+    encMem:'このブラウザでは端末に保存できないため、データはこの画面を閉じると消えます（暗号化は有効）。', encNone:'このブラウザでは暗号化機能が使えません。',
+    balance:'残高', rate:'1ptあたりの評価額（円）', editAcct:'口座を編集', name:'名前', manualNote:'年金・ポイントなど連携できない口座は、ここで残高を更新してください。',
+    lastImport:'最終取り込み', notImported:'未取り込み', members:'メンバー',
+    lockedOut:'ロックしました', me:'わたし',
+    addAcct:'口座を追加', acctType:'種類', presets:'よく使う名前から選ぶ', payDay:'引き落とし日（毎月）', acctAdded:n=>`${n}を追加しました`,
+    acctDup:'同じ名前の口座がすでにあります', nameReq:'名前を入れてください', delAcct:'この口座を削除', archiveAcct:'この口座を非表示にする',
+    archiveNote:'入出金の記録があるため、削除ではなく非表示にします。記録と分析はそのまま残ります。', acctArchived:'非表示にしました',
+    hiddenAccts:n=>`非表示の口座（${n}）`, unhide:'表示に戻す', unhidden:'表示に戻しました', manageAccts:'口座の一覧',
+    note_bank:'明細CSVを取り込むと入出金が入ります。残高はここで直接入力できます。', note_card:'引き落とし日を入れると、資産画面の「引き落とし予定」に出ます。',
+    note_emoney:'チャージ残高を入れてください。利用履歴はCSVや手入力で記録します。', note_cash:'財布やへそくりなど、分けて管理したい現金ごとに作れます。',
+    note_invest:'評価額を月1回くらい手入力で更新してください。', note_pension:'確定拠出年金などの評価額を、サイトで確認して入力してください。',
+    note_points:'1ptあたりの評価額を入れると総資産に含めます。0なら含めずに表示だけします。', note_miles:'マイルは初期設定では総資産に含めません。含めたいときは評価額を入れてください。'
+  },
+  en: {
+    home:'Home', tx:'Activity', insights:'Insights', assets:'Assets', settings:'Settings',
+    search:'Search', sample:'Showing sample data', netWorth:'Net worth', sharedSpend:'Shared spending this month',
+    accounts:'Accounts', add:'Add', import:'Import', review:'Review', budget:'Budget',
+    personal:'Personal', couple:'Couple', family:'Family',
+    importLate:(d)=>`No import for ${d} days`, importLateSub:n=>`Statements for ${n} are not in yet`,
+    importNow:'Import CSV', reviewDue:'Weekly review', reviewDueSub:'Ten minutes to check last week', startReview:'Start review',
+    monthBudget:'Budget this month', left:'left', perDay:d=>`${d} per day`, daysLeft:n=>`${n} days left`, over:'Over',
+    recent:'Recent activity', seeAll:'See all', all:'All', expense:'Expense', income:'Income', transfer:'Transfer', uncategorized:'Uncategorized',
+    noTx:'Nothing recorded this month yet', searchPh:'Search shops or notes',
+    spent:'Spent', thisMonth:'This month', lastMonth:'Last month', net:'Net cashflow', byCategory:'By category', vsBudget:'vs budget',
+    total:'Total', assetTrend:'Net worth over time', breakdown:'Breakdown', liabilities:'Card balance', upcoming:'Upcoming payments',
+    subs:'Subscriptions (detected)', perMonth:'per month', estimated:'pending', points:'Points & miles', notCounted:'Not in net worth',
+    settle:'Settle up', paid:'Paid', shouldPay:'Share', settleMsg:(a,b,v)=>`${a} pays ${b} ${v} to settle`, even:'All square',
+    secLang:'Language', secSecurity:'Security', secData:'Data', secApp:'App',
+    language:'Language', changePin:'Change PIN', autoLock:'Auto-lock', lockNow:'Lock now', biometric:'Face ID / Touch ID',
+    encryption:'Encryption status', categories:'Categories & budgets', rules:'Auto-categorize rules', backup:'Encrypted backup', restore:'Restore from backup',
+    resetSample:'Reset to sample', version:'Version', changelog:'Changelog', checkUpdate:'Check for updates', secPlan:'Security layers',
+    min:n=>`${n} min`, save:'Save', cancel:'Cancel', del:'Delete', delConfirm:'Tap again to delete', close:'Close',
+    amount:'Amount', desc:'Description', date:'Date', category:'Category', account:'Account', payer:'Paid by', memo:'Note',
+    learnRule:'Categorize this automatically next time', newTx:'Add transaction', editTx:'Edit transaction', saved:'Saved', deleted:'Deleted',
+    pinEnter:'Enter PIN', pinWrong:n=>`Wrong PIN (${n} tries left)`, pinLocked:s=>`Try again in ${s}s`, pinHint:'Prototype PIN is 1234',
+    bioProto:'Face ID arrives with passkeys in the full version', unlocking:'Decrypting…',
+    week:'This week', weekAvg:'8-week average', topCats:'Top categories this week', toCategorize:n=>`${n} uncategorized`, categorizeNow:'Categorize',
+    importStatus:'Import status', daysAgo:n=>n===0?'today':`${n}d ago`, markDone:'Finish review', reviewDone:'Done. See you next week',
+    importTitle:'Import CSV', importLead:'Pick a Money Forward export, or a statement CSV from your bank or card. Shift_JIS and UTF-8 are detected automatically.',
+    chooseFile:'Choose CSV file', target:'Import into', autoDetect:'Automatic (Money Forward)', positiveIsExpense:'Treat positive amounts as spending (card statements)',
+    found:n=>`Read ${n} rows`, dupes:n=>`${n} duplicates will be skipped`, uncatN:n=>`${n} uncategorized (sort later)`, doImport:n=>`Import ${n}`, imported:n=>`Imported ${n}`,
+    csvErr:'Could not find date, description and amount columns in this file.', mfDetected:'Money Forward format detected',
+    booksTitle:'Books', booksLead:'Keep money separate. Shared books record who paid and work out who owes what.',
+    personalD:'Your own budget and assets', coupleD:'Shared spending with your partner', familyD:'Shared spending with family', inviteNote:'In the full version, members join by invite link and add entries from their own phones.',
+    catLead:'Edit names in both languages and the monthly budget. Entries in a deleted category move to Uncategorized.',
+    addCat:'Add category', expenseCats:'Spending', incomeCats:'Income', nameJa:'日本語', nameEn:'English', budgetYen:'Budget (¥)',
+    ruleLead:'If a description contains the keyword, it goes into that category. Used on import and when adding.', keyword:'Keyword', addRule:'Add rule',
+    backupLead:'Turns all your data into a text block encrypted with a passphrase. Keep it in your notes or password manager.',
+    passphrase:'Passphrase (8+ characters)', makeBackup:'Create backup', copy:'Copy', copied:'Copied', copyFail:'Could not copy automatically. Select the text and copy it',
+    restoreLead:'Paste the backup text and its passphrase. Your current data will be replaced.', doRestore:'Restore', restored:'Restored', restoreErr:'Could not restore. Check the text and the passphrase',
+    resetLead:'Erase your entries and go back to the sample data.', resetConfirm:'Tap again to reset', resetDone:'Reset to sample data',
+    pinLead:'4 to 6 digits. Your data is re-encrypted with the new PIN.', curPin:'Current PIN', newPin:'New PIN', newPin2:'Confirm new PIN', pinChanged:'PIN changed',
+    pinMismatch:'New PINs do not match', pinBad:'Current PIN is wrong', pinFormat:'Use 4 to 6 digits',
+    upToDate:v=>`You are up to date (v${v})`, updateLead:'In the full version, the app tells you when a new version is out and shows what changed. Data format changes migrate automatically, with a backup taken first.',
+    whatsNew:"What's new", encOk:'Stored on this device with AES-256-GCM. The key is derived from your PIN each time and never saved.',
+    encMem:'This browser blocks device storage, so data is lost when you close this page (still encrypted).', encNone:'Encryption is not available in this browser.',
+    balance:'Balance', rate:'Value per point (¥)', editAcct:'Edit account', name:'Name', manualNote:'For pensions, points and other accounts that cannot sync, update the balance here.',
+    lastImport:'Last import', notImported:'Not imported', members:'Members',
+    lockedOut:'Locked', me:'Me',
+    addAcct:'Add account', acctType:'Type', presets:'Pick a common name', payDay:'Payment day (monthly)', acctAdded:n=>`Added ${n}`,
+    acctDup:'An account with this name already exists', nameReq:'Enter a name', delAcct:'Delete this account', archiveAcct:'Hide this account',
+    archiveNote:'This account has transactions, so it is hidden instead of deleted. Its history and insights stay.', acctArchived:'Hidden',
+    hiddenAccts:n=>`Hidden accounts (${n})`, unhide:'Show again', unhidden:'Shown again', manageAccts:'Accounts',
+    note_bank:'Import statement CSVs to add transactions. You can type the balance here.', note_card:'With a payment day, it shows under Upcoming payments.',
+    note_emoney:'Enter the current balance. Record spending by CSV or by hand.', note_cash:'Make one per pot of cash you want to track, like your wallet or savings jar.',
+    note_invest:'Update the market value by hand about once a month.', note_pension:'Check the value on the provider site and enter it here.',
+    note_points:'Set a value per point to count it in net worth. At 0 it is shown but not counted.', note_miles:'Miles are not counted in net worth by default. Set a value to include them.'
+  }
+};
+const TYPE_LABEL = {
+  ja:{bank:'預金',cash:'現金',emoney:'電子マネー・QR',card:'クレジットカード',invest:'証券・NISA・金',pension:'年金（確定拠出）',points:'ポイント',miles:'マイル'},
+  en:{bank:'Bank',cash:'Cash',emoney:'E-money & QR',card:'Credit cards',invest:'Securities, NISA, gold',pension:'Pension (DC)',points:'Points',miles:'Miles'}
+};
+
+/* ---------- state ---------- */
+let S = null, KEY = null, SALT = null;
+let noStore = false, noCrypto = !(window.crypto && crypto.subtle);
+const UI = { tab:'home', month:null, filter:'all', q:'', bannerHidden:false };
+let lastAct = Date.now();
+const MEM = {};
+function lsGet(k){ try{ const v = localStorage.getItem(k); return v; }catch(e){ noStore = true; return MEM[k] ?? null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){ noStore = true; MEM[k]=v; } }
+function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){ delete MEM[k]; } }
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const L = () => (S && S.lang) || readMeta().lang || 'ja';
+function t(k, ...a){ const d = I[L()] || I.ja; const v = d[k] ?? I.ja[k] ?? k; return typeof v === 'function' ? v(...a) : v; }
+const pad = n => String(n).padStart(2,'0');
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const pd = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+const today0 = () => { const d = new Date(); d.setHours(0,0,0,0); return d; };
+const mk = s => s.slice(0,7);
+const addMonths = (key, n) => { const [y,m] = key.split('-').map(Number); const d = new Date(y, m-1+n, 1); return `${d.getFullYear()}-${pad(d.getMonth()+1)}`; };
+const daysIn = key => { const [y,m] = key.split('-').map(Number); return new Date(y, m, 0).getDate(); };
+const daysBetween = (a,b) => Math.round((b - a) / 86400000);
+function yen(n, sign){ const s = Math.round(Math.abs(n)).toLocaleString('ja-JP'); return (n < 0 ? '−' : (sign && n > 0 ? '+' : '')) + '¥' + s; }
+function monthLabel(key){ const [y,m] = key.split('-').map(Number); return L()==='en' ? new Date(y,m-1,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'}) : `${y}年${m}月`; }
+function dayLabel(s){ const d = pd(s); const td = today0(); const diff = daysBetween(d, td);
+  if (diff === 0) return L()==='en' ? 'Today' : '今日'; if (diff === 1) return L()==='en' ? 'Yesterday' : '昨日';
+  return L()==='en' ? d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}) : `${d.getMonth()+1}月${d.getDate()}日（${'日月火水木金土'[d.getDay()]}）`; }
+const cat = id => S.categories.find(c => c.id === id) || S.categories.find(c => c.id === 'uncat');
+const catName = id => { const c = cat(id); return c ? (L()==='en' ? c.en : c.ja) : id; };
+const acct = id => S.accounts.find(a => a.id === id);
+const bookName = b => t(b);
+const memberName = (book, id) => { const m = (S.books[book]?.members || []).find(x => x.id === id); return m ? (L()==='en' ? m.en : m.ja) : ''; };
+const isXfer = x => cat(x.cat)?.type === 'xfer';
+const isExp = x => x.amt < 0 && !isXfer(x);
+const isInc = x => x.amt > 0 && !isXfer(x);
+const txIn = (book, key) => S.tx.filter(x => x.book === book && (!key || mk(x.date) === key));
+const sum = (arr, f = x => x) => arr.reduce((a,x) => a + f(x), 0);
+const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
+function toast(msg){ const el = $('#toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove('on'), 2200); }
+function readMeta(){ try { return JSON.parse(lsGet(META) || '{}'); } catch(e){ return {}; } }
+function writeMeta(m){ lsSet(META, JSON.stringify({ ...readMeta(), ...m })); }
+
+const ICON = {
+  home:'<path d="M5 20V11h4v9M5 11l7-6 7 6M19 11v9h-4v-5h-6"/>',
+  tx:'<path d="M5 8h13l-3-3M19 16H6l3 3"/>',
+  insights:'<path d="M5 20V12M10 20V6M15 20v-8M20 20V9"/>',
+  assets:'<path d="M3 10l9-5 9 5M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/>',
+  settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+  cal:'<rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  upload:'<path d="M12 16V4M7 9l5-5 5 5M5 20h14"/>',
+  check:'<path d="M5 12.5l4.5 4.5L19 7"/>',
+  pie:'<path d="M12 3v9h9a9 9 0 1 1-9-9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/>',
+  chev:'<path d="M9 6l6 6-6 6"/>', chevL:'<path d="M15 6l-6 6 6 6"/>', down:'<path d="M6 9l6 6 6-6"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>', alert:'<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L2 18a2 2 0 0 0 1.7 3h16.6A2 2 0 0 0 22 18L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
+  lock:'<rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  face:'<path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M9 9v1.5M15 9v1.5M12 9v4h-1M9 16c1.7 1.3 4.3 1.3 6 0"/>',
+  back:'<path d="M20 7H9l-5 5 5 5h11zM12.5 10l4 4M16.5 10l-4 4"/>',
+  globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+  key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M14 9l2 2"/>',
+  timer:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/>',
+  shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+  tag:'<path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="8" cy="8" r="1.5"/>',
+  wand:'<path d="M15 4V2M15 10V8M11 6h2M17 6h2M4 20L14 10"/>',
+  save:'<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>', restore:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/>',
+  refresh:'<path d="M20 11a8 8 0 0 0-14.9-4M4 4v4h4M4 13a8 8 0 0 0 14.9 4M20 20v-4h-4"/>',
+  list:'<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/>'
+};
+const ic = (n, extra='') => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${ICON[n]||''}</svg>`;
+
+/* ---------- crypto ---------- */
+const TE = new TextEncoder(), TD = new TextDecoder();
+function b64e(u8){ let s=''; for (let i=0;i<u8.length;i+=0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i+0x8000)); return btoa(s); }
+function b64d(s){ const b = atob(s), u = new Uint8Array(b.length); for (let i=0;i<b.length;i++) u[i] = b.charCodeAt(i); return u; }
+async function deriveKey(pass, salt){
+  const base = await crypto.subtle.importKey('raw', TE.encode(pass), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name:'PBKDF2', salt, iterations:210000, hash:'SHA-256' }, base, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']);
+}
+async function seal(key, obj){ const iv = crypto.getRandomValues(new Uint8Array(12)); const ct = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, TE.encode(JSON.stringify(obj))); return { iv:b64e(iv), ct:b64e(new Uint8Array(ct)) }; }
+async function unseal(key, box){ const pt = await crypto.subtle.decrypt({ name:'AES-GCM', iv:b64d(box.iv) }, key, b64d(box.ct)); return JSON.parse(TD.decode(pt)); }
+
+let saveTimer = null;
+function persist(){ clearTimeout(saveTimer); saveTimer = setTimeout(persistNow, 250); }
+async function persistNow(){
+  if (!S || !KEY || noCrypto) return;
+  try { const box = await seal(KEY, S); lsSet(VAULT, JSON.stringify({ v:1, salt:b64e(SALT), ...box })); }
+  catch(e){ console.warn('save failed', e); }
+}
+
+/* ---------- migrations: each step upgrades the data one schema version ---------- */
+const MIGRATIONS = {
+  // 1: s => { /* example for v2: add field */ return s; }
+};
+function migrate(s){
+  let from = s.schema || 1;
+  while (from < SCHEMA) { s = MIGRATIONS[from](s); from++; s.schema = from; }
+  if (s.appVersion !== VERSION) { s.prevVersion = s.appVersion; s.appVersion = VERSION; s.whatsNew = true; }
+  return s;
+}
+
+/* ---------- sample data ---------- */
+function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let x = Math.imul(seed ^ seed >>> 15, 1 | seed); x = x + Math.imul(x ^ x >>> 7, 61 | x) ^ x; return ((x ^ x >>> 14) >>> 0) / 4294967296; }; }
+function makeSample(lang){
+  const r = rng(20261018);
+  const R = (a,b) => Math.round((a + r()*(b-a)) / 10) * 10;
+  const pick = a => a[Math.floor(r()*a.length)];
+  const td = today0();
+  const categories = [
+    ['food','食費','Food',48000,'exp'],['daily','日用品','Household',8000,'exp'],['home','住まい','Housing',115000,'exp'],
+    ['util','水道・光熱','Utilities',12000,'exp'],['phone','通信','Phone & internet',8000,'exp'],['transit','交通','Transport',10000,'exp'],
+    ['social','外食・交際','Eating out & social',20000,'exp'],['outdoor','趣味・アウトドア','Hobbies & outdoors',18000,'exp'],
+    ['beauty','美容・衣服','Beauty & clothes',12000,'exp'],['health','健康・医療','Health',5000,'exp'],['learn','学び','Learning',5000,'exp'],
+    ['subs','サブスク','Subscriptions',4000,'exp'],['travel','旅行','Travel',25000,'exp'],['other','その他','Other',8000,'exp'],
+    ['uncat','未分類','Uncategorized',0,'exp'],
+    ['salary','給与','Salary',0,'inc'],['side','副収入','Side income',0,'inc'],['incother','その他収入','Other income',0,'inc'],
+    ['transfer','振替','Transfer',0,'xfer']
+  ].map(([id,ja,en,budget,type]) => ({ id, ja, en, budget, type }));
+  const accounts = [
+    ['smbc','三井住友銀行（Olive）','bank',1284300],['rakutenbank','楽天銀行','bank',412880],['cash','現金','cash',23400],
+    ['olivecard','Oliveクレジット','card',0,null,null,26],['rakutencard','楽天カード','card',0,null,null,27],
+    ['paypay','PayPay','emoney',8210],['suica','Suica','emoney',4560],
+    ['sbi','SBI証券（NISA）','invest',1620000],['rakutensec','楽天証券（金）','invest',540000],
+    ['dc1','確定拠出年金（NRK）','pension',2130000],['dc2','確定拠出年金（JIS&T）','pension',860000],
+    ['amazonpt','Amazonポイント','points',1240,'pt',1],['rakutenpt','楽天ポイント','points',8930,'pt',1],['jcbpt','JCBポイント','points',412,'pt',0],
+    ['ana','ANAマイレージ','miles',23400,'mi',0],['jal','JALマイレージ','miles',8800,'mi',0]
+  ].map(([id,name,type,balance,unit,rate,payDay]) => ({ id, name, type, balance, unit:unit||null, rate:rate??null, payDay:payDay||null }));
+
+  const FOOD = ['セブン-イレブン','ファミリーマート','成城石井','ライフ','まいばすけっと','スターバックス','ドトール','ベーカリー','ローソン'];
+  const DINE = ['焼き鳥 とり平','イタリアン ルッチョラ','タイ料理 バーンタイ','回転寿司','韓国料理 ソウル','ラーメン 一心'];
+  const DAILY = ['マツモトキヨシ','無印良品','ダイソー','ニトリ','ウエルシア'];
+  const tx = []; let n = 0; const cardSpend = {};
+  const add = (d, desc, amt, acctId, catId, extra = {}) => tx.push({ id:'s'+(n++), date:iso(d), desc, amt, acct:acctId, cat:catId, book:'personal', src:'sample', ...extra });
+  for (let k = 125; k >= 0; k--) {
+    const d = new Date(td); d.setDate(td.getDate() - k);
+    const dd = d.getDate(), key = mk(iso(d));
+    const spend = (desc, amt, a, c) => { add(d, desc, -amt, a, c); if (a === 'olivecard' || a === 'rakutencard') cardSpend[a+'|'+key] = (cardSpend[a+'|'+key]||0) + amt; };
+    if (r() < .72) spend(pick(FOOD), R(280,2400), pick(['olivecard','olivecard','paypay','cash','rakutencard']), 'food');
+    if (r() < .12) spend(pick(DINE), R(2800,7600), 'olivecard', 'social');
+    if (r() < .13) spend(pick(DAILY), R(380,3200), pick(['olivecard','paypay']), 'daily');
+    if (k % 9 === 0) spend('Suica チャージ', 3000, 'olivecard', 'transit');
+    if (dd === 1) { spend('フィットネスジム 月会費', 7700, 'olivecard', 'outdoor'); add(d, 'PayPay チャージ', -10000, 'smbc', 'transfer'); }
+    if (dd === 3) spend('Spotify', 1080, 'rakutencard', 'subs');
+    if (dd === 8) spend('Netflix', 1590, 'olivecard', 'subs');
+    if (dd === 20) spend('iCloud+', 400, 'olivecard', 'subs');
+    if (dd === 5) spend('東京電力', R(5200,8400), 'olivecard', 'util');
+    if (dd === 11) spend('東京ガス', R(2800,4200), 'olivecard', 'util');
+    if (dd === 22 && d.getMonth() % 2 === 0) add(d, '水道局', -4620, 'smbc', 'util');
+    if (dd === 15) spend('楽天モバイル', 3278, 'rakutencard', 'phone');
+    if (dd === 18) spend('光回線', 4180, 'olivecard', 'phone');
+    if (dd === 14) spend('Kindle本', 1210, 'rakutencard', 'learn');
+    if (dd === 10) add(d, 'NISA 積立（SBI証券）', -33333, 'smbc', 'transfer');
+    if (dd === 25) add(d, '給与', 312000, 'smbc', 'salary');
+    if (dd === 27) add(d, '家賃', -112000, 'smbc', 'home');
+    if (dd === 26) add(d, 'Oliveクレジット 引き落とし', -(cardSpend['olivecard|'+addMonths(key,-1)] || 71200), 'smbc', 'transfer');
+    if (dd === 27) add(d, '楽天カード 引き落とし', -(cardSpend['rakutencard|'+addMonths(key,-1)] || 18400), 'rakutenbank', 'transfer');
+    if (dd === 7 || dd === 23) spend(pick(['ヘアサロン','UNIQLO','ZARA','コスメ']), R(2900,6600), 'olivecard', 'beauty');
+    if (dd === 12 && r() < .6) spend('モンベル', R(3000,12000), 'olivecard', 'outdoor');
+    if (dd === 17 && r() < .4) spend('クリニック', 2640, 'cash', 'health');
+    if (k === 48) spend('JAL 国内線', 24800, 'olivecard', 'travel');
+    if (k === 40) spend('旅館 ひなた', 33000, 'olivecard', 'travel');
+    if (k === 39) spend('レンタカー', 9900, 'olivecard', 'travel');
+    if (k === 30) add(d, 'メルカリ 売上', 4200, 'rakutenbank', 'incother');
+    if (k === 2) spend('AMAZON.CO.JP', 2980, 'rakutencard', 'uncat');
+    if (k === 4) spend('SQ*COFFEE STAND', 1450, 'olivecard', 'uncat');
+    if (k === 9) spend('PAYPAY*ヤマダ', 3300, 'paypay', 'uncat');
+    // shared books
+    if (r() < .27) { const it = pick([['スーパー','food',1800,6200],['外食','social',4000,12000],['映画','outdoor',3800,3800],['日用品','daily',800,3000],['週末のドライブ','travel',3000,9000]]);
+      add(d, it[0], -R(it[2],it[3]), null, it[1], { book:'couple', payer: r() < .55 ? 'me' : 'p' }); }
+    if (r() < .09) { const it = pick([['帰省の交通費','transit',8000,16000],['家族の食事会','social',9000,18000],['実家の日用品','daily',1500,4000],['誕生日プレゼント','other',3000,8000]]);
+      add(d, it[0], -R(it[2],it[3]), null, it[1], { book:'family', payer: pick(['me','mom','dad']) }); }
+  }
+  // net worth history (12 months), ending at the live value
+  const hist = []; let v = 0; const r2 = rng(7);
+  for (let i = 11; i >= 1; i--) { hist.push({ m: addMonths(mk(iso(td)), -i), v: null }); }
+  const draft = { categories, accounts, tx };
+  const now = netWorth(draft);
+  v = now; for (let i = hist.length - 1; i >= 0; i--) { v = v - (52000 + (r2() - .45) * 90000); hist[i].v = Math.round(v / 1000) * 1000; }
+  const ago = n => { const d = new Date(td); d.setDate(td.getDate() - n); return d.toISOString(); };
+  return {
+    schema: SCHEMA, appVersion: VERSION, lang: lang || 'ja', lockMin: 5, sample: true,
+    books: {
+      personal: { members: [] },
+      couple: { members: [{ id:'me', ja:'わたし', en:'Me' }, { id:'p', ja:'パートナー', en:'Partner' }] },
+      family: { members: [{ id:'me', ja:'わたし', en:'Me' }, { id:'mom', ja:'母', en:'Mum' }, { id:'dad', ja:'父', en:'Dad' }] }
+    },
+    activeBook: 'personal', categories, accounts, tx, history: hist,
+    rules: [ { kw:'AMAZON', cat:'daily' }, { kw:'セブン', cat:'food' }, { kw:'Suica', cat:'transit' }, { kw:'Netflix', cat:'subs' } ],
+    lastImport: { olivecard: ago(9), rakutencard: ago(9), smbc: ago(3), rakutenbank: ago(3), paypay: ago(3), suica: ago(12), sbi: ago(20), rakutensec: ago(20) },
+    lastReview: ago(8)
+  };
+}
+
+/* ---------- money maths ---------- */
+function cardDebt(state, a){
+  const td = today0(), key = mk(iso(td)), prev = addMonths(key, -1);
+  const spentIn = k => -sum(state.tx.filter(x => x.acct === a.id && mk(x.date) === k && x.amt < 0), x => x.amt);
+  return spentIn(key) + (td.getDate() < (a.payDay || 27) ? spentIn(prev) : 0);
+}
+function acctValue(state, a){
+  if (a.type === 'card') return -cardDebt(state, a);
+  if (a.type === 'points' || a.type === 'miles') return a.balance * (a.rate || 0);
+  return a.balance;
+}
+function netWorth(state){ return sum(state.accounts.filter(a => !a.hidden), a => acctValue(state, a)); }
+const liveAccts = () => S.accounts.filter(a => !a.hidden);
+function budgetTotal(){ return sum(S.categories.filter(c => c.type === 'exp'), c => c.budget || 0); }
+
+/* ---------- lock screen ---------- */
+let pinBuf = '';
+function showLock(msg){
+  document.body.classList.add('locked'); document.body.dataset.tab = 'home';
+  $('#nav').hidden = true; $('#app').innerHTML = ''; closeSheet(true);
+  const meta = readMeta(); const len = meta.pinLen || 4;
+  let el = $('#lock'); if (!el) { el = document.createElement('section'); el.id = 'lock'; el.className = 'lock'; document.body.appendChild(el); }
+  el.innerHTML = `
+    <button class="langs" data-act="locklang">${L()==='ja' ? 'English' : '日本語'}</button>
+    <div class="mark">Kura<span>.</span></div>
+    <div class="msg ${msg && msg.err ? 'err' : ''}" id="lockmsg">${esc(msg ? msg.text : t('pinEnter'))}</div>
+    <div class="dots" id="dots">${Array.from({length:len}, (_,i) => `<i class="${i < pinBuf.length ? 'on' : ''}"></i>`).join('')}</div>
+    <div class="keypad">
+      ${[1,2,3,4,5,6,7,8,9].map(n => `<button data-key="${n}" aria-label="${n}">${n}</button>`).join('')}
+      <button class="plain" data-act="bio" aria-label="${esc(t('biometric'))}">${ic('face')}</button>
+      <button data-key="0" aria-label="0">0</button>
+      <button class="plain" data-key="del" aria-label="Delete">${ic('back')}</button>
+    </div>
+    <div class="hint">${esc(t('pinHint'))}</div>`;
+  el.hidden = false;
+}
+function updateDots(){ const len = readMeta().pinLen || 4; $('#dots').innerHTML = Array.from({length:len}, (_,i) => `<i class="${i < pinBuf.length ? 'on' : ''}"></i>`).join(''); }
+async function pressKey(k){
+  const meta = readMeta();
+  if (meta.lockUntil && Date.now() < meta.lockUntil) { $('#lockmsg').textContent = t('pinLocked', Math.ceil((meta.lockUntil - Date.now())/1000)); return; }
+  if (k === 'del') { pinBuf = pinBuf.slice(0,-1); updateDots(); return; }
+  const len = meta.pinLen || 4;
+  if (pinBuf.length >= len) return;
+  pinBuf += k; updateDots();
+  if (pinBuf.length === len) { const pin = pinBuf; await tryUnlock(pin); }
+}
+async function tryUnlock(pin){
+  $('#lockmsg').textContent = t('unlocking'); $('#lockmsg').classList.remove('err');
+  const raw = lsGet(VAULT);
+  try {
+    if (noCrypto) { if (pin !== DEMO_PIN) throw new Error('pin'); S = migrate(makeSample(readMeta().lang)); }
+    else if (!raw) {
+      if (pin !== DEMO_PIN) throw new Error('pin');
+      SALT = crypto.getRandomValues(new Uint8Array(16)); KEY = await deriveKey(pin, SALT);
+      S = makeSample(readMeta().lang); await persistNow(); writeMeta({ pinLen:4 });
+    } else {
+      const v = JSON.parse(raw); SALT = b64d(v.salt); KEY = await deriveKey(pin, SALT);
+      S = migrate(await unseal(KEY, v)); persist();
+    }
+    writeMeta({ fails:0, lockUntil:0, lang:S.lang });
+    pinBuf = ''; lastAct = Date.now();
+    const el = $('#lock'); if (el) el.hidden = true;
+    document.body.classList.remove('locked');
+    UI.month = mk(iso(today0()));
+    render();
+    if (S.whatsNew) { S.whatsNew = false; persist(); openChangelog(true); }
+  } catch(e) {
+    KEY = null; S = null; pinBuf = '';
+    const fails = (readMeta().fails || 0) + 1;
+    const lockUntil = fails >= 5 ? Date.now() + 30000 * Math.pow(2, fails - 5) : 0;
+    writeMeta({ fails, lockUntil });
+    updateDots(); const d = $('#dots'); d.classList.remove('shake'); void d.offsetWidth; d.classList.add('shake');
+    const m = $('#lockmsg'); m.classList.add('err');
+    m.textContent = lockUntil ? t('pinLocked', Math.ceil((lockUntil - Date.now())/1000)) : t('pinWrong', 5 - fails);
+  }
+}
+function lockApp(){ persistNow(); S = null; KEY = null; pinBuf = ''; showLock({ text:t('lockedOut') }); }
+['pointerdown','keydown','scroll','touchstart'].forEach(ev => addEventListener(ev, () => { lastAct = Date.now(); }, { passive:true }));
+setInterval(() => { if (S && Date.now() - lastAct > (S.lockMin || 5) * 60000) lockApp(); }, 10000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && S && Date.now() - lastAct > (S.lockMin || 5) * 60000) lockApp(); });
+
+/* ---------- render ---------- */
+function render(){
+  if (!S) return;
+  document.documentElement.lang = L();
+  document.body.dataset.tab = UI.tab;
+  const nav = $('#nav'); nav.hidden = false;
+  nav.innerHTML = ['home','tx','insights','assets','settings'].map(k => `<button data-act="tab" data-arg="${k}" ${UI.tab === k ? 'aria-current="page"' : ''}>${ic(k)}<span>${esc(t(k))}</span></button>`).join('');
+  const v = { home:viewHome, tx:viewTx, insights:viewInsights, assets:viewAssets, settings:viewSettings }[UI.tab];
+  pendingCharts = [];
+  $('#app').innerHTML = topbar() + v();
+  pendingCharts.forEach(f => f());
+}
+function topbar(){
+  const b = S.activeBook; const initials = { personal:'U', couple:'2', family:'F' }[b];
+  const reviewDue = daysBetween(new Date(S.lastReview), new Date()) >= 7;
+  return `<div class="top">
+    <button class="circle" data-act="books" aria-label="${esc(t('booksTitle'))}">${initials}</button>
+    <button class="search" data-act="search">${ic('search')}<span>${esc(t('search'))}</span></button>
+    <button class="circle ${reviewDue ? 'dot' : ''}" data-act="review" aria-label="${esc(t('review'))}">${ic('cal')}</button>
+    <button class="circle" data-act="add" aria-label="${esc(t('add'))}">${ic('plus')}</button>
+  </div>
+  ${S.sample ? `<div class="sample"><button class="pill" data-act="sampleinfo"><i></i>${esc(t('sample'))}</button></div>` : ''}`;
+}
+function avatarFor(x){
+  const c = cat(x.cat); const ch = (L()==='en' ? c.en : c.ja).slice(0,1);
+  let badge = '';
+  if (x.acct) { const a = acct(x.acct); if (a) { const col = { bank:'#4a6cf7', cash:'#4b9a6a', card:'#d0496e', emoney:'#e08a1e', invest:'#7a5af0' }[a.type] || '#666'; badge = `<span class="badge" style="background:${col}">${esc(a.name.replace(/[（(].*$/,'').slice(0,1))}</span>`; } }
+  else if (x.payer) { badge = `<span class="badge" style="background:#7a5af0">${esc(memberName(x.book, x.payer).slice(0,1))}</span>`; }
+  return `<span class="av">${esc(ch)}${badge}</span>`;
+}
+function txRow(x){
+  const sub = [catName(x.cat), x.acct ? acct(x.acct)?.name : memberName(x.book, x.payer)].filter(Boolean).join(' · ');
+  return `<button class="row" data-act="edit" data-arg="${x.id}">${avatarFor(x)}
+    <span class="main"><span class="t1">${esc(x.desc)}${x.cat === 'uncat' ? `<span class="tag">${esc(t('uncategorized'))}</span>` : ''}</span><span class="t2">${esc(sub)}</span></span>
+    <span class="amt tnum ${x.amt > 0 && !isXfer(x) ? 'pos' : ''}">${yen(x.amt, true)}<small>${esc(dayLabel(x.date))}</small></span></button>`;
+}
+
+/* Home */
+function viewHome(){
+  const b = S.activeBook, key = mk(iso(today0()));
+  if (b !== 'personal') return viewHomeShared();
+  const nw = netWorth(S);
+  const monthTx = txIn('personal', key);
+  const spent = -sum(monthTx.filter(isExp), x => x.amt);
+  const bt = budgetTotal(); const left = bt - spent;
+  const dl = daysIn(key) - today0().getDate() + 1;
+  const prevNw = S.history[S.history.length - 1]?.v || nw;
+  const late = Object.entries(S.lastImport).map(([id, at]) => ({ id, d: daysBetween(new Date(at), new Date()) })).filter(o => o.d >= 7 && acct(o.id) && ['card','bank','emoney'].includes(acct(o.id).type)).sort((a,b) => b.d - a.d);
+  const recent = S.tx.filter(x => x.book === 'personal').sort((a,b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id)).slice(0,5);
+  let banner = '';
+  if (!UI.bannerHidden && late.length) {
+    banner = `<div class="card"><div class="banner"><span class="ic">${ic('alert')}</span><div><h4>${esc(t('importLate', late[0].d))}</h4><p>${esc(t('importLateSub', late.map(o => acct(o.id).name).join('、')))}</p></div><button class="x" data-act="hidebanner" aria-label="${esc(t('close'))}">${ic('x')}</button></div><button class="btn mt" data-act="import">${esc(t('importNow'))}</button></div>`;
+  } else if (!UI.bannerHidden && daysBetween(new Date(S.lastReview), new Date()) >= 7) {
+    banner = `<div class="card"><div class="banner"><span class="ic">${ic('cal')}</span><div><h4>${esc(t('reviewDue'))}</h4><p>${esc(t('reviewDueSub'))}</p></div><button class="x" data-act="hidebanner" aria-label="${esc(t('close'))}">${ic('x')}</button></div><button class="btn mt" data-act="review">${esc(t('startReview'))}</button></div>`;
+  }
+  const pct = bt ? Math.min(100, spent / bt * 100) : 0;
+  return `
+  <section class="hero">
+    <div class="lbl">${esc(t('personal'))} · ${esc(t('netWorth'))}</div>
+    <div class="big tnum">${nw < 0 ? '−' : ''}<small>¥</small>${Math.round(Math.abs(nw)).toLocaleString('ja-JP')}</div>
+    <div class="sub tnum">${L()==='en' ? 'vs last month' : '先月末から'} <b class="${nw - prevNw >= 0 ? 'pos' : 'neg'}">${yen(nw - prevNw, true)}</b></div>
+    <button class="chip" data-act="tab" data-arg="assets">${esc(t('accounts'))}</button>
+  </section>
+  <div class="actions">
+    <button class="act" data-act="add"><span>${ic('plus')}</span><span>${esc(t('add'))}</span></button>
+    <button class="act" data-act="import"><span>${ic('upload')}</span><span>${esc(t('import'))}</span></button>
+    <button class="act" data-act="review"><span>${ic('check')}</span><span>${esc(t('review'))}</span></button>
+    <button class="act" data-act="tab" data-arg="insights"><span>${ic('pie')}</span><span>${esc(t('budget'))}</span></button>
+  </div>
+  <div class="stack">
+    ${banner}
+    <div class="card">
+      <div class="ctitle"><h3>${esc(t('monthBudget'))}</h3><span class="faint">${esc(t('daysLeft', dl))}</span></div>
+      <div class="val tnum">${yen(Math.max(left,0))} <span class="muted" style="font-size:15px;font-weight:500">${left >= 0 ? esc(t('left')) : ''}</span>${left < 0 ? ` <span class="neg" style="font-size:15px;font-weight:600">${esc(t('over'))} ${yen(-left)}</span>` : ''}</div>
+      <div class="meter"><i class="${spent > bt ? 'over' : ''}" style="width:${pct}%"></i></div>
+      <div class="kv tnum"><span>${esc(t('spent'))} ${yen(spent)} / ${yen(bt)}</span><span>${esc(t('perDay', yen(Math.max(left,0) / dl)))}</span></div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><h3>${esc(t('recent'))}</h3><button class="more" data-act="tab" data-arg="tx">${esc(t('seeAll'))}</button></div>
+      <div class="rows">${recent.map(txRow).join('')}</div>
+    </div>
+  </div>`;
+}
+function settleCalc(book, key){
+  const mem = S.books[book].members; const list = txIn(book, key).filter(isExp);
+  const total = -sum(list, x => x.amt); const share = total / mem.length;
+  const paid = mem.map(m => ({ m, p: -sum(list.filter(x => x.payer === m.id), x => x.amt) }));
+  paid.forEach(o => o.bal = o.p - share);
+  const debtor = [...paid].sort((a,b) => a.bal - b.bal)[0], creditor = [...paid].sort((a,b) => b.bal - a.bal)[0];
+  return { total, share, paid, debtor, creditor };
+}
+function viewHomeShared(){
+  const b = S.activeBook, key = mk(iso(today0()));
+  const st = settleCalc(b, key);
+  const recent = S.tx.filter(x => x.book === b).sort((a,c) => c.date.localeCompare(a.date)).slice(0,6);
+  const nm = m => L()==='en' ? m.en : m.ja;
+  const msg = Math.abs(st.debtor.bal) < 1 ? t('even') : t('settleMsg', nm(st.debtor.m), nm(st.creditor.m), yen(Math.min(-st.debtor.bal, st.creditor.bal)));
+  return `
+  <section class="hero">
+    <div class="lbl">${esc(t(b))} · ${esc(t('sharedSpend'))}</div>
+    <div class="big tnum"><small>¥</small>${Math.round(st.total).toLocaleString('ja-JP')}</div>
+    <div class="sub">${esc(t('members'))}: ${S.books[b].members.map(m => esc(nm(m))).join('・')}</div>
+    <button class="chip" data-act="books">${esc(t('booksTitle'))}</button>
+  </section>
+  <div class="actions">
+    <button class="act" data-act="add"><span>${ic('plus')}</span><span>${esc(t('add'))}</span></button>
+    <button class="act" data-act="tab" data-arg="tx"><span>${ic('list')}</span><span>${esc(t('tx'))}</span></button>
+    <button class="act" data-act="review"><span>${ic('check')}</span><span>${esc(t('review'))}</span></button>
+    <button class="act" data-act="tab" data-arg="insights"><span>${ic('pie')}</span><span>${esc(t('insights'))}</span></button>
+  </div>
+  <div class="stack">
+    <div class="card">
+      <div class="ctitle"><h3>${esc(t('settle'))} · ${esc(monthLabel(key))}</h3></div>
+      <div class="rows">${st.paid.map(o => `<div class="row"><span class="av">${esc(nm(o.m).slice(0,1))}</span><span class="main"><span class="t1">${esc(nm(o.m))}</span><span class="t2 tnum">${esc(t('paid'))} ${yen(o.p)} · ${esc(t('shouldPay'))} ${yen(st.share)}</span></span><span class="amt tnum ${o.bal >= 0 ? 'pos' : 'neg'}">${yen(o.bal, true)}</span></div>`).join('')}</div>
+      <div class="okbox mt">${ic('info')}<span>${esc(msg)}</span></div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><h3>${esc(t('recent'))}</h3><button class="more" data-act="tab" data-arg="tx">${esc(t('seeAll'))}</button></div>
+      <div class="rows">${recent.map(txRow).join('')}</div>
+    </div>
+  </div>`;
+}
+
+/* Activity */
+function monthSwitch(){
+  const cur = mk(iso(today0()));
+  return `<div class="monthsw"><button data-act="month" data-arg="-1" aria-label="prev">${ic('chevL')}</button><span>${esc(monthLabel(UI.month))}</span><button data-act="month" data-arg="1" aria-label="next" ${UI.month >= cur ? 'disabled' : ''}>${ic('chev')}</button></div>`;
+}
+function bookSwitch(){ return `<button class="booksw" data-act="books">${esc(t(S.activeBook))}${ic('down')}</button>`; }
+function viewTx(){
+  const q = UI.q.trim().toLowerCase();
+  let list = txIn(S.activeBook, q ? null : UI.month);
+  if (UI.filter === 'exp') list = list.filter(isExp);
+  if (UI.filter === 'inc') list = list.filter(isInc);
+  if (UI.filter === 'xfer') list = list.filter(isXfer);
+  if (UI.filter === 'uncat') list = list.filter(x => x.cat === 'uncat');
+  if (q) list = list.filter(x => (x.desc + ' ' + catName(x.cat) + ' ' + (x.memo||'')).toLowerCase().includes(q));
+  list.sort((a,b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+  const groups = []; list.forEach(x => { const g = groups[groups.length-1]; if (g && g.d === x.date) g.items.push(x); else groups.push({ d:x.date, items:[x] }); });
+  const uncatN = txIn(S.activeBook).filter(x => x.cat === 'uncat').length;
+  const chips = [['all',t('all')],['exp',t('expense')],['inc',t('income')],['xfer',t('transfer')],['uncat',t('uncategorized') + (uncatN ? ` ${uncatN}` : '')]];
+  return `<h1 class="pg">${esc(t('tx'))}</h1>
+  <div class="pgsub">${bookSwitch()}${q ? '' : monthSwitch()}</div>
+  <label class="field">${ic('search')}<input id="q" type="search" placeholder="${esc(t('searchPh'))}" value="${esc(UI.q)}" autocomplete="off"></label>
+  <div class="chips">${chips.map(([k,l]) => `<button class="chipb" data-act="filter" data-arg="${k}" aria-pressed="${UI.filter === k}">${esc(l)}</button>`).join('')}</div>
+  <div class="card">${groups.length ? groups.map(g => `<div class="daygrp"><span>${esc(dayLabel(g.d))}</span><span class="tnum">${yen(sum(g.items.filter(x => !isXfer(x)), x => x.amt), true)}</span></div><div class="rows">${g.items.map(txRow).join('')}</div>`).join('') : `<p class="muted" style="margin:6px 0">${esc(t('noTx'))}</p>`}</div>`;
+}
+
+/* charts */
+let pendingCharts = [];
+function lineChart(id, { labels, series, height = 210, minZero = true, fmtX = l => l, fmtV = v => yen(v) }){
+  const W = 600, H = height, pl = 6, pr = 118, pt = 16, pb = 30;
+  const vals = series.flatMap(s => s.values.filter(v => v != null));
+  let max = Math.max(...vals), min = minZero ? 0 : Math.min(...vals);
+  const span = (max - min) || 1; max += span * .08; if (!minZero) min -= span * .12;
+  const n = labels.length, x = i => pl + i * (W - pl - pr) / Math.max(1, n - 1), y = v => pt + (H - pt - pb) * (1 - (v - min) / (max - min));
+  const grid = [0, .5, 1].map(f => { const gy = pt + (H - pt - pb) * f; return `<line class="grid" x1="${pl}" x2="${W - pr + 4}" y1="${gy}" y2="${gy}"/>`; }).join('');
+  const ticks = [0, Math.floor((n-1)/2), n-1].map(i => `<text x="${x(i)}" y="${H - 6}" text-anchor="${i === 0 ? 'start' : i === n-1 ? 'end' : 'middle'}">${esc(fmtX(labels[i], i))}</text>`).join('');
+  const ends = [];
+  const paths = series.map((s, si) => {
+    const pts = s.values.map((v, i) => v == null ? null : [x(i), y(v)]).filter(Boolean);
+    if (!pts.length) return '';
+    const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join('');
+    const last = pts[pts.length - 1]; ends.push({ y:last[1], x:last[0], s, v:s.values.filter(v => v != null).slice(-1)[0] });
+    const area = s.area ? `<path d="${d}L${last[0]} ${H - pb}L${pts[0][0]} ${H - pb}Z" fill="url(#g-${id}-${si})"/>` : '';
+    return `<defs><linearGradient id="g-${id}-${si}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${s.color}" stop-opacity=".32"/><stop offset="1" stop-color="${s.color}" stop-opacity="0"/></linearGradient></defs>${area}<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.dash ? 2.5 : 3.5}" stroke-linejoin="round" stroke-linecap="round" ${s.dash ? 'stroke-dasharray="7 7"' : ''}/>`;
+  }).join('');
+  ends.sort((a,b) => a.y - b.y); for (let i = 1; i < ends.length; i++) if (ends[i].y - ends[i-1].y < 44) ends[i].y = ends[i-1].y + 44;
+  const endMarks = ends.map(e => `<circle cx="${e.x}" cy="${e.s.values.filter(v=>v!=null).length ? y(e.v) : e.y}" r="6" fill="${e.s.color}" stroke="#1a1424" stroke-width="3"/><text class="lab" x="${W - pr + 14}" y="${e.y - 2}">${esc(e.s.name)}</text><text x="${W - pr + 14}" y="${e.y + 20}" class="tnum">${esc(fmtV(e.v))}</text>`).join('');
+  pendingCharts.push(() => {
+    const el = document.getElementById(id); if (!el) return;
+    const svg = el.querySelector('svg'), tip = el.querySelector('.tip'), cross = el.querySelector('.cross'), dots = el.querySelectorAll('.hd');
+    const move = e => {
+      const r = svg.getBoundingClientRect(); const px = (e.clientX - r.left) / r.width * W;
+      const i = Math.max(0, Math.min(n - 1, Math.round((px - pl) / ((W - pl - pr) / Math.max(1, n - 1)))));
+      cross.setAttribute('x1', x(i)); cross.setAttribute('x2', x(i)); cross.style.opacity = 1;
+      series.forEach((s, si) => { const v = s.values[i]; const dEl = dots[si]; if (v == null) { dEl.style.opacity = 0; return; } dEl.setAttribute('cx', x(i)); dEl.setAttribute('cy', y(v)); dEl.style.opacity = 1; });
+      tip.innerHTML = `<div class="faint">${esc(fmtX(labels[i], i, true))}</div>` + series.filter(s => s.values[i] != null).map(s => `<div><span class="sw" style="background:${s.color}"></span>${esc(s.name)} <b class="tnum">${esc(fmtV(s.values[i]))}</b></div>`).join('');
+      const left = x(i) / W * r.width; tip.style.left = Math.max(70, Math.min(r.width - 70, left)) + 'px'; tip.classList.add('on');
+    };
+    const out = () => { tip.classList.remove('on'); cross.style.opacity = 0; dots.forEach(d => d.style.opacity = 0); };
+    el.addEventListener('pointermove', move); el.addEventListener('pointerdown', move); el.addEventListener('pointerleave', out);
+  });
+  return `<div class="chart" id="${id}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(series.map(s => s.name).join(', '))}">${grid}${paths}${endMarks}${ticks}
+    <line class="cross" x1="0" x2="0" y1="${pt}" y2="${H - pb}" stroke="rgba(255,255,255,.35)" stroke-width="1.5" style="opacity:0"/>
+    ${series.map(s => `<circle class="hd" r="7" fill="${s.color}" stroke="#1a1424" stroke-width="3" style="opacity:0"/>`).join('')}</svg><div class="tip"></div></div>`;
+}
+
+/* Insights */
+function viewInsights(){
+  const b = S.activeBook, key = UI.month, prevKey = addMonths(key, -1);
+  const cur = mk(iso(today0())) === key;
+  const cum = (k, upto) => { const days = daysIn(k), arr = []; let acc = 0; const list = txIn(b, k).filter(isExp);
+    for (let d = 1; d <= days; d++) { acc += -sum(list.filter(x => +x.date.slice(8) === d), x => x.amt); arr.push(d <= upto ? acc : null); } return arr; };
+  const thisArr = cum(key, cur ? today0().getDate() : daysIn(key)), lastArr = cum(prevKey, daysIn(prevKey));
+  const n = Math.max(thisArr.length, lastArr.length); while (thisArr.length < n) thisArr.push(null); while (lastArr.length < n) lastArr.push(null);
+  const spent = thisArr.filter(v => v != null).slice(-1)[0] || 0;
+  const lastSame = lastArr[(cur ? today0().getDate() : daysIn(key)) - 1] ?? lastArr.filter(v => v != null).slice(-1)[0];
+  const diff = spent - (lastSame || 0);
+  const months = Array.from({length:6}, (_,i) => addMonths(key, i - 5));
+  const incomeOf = k => sum(txIn(b, k).filter(isInc), x => x.amt), expOf = k => -sum(txIn(b, k).filter(isExp), x => x.amt);
+  const incs = months.map(incomeOf), nets = months.map(k => incomeOf(k) - expOf(k));
+  const maxInc = Math.max(1, ...incs), maxNet = Math.max(1, ...nets.map(Math.abs));
+  const mShort = k => L()==='en' ? new Date(+k.slice(0,4), +k.slice(5)-1, 1).toLocaleDateString('en-GB',{month:'short'}) : `${+k.slice(5)}月`;
+  const byCat = {}; txIn(b, key).filter(isExp).forEach(x => byCat[x.cat] = (byCat[x.cat] || 0) - x.amt);
+  const cats = S.categories.filter(c => c.type === 'exp' && (byCat[c.id] || (b === 'personal' && c.budget))).map(c => ({ c, v: byCat[c.id] || 0 })).sort((a,b2) => b2.v - a.v);
+  const maxCat = Math.max(1, ...cats.map(o => Math.max(o.v, b === 'personal' ? o.c.budget || 0 : 0)));
+  const chart = lineChart('spendchart', {
+    labels: Array.from({length:n}, (_,i) => i + 1),
+    series: [ { name:t('lastMonth'), values:lastArr, color:'rgba(246,243,250,.45)', dash:true }, { name: cur ? t('thisMonth') : mShort(key), values:thisArr, color:'#f4c542', area:true } ],
+    fmtX: (l, i, long) => L()==='en' ? `${long ? 'Day ' : ''}${l}` : `${l}日`
+  });
+  return `<h1 class="pg">${esc(t('insights'))}</h1>
+  <div class="pgsub">${bookSwitch()}${monthSwitch()}</div>
+  <div class="stack">
+    <div class="card">
+      <div class="eyebrow">${esc(t('spent'))}</div>
+      <div class="val tnum">${yen(spent)}</div>
+      <div class="kv tnum" style="justify-content:flex-start;margin:2px 0 12px"><span>${esc(t('lastMonth'))}${L()==='en' ? ', same point: ' : '同日比 '}<b class="${diff > 0 ? 'neg' : 'pos'}">${yen(diff, true)}</b></span></div>
+      ${chart}
+    </div>
+    <div class="grid2">
+      <div class="card"><div class="eyebrow">${esc(t('income'))}</div><div class="val tnum" style="font-size:22px">${yen(incs[5])}</div>
+        <div class="minibars">${incs.map((v,i) => `<div class="${i === 5 ? 'cur' : ''}" style="height:${Math.max(4, v / maxInc * 100)}%" data-tip="${esc(mShort(months[i]))} ${yen(v)}"></div>`).join('')}</div></div>
+      <div class="card"><div class="eyebrow">${esc(t('net'))}</div><div class="val tnum ${nets[5] >= 0 ? 'pos' : 'neg'}" style="font-size:22px">${yen(nets[5], true)}</div>
+        <div class="minibars">${nets.map((v,i) => `<div class="${v >= 0 ? 'posb' : 'negb'}" style="height:${Math.max(4, Math.abs(v) / maxNet * 100)}%;opacity:${i === 5 ? 1 : .55}" data-tip="${esc(mShort(months[i]))} ${yen(v, true)}"></div>`).join('')}</div></div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><h3>${esc(t('byCategory'))}${b === 'personal' ? ` · ${esc(t('vsBudget'))}` : ''}</h3>${b === 'personal' ? `<button class="more" data-act="cats">${esc(t('budget'))}</button>` : ''}</div>
+      ${cats.map(({c, v}) => { const bud = b === 'personal' ? c.budget || 0 : 0; const over = bud && v > bud;
+        return `<div class="catrow"><div class="top2"><span class="nm">${esc(L()==='en' ? c.en : c.ja)}${over ? `<em>${esc(t('over'))} ${yen(v - bud)}</em>` : ''}</span><span class="amt tnum">${yen(v)}${bud ? `<small> / ${yen(bud)}</small>` : ''}</span></div>
+        <div class="meter"><i class="${over ? 'over' : ''}" style="width:${Math.min(100, (bud ? v / bud : v / maxCat) * 100)}%"></i></div></div>`; }).join('')}
+    </div>
+  </div>`;
+}
+
+/* Assets */
+function viewAssets(){
+  const nw = netWorth(S);
+  const hist = [...S.history, { m: mk(iso(today0())), v: nw }];
+  const mShort = k => L()==='en' ? new Date(+k.slice(0,4), +k.slice(5)-1, 1).toLocaleDateString('en-GB',{month:'short'}) : `${+k.slice(5)}月`;
+  const chart = lineChart('nwchart', { labels: hist.map(h => h.m), series: [{ name:t('netWorth'), values: hist.map(h => h.v), color:'#9c8bff', area:true }], minZero:false, height:200,
+    fmtX: (m, i, long) => long ? monthLabel(m) : mShort(m), fmtV: v => L()==='en' ? '¥' + (v/1e6).toFixed(2) + 'M' : '¥' + Math.round(v/10000).toLocaleString('ja-JP') + '万' });
+  const order = ['bank','cash','emoney','invest','pension','card','points','miles'];
+  const groups = order.map(tp => ({ tp, items: liveAccts().filter(a => a.type === tp) })).filter(g => g.items.length);
+  const posTotal = sum(liveAccts().filter(a => !['card','points','miles'].includes(a.type)), a => acctValue(S, a));
+  const td = today0();
+  const upcoming = liveAccts().filter(a => a.type === 'card' && a.payDay).map(a => {
+    const key = mk(iso(td)); const before = td.getDate() < a.payDay;
+    const k = before ? addMonths(key, -1) : key;
+    const amt = -sum(S.tx.filter(x => x.acct === a.id && mk(x.date) === k && x.amt < 0), x => x.amt);
+    const dueKey = before ? key : addMonths(key, 1);
+    return { a, amt, due: `${dueKey}-${pad(a.payDay)}`, pending: !before };
+  });
+  const subsMap = {}; S.tx.filter(x => x.cat === 'subs' && x.book === 'personal').forEach(x => { (subsMap[x.desc] ||= []).push(x); });
+  const subs = Object.entries(subsMap).filter(([,l]) => new Set(l.map(x => mk(x.date))).size >= 2).map(([d,l]) => { l.sort((a,b) => b.date.localeCompare(a.date)); return { d, amt:-l[0].amt, acct:l[0].acct, last:l[0].date }; });
+  const lastImp = id => S.lastImport[id] ? t('daysAgo', daysBetween(new Date(S.lastImport[id]), new Date())) : t('notImported');
+  return `<h1 class="pg">${esc(t('assets'))}</h1>
+  <div class="pgsub"><span class="booksw" style="font-size:16px">${esc(t('personal'))}</span><button class="btn sm ghost" data-act="addacct">${ic('plus','style="width:16px;height:16px"')} ${esc(t('addAcct'))}</button></div>
+  <div class="stack">
+    <div class="card"><div class="eyebrow">${esc(t('netWorth'))}</div><div class="val tnum">${yen(nw)}</div><div style="height:12px"></div>${chart}</div>
+    <div class="card">
+      <div class="ctitle"><h3>${esc(t('breakdown'))}</h3></div>
+      ${groups.filter(g => !['card','points','miles'].includes(g.tp)).map(g => { const v = sum(g.items, a => acctValue(S, a));
+        return `<div class="catrow"><div class="top2"><span class="nm">${esc(TYPE_LABEL[L()][g.tp])}</span><span class="amt tnum">${yen(v)} <small>${(v / posTotal * 100).toFixed(1)}%</small></span></div><div class="meter"><i style="width:${v / posTotal * 100}%;background:var(--violet)"></i></div></div>`; }).join('')}
+    </div>
+    <div class="card">
+      <div class="ctitle"><h3>${esc(t('upcoming'))}</h3></div>
+      <div class="rows">${upcoming.map(u => `<div class="row"><span class="av">${esc(u.a.name.slice(0,1))}</span><span class="main"><span class="t1">${esc(u.a.name)}</span><span class="t2">${esc(dayLabel(u.due))}${u.pending ? ` · ${esc(t('estimated'))}` : ''}</span></span><span class="amt tnum">${yen(-u.amt)}</span></div>`).join('')}</div>
+    </div>
+    ${groups.map(g => `<div class="card"><div class="ctitle"><h3>${esc(TYPE_LABEL[L()][g.tp])}</h3>${['points','miles'].includes(g.tp) ? `<span class="faint" style="font-size:13px">${g.items.some(a => a.rate) ? '' : esc(t('notCounted'))}</span>` : ''}</div><div class="rows">${g.items.map(a => {
+        const val = ['points','miles'].includes(a.type) ? `${a.balance.toLocaleString('ja-JP')} ${a.unit}` : yen(acctValue(S, a));
+        const sub = ['points','miles'].includes(a.type) ? (a.rate ? `≈ ${yen(a.balance * a.rate)}` : t('notCounted')) : `${t('lastImport')} ${lastImp(a.id)}`;
+        return `<button class="row" data-act="acct" data-arg="${a.id}"><span class="av">${esc(a.name.slice(0,1))}</span><span class="main"><span class="t1">${esc(a.name)}</span><span class="t2">${esc(sub)}</span></span><span class="amt tnum">${esc(val)}</span>${ic('chev','class="chev"')}</button>`; }).join('')}</div></div>`).join('')}
+    <div class="card"><div class="ctitle"><h3>${esc(t('subs'))}</h3><span class="tnum muted">${yen(sum(subs, s => s.amt))} / ${esc(t('perMonth'))}</span></div>
+      <div class="rows">${subs.map(s => `<div class="row"><span class="av">${esc(s.d.slice(0,1))}</span><span class="main"><span class="t1">${esc(s.d)}</span><span class="t2">${esc(acct(s.acct)?.name || '')}</span></span><span class="amt tnum">${yen(s.amt)}</span></div>`).join('')}</div></div>
+    <button class="btn ghost" data-act="addacct">${ic('plus','style="width:18px;height:18px"')} ${esc(t('addAcct'))}</button>
+    ${S.accounts.some(a => a.hidden) ? `<button class="btn ghost" style="background:none;color:var(--fg-2)" data-act="hiddenaccts">${esc(t('hiddenAccts', S.accounts.filter(a => a.hidden).length))}</button>` : ''}
+  </div>`;
+}
+
+/* Settings */
+function setRow(icon, label, value, act, arg){ return `<button class="row setrow" data-act="${act}" ${arg ? `data-arg="${arg}"` : ''}><span class="av">${ic(icon)}</span><span class="main"><span class="t1">${esc(label)}</span></span><span class="t2 muted">${esc(value || '')}</span>${ic('chev','class="chev"')}</button>`; }
+function viewSettings(){
+  return `<h1 class="pg">${esc(t('settings'))}</h1>
+  <div class="stack" style="margin-top:14px">
+    <div><h5 class="eyebrow" style="margin:0 0 8px 4px">${esc(t('secLang'))}</h5><div class="card" style="padding:14px"><div class="seg"><button data-act="lang" data-arg="ja" aria-pressed="${L()==='ja'}">日本語</button><button data-act="lang" data-arg="en" aria-pressed="${L()==='en'}">English</button></div></div></div>
+    <div><h5 class="eyebrow" style="margin:0 0 8px 4px">${esc(t('secSecurity'))}</h5><div class="card" style="padding:4px 18px"><div class="rows list" style="background:none;padding:0">
+      ${setRow('shield', t('secPlan'), '', 'secplan')}
+      ${setRow('key', t('changePin'), '', 'pin')}
+      ${setRow('timer', t('autoLock'), t('min', S.lockMin), 'autolock')}
+      ${setRow('face', t('biometric'), L()==='en' ? 'Full version' : '本番版で対応', 'bio')}
+      ${setRow('lock', t('encryption'), noCrypto ? '—' : 'AES-256', 'enc')}
+      ${setRow('lock', t('lockNow'), '', 'lock')}
+    </div></div></div>
+    <div><h5 class="eyebrow" style="margin:0 0 8px 4px">${esc(t('secData'))}</h5><div class="card" style="padding:4px 18px"><div class="rows list" style="background:none;padding:0">
+      ${setRow('assets', t('manageAccts'), String(liveAccts().length), 'tab', 'assets')}
+      ${setRow('plus', t('addAcct'), '', 'addacct')}
+      ${setRow('tag', t('categories'), '', 'cats')}
+      ${setRow('wand', t('rules'), String(S.rules.length), 'rules')}
+      ${setRow('upload', t('importTitle'), '', 'import')}
+      ${setRow('save', t('backup'), '', 'backup')}
+      ${setRow('restore', t('restore'), '', 'restore')}
+      ${setRow('refresh', t('resetSample'), '', 'reset')}
+    </div></div></div>
+    <div><h5 class="eyebrow" style="margin:0 0 8px 4px">${esc(t('secApp'))}</h5><div class="card" style="padding:4px 18px"><div class="rows list" style="background:none;padding:0">
+      ${setRow('info', t('version'), 'v' + VERSION + ' · data v' + SCHEMA, 'changelog')}
+      ${setRow('list', t('changelog'), '', 'changelog')}
+      ${setRow('refresh', t('checkUpdate'), '', 'update')}
+    </div></div></div>
+  </div>`;
+}
+
+/* ---------- sheets ---------- */
+function openSheet(html, mount){
+  closeSheet(true);
+  const s = document.createElement('div'); s.className = 'scrim'; s.id = 'scrim';
+  s.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div>`;
+  s.addEventListener('click', e => { if (e.target === s) closeSheet(); });
+  document.body.appendChild(s); requestAnimationFrame(() => s.classList.add('on'));
+  if (mount) mount(s.querySelector('.sheet'));
+}
+function closeSheet(now){ const s = $('#scrim'); if (!s) return; if (now) { s.remove(); return; } s.classList.remove('on'); setTimeout(() => s.remove(), 200); }
+
+function catOptions(type, sel){ return S.categories.filter(c => c.type === type || (type === 'exp' && c.id === 'uncat')).filter((c,i,a) => a.indexOf(c) === i).map(c => `<option value="${c.id}" ${c.id === sel ? 'selected' : ''}>${esc(L()==='en' ? c.en : c.ja)}</option>`).join(''); }
+function ruleCat(desc){ const d = desc.toLowerCase(); const r = S.rules.find(r => r.kw && d.includes(r.kw.toLowerCase())); return r ? r.cat : null; }
+
+function openTx(id){
+  const x = id ? S.tx.find(z => z.id === id) : null;
+  const book = x ? x.book : S.activeBook;
+  let type = x ? (isXfer(x) ? 'xfer' : x.amt > 0 ? 'inc' : 'exp') : 'exp';
+  const shared = book !== 'personal';
+  const acctOpts = liveAccts().filter(a => ['bank','cash','card','emoney','invest'].includes(a.type)).map(a => `<option value="${a.id}" ${(x ? x.acct : 'cash') === a.id ? 'selected' : ''}>${esc(a.name)}</option>`).join('');
+  const memOpts = (S.books[book].members || []).map(m => `<option value="${m.id}" ${(x ? x.payer : 'me') === m.id ? 'selected' : ''}>${esc(L()==='en' ? m.en : m.ja)}</option>`).join('');
+  openSheet(`<h2>${esc(t(x ? 'editTx' : 'newTx'))}</h2><p class="lead">${esc(t(book))}</p>
+    <form class="form" id="txf">
+      <div class="seg" id="tseg">${['exp','inc','xfer'].filter(k => !shared || k === 'exp').map(k => `<button type="button" data-t="${k}" aria-pressed="${k === type}">${esc(t({exp:'expense',inc:'income',xfer:'transfer'}[k]))}</button>`).join('')}</div>
+      <input class="inp amtin tnum" id="f-amt" inputmode="numeric" placeholder="¥0" value="${x ? Math.abs(x.amt).toLocaleString('ja-JP') : ''}" aria-label="${esc(t('amount'))}">
+      <label>${esc(t('desc'))}<input class="inp" id="f-desc" value="${esc(x ? x.desc : '')}" autocomplete="off"></label>
+      <div class="two"><label>${esc(t('date'))}<input class="inp" id="f-date" type="date" value="${x ? x.date : iso(today0())}"></label>
+      <label>${esc(t('category'))}<select class="inp" id="f-cat">${catOptions(type, x ? x.cat : (type === 'exp' ? 'food' : 'salary'))}</select></label></div>
+      ${shared ? `<label>${esc(t('payer'))}<select class="inp" id="f-payer">${memOpts}</select></label>` : `<label>${esc(t('account'))}<select class="inp" id="f-acct">${acctOpts}</select></label>`}
+      <label>${esc(t('memo'))}<input class="inp" id="f-memo" value="${esc(x?.memo || '')}"></label>
+      <label class="check"><input type="checkbox" id="f-rule"> ${esc(t('learnRule'))}</label>
+      <div class="btnrow">${x ? `<button type="button" class="btn danger" id="f-del" style="flex:1">${esc(t('del'))}</button>` : ''}<button class="btn" style="flex:2">${esc(t('save'))}</button></div>
+    </form>`, sh => {
+    const amt = sh.querySelector('#f-amt'), desc = sh.querySelector('#f-desc'), catSel = sh.querySelector('#f-cat');
+    sh.querySelector('#tseg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; type = b.dataset.t;
+      sh.querySelectorAll('#tseg button').forEach(z => z.setAttribute('aria-pressed', z === b)); catSel.innerHTML = catOptions(type, type === 'exp' ? 'food' : type === 'inc' ? 'salary' : 'transfer'); });
+    amt.addEventListener('input', () => { const v = amt.value.replace(/[^\d]/g,''); amt.value = v ? (+v).toLocaleString('ja-JP') : ''; });
+    desc.addEventListener('change', () => { const c = ruleCat(desc.value); if (c && type === 'exp') catSel.value = c; });
+    if (!x) setTimeout(() => amt.focus(), 250);
+    const del = sh.querySelector('#f-del');
+    if (del) del.addEventListener('click', () => { if (!del.dataset.arm) { del.dataset.arm = 1; del.textContent = t('delConfirm'); return; } S.tx = S.tx.filter(z => z.id !== x.id); persist(); closeSheet(); render(); toast(t('deleted')); });
+    sh.querySelector('#txf').addEventListener('submit', e => { e.preventDefault();
+      const v = +amt.value.replace(/[^\d]/g,''); if (!v) { amt.focus(); return; }
+      const c = catSel.value; const d = desc.value.trim() || catName(c);
+      const rec = { id: x ? x.id : uid(), date: sh.querySelector('#f-date').value || iso(today0()), desc: d, amt: type === 'inc' ? v : -v, cat: c, book, memo: sh.querySelector('#f-memo').value.trim(), src: x ? x.src : 'manual' };
+      if (shared) { rec.payer = sh.querySelector('#f-payer').value; rec.acct = null; } else rec.acct = sh.querySelector('#f-acct').value;
+      if (x) Object.assign(x, rec); else S.tx.push(rec);
+      if (sh.querySelector('#f-rule').checked && desc.value.trim()) { S.rules = S.rules.filter(r => r.kw !== desc.value.trim()); S.rules.unshift({ kw: desc.value.trim(), cat: c }); }
+      persist(); closeSheet(); render(); toast(t('saved')); });
+  });
+}
+
+function openBooks(){
+  openSheet(`<h2>${esc(t('booksTitle'))}</h2><p class="lead">${esc(t('booksLead'))}</p>
+    <div class="list">${['personal','couple','family'].map(b => `<button class="row" data-act="setbook" data-arg="${b}"><span class="av">${{personal:'U',couple:'2',family:'F'}[b]}</span><span class="main"><span class="t1">${esc(t(b))}</span><span class="t2">${esc(t(b + 'D'))}</span></span>${S.activeBook === b ? `<span class="pos">${ic('check','style="width:20px;height:20px"')}</span>` : ''}</button>`).join('')}</div>
+    <p class="note">${esc(t('inviteNote'))}</p>`);
+}
+
+function openReview(){
+  const b = S.activeBook, td = today0();
+  const wk = i => { const s = new Date(td); s.setDate(td.getDate() - 6 - i * 7); const e = new Date(td); e.setDate(td.getDate() - i * 7); return [iso(s), iso(e)]; };
+  const spentIn = ([s,e]) => -sum(S.tx.filter(x => x.book === b && isExp(x) && x.date >= s && x.date <= e), x => x.amt);
+  const thisW = spentIn(wk(0)); const avg = sum(Array.from({length:8}, (_,i) => spentIn(wk(i+1)))) / 8;
+  const byCat = {}; S.tx.filter(x => x.book === b && isExp(x) && x.date >= wk(0)[0]).forEach(x => byCat[x.cat] = (byCat[x.cat]||0) - x.amt);
+  const top = Object.entries(byCat).sort((a,c) => c[1] - a[1]).slice(0,3);
+  const uncatN = S.tx.filter(x => x.book === b && x.cat === 'uncat').length;
+  const imp = liveAccts().filter(a => ['bank','card','emoney','invest'].includes(a.type));
+  openSheet(`<h2>${esc(t('reviewDue'))}</h2><p class="lead">${esc(t(b))} · ${esc(dayLabel(wk(0)[0]))} – ${esc(dayLabel(wk(0)[1]))}</p>
+    <div class="grid2"><div class="card" style="padding:16px"><div class="eyebrow">${esc(t('week'))}</div><div class="val tnum" style="font-size:22px">${yen(thisW)}</div></div>
+    <div class="card" style="padding:16px"><div class="eyebrow">${esc(t('weekAvg'))}</div><div class="val tnum" style="font-size:22px">${yen(avg)}</div><div class="tnum ${thisW > avg ? 'neg' : 'pos'}" style="font-size:13px">${yen(thisW - avg, true)}</div></div></div>
+    <h5>${esc(t('topCats'))}</h5><div class="list">${top.map(([c,v]) => `<div class="row"><span class="main"><span class="t1">${esc(catName(c))}</span></span><span class="amt tnum">${yen(v)}</span></div>`).join('') || `<div class="row muted">—</div>`}</div>
+    ${uncatN ? `<div class="okbox warnbox mt">${ic('alert')}<span style="flex:1">${esc(t('toCategorize', uncatN))}</span><button class="btn sm ghost" data-act="gouncat">${esc(t('categorizeNow'))}</button></div>` : ''}
+    ${b === 'personal' ? `<h5>${esc(t('importStatus'))}</h5><div class="list">${imp.map(a => { const d = S.lastImport[a.id] ? daysBetween(new Date(S.lastImport[a.id]), new Date()) : null;
+      return `<div class="row"><span class="main"><span class="t1">${esc(a.name)}</span></span><span class="t2 tnum ${d == null || d >= 7 ? 'neg' : 'muted'}">${esc(d == null ? t('notImported') : t('daysAgo', d))}</span></div>`; }).join('')}</div>
+      <button class="btn ghost mt" data-act="import">${esc(t('importNow'))}</button>` : ''}
+    <button class="btn mt" data-act="reviewdone">${esc(t('markDone'))}</button>`);
+}
+
+/* CSV */
+function parseCSV(text){
+  const rows = []; let row = [], f = '', q = false;
+  for (let i = 0; i < text.length; i++) { const c = text[i];
+    if (q) { if (c === '"') { if (text[i+1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true; else if (c === ',') { row.push(f); f = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i+1] === '\n') i++; row.push(f); rows.push(row); row = []; f = ''; }
+    else f += c; }
+  if (f !== '' || row.length) { row.push(f); rows.push(row); }
+  return rows.filter(r => r.some(v => v.trim() !== ''));
+}
+function normDate(s){
+  s = (s||'').trim(); let m;
+  if ((m = s.match(/^(\d{4})[\/\-.年](\d{1,2})[\/\-.月](\d{1,2})/))) return `${m[1]}-${pad(m[2])}-${pad(m[3])}`;
+  if ((m = s.match(/^(\d{2})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/))) return `20${m[1]}-${pad(m[2])}-${pad(m[3])}`;
+  return null;
+}
+const num = s => { const v = String(s ?? '').replace(/[¥,円\s"]/g,'').replace(/^[(（](.*)[)）]$/,'-$1').replace('▲','-').replace('△','-'); return v === '' || isNaN(+v) ? null : +v; };
+const MF_MAP = { '食費':'food','日用品':'daily','住宅':'home','水道・光熱費':'util','通信費':'phone','交通費':'transit','自動車':'transit','交際費':'social','趣味・娯楽':'outdoor','衣服・美容':'beauty','健康・医療':'health','教養・教育':'learn','特別な支出':'other','その他':'other','税・社会保障':'other','保険':'other','現金・カード':'transfer','未分類':'uncat' };
+function decodeFile(buf){
+  let txt = new TextDecoder('utf-8').decode(buf);
+  if (txt.includes(String.fromCharCode(0xFFFD))) { try { txt = new TextDecoder('shift_jis').decode(buf); } catch(e){} }
+  return txt.replace(/^﻿/, '');
+}
+function buildImport(text, target, posIsExp){
+  const rows = parseCSV(text); if (!rows.length) return { err:true };
+  let hi = rows.findIndex(r => r.some(c => /日付|利用日|取引日|date/i.test(c)));
+  if (hi < 0) return { err:true };
+  const H = rows[hi].map(h => h.trim());
+  const col = re => H.findIndex(h => re.test(h));
+  const isMF = H.includes('計算対象') && H.some(h => h.includes('保有金融機関'));
+  const out = [];
+  const known = new Set(S.tx.map(x => x.extId).filter(Boolean));
+  const sig = new Set(S.tx.map(x => `${x.date}|${x.amt}|${x.desc}`));
+  let dupes = 0;
+  for (const r of rows.slice(hi + 1)) {
+    if (isMF) {
+      const g = n => r[col(new RegExp('^' + n))] ?? '';
+      const date = normDate(g('日付')); const amt = num(g('金額')); if (!date || amt == null) continue;
+      const desc = g('内容').trim(); const inst = g('保有金融機関').trim(); const big = g('大項目').trim(), mid = g('中項目').trim();
+      const ext = g('ID').trim();
+      let c = ruleCat(desc) || (big === '収入' ? (mid === '給与' ? 'salary' : 'incother') : MF_MAP[big] || 'uncat');
+      if (g('振替').trim() === '1' || g('計算対象').trim() === '0') c = 'transfer';
+      let a = S.accounts.find(z => inst && (z.name.includes(inst) || inst.includes(z.name.replace(/[（(].*$/,''))));
+      const rec = { id:uid(), date, desc: desc || inst, amt, cat:c, book:'personal', acct: a ? a.id : null, acctName: a ? null : inst, extId: ext ? 'mf:' + ext : null, memo: g('メモ').trim(), src:'mf' };
+      if ((rec.extId && known.has(rec.extId)) || sig.has(`${date}|${amt}|${rec.desc}`)) { dupes++; continue; }
+      out.push(rec);
+    } else {
+      const di = col(/日付|利用日|取引日|date/i), ds = col(/内容|摘要|利用店名|ご利用店名|ご利用先|取引内容|お取引内容|説明|description/i);
+      const ai = col(/^(?!.*入金).*(利用金額|ご利用金額|支払金額|金額|amount)/i), outI = col(/出金|お引出し|引出/), inI = col(/入金|お預入れ|預入/);
+      if (di < 0 || (ai < 0 && outI < 0)) return { err:true };
+      const date = normDate(r[di]); if (!date) continue;
+      let amt;
+      if (outI >= 0 || inI >= 0) { const o = num(r[outI]) || 0, i2 = num(r[inI]) || 0; amt = i2 - o; if (!amt) continue; }
+      else { const v = num(r[ai]); if (v == null) continue; amt = posIsExp ? -v : v; }
+      const desc = (r[ds] || '').trim();
+      const c = ruleCat(desc) || (amt > 0 ? 'incother' : 'uncat');
+      if (sig.has(`${date}|${amt}|${desc}`)) { dupes++; continue; }
+      out.push({ id:uid(), date, desc, amt, cat:c, book:'personal', acct:target, src:'csv' });
+    }
+  }
+  return { isMF, out, dupes };
+}
+function openImport(){
+  const opts = liveAccts().filter(a => ['bank','card','emoney','cash','invest'].includes(a.type)).map(a => `<option value="${a.id}">${esc(a.name)}</option>`).join('');
+  openSheet(`<h2>${esc(t('importTitle'))}</h2><p class="lead">${esc(t('importLead'))}</p>
+    <div class="form">
+      <label>${esc(t('target'))}<select class="inp" id="i-acct"><option value="">${esc(t('autoDetect'))}</option>${opts}</select></label>
+      <label class="check"><input type="checkbox" id="i-pos" checked> ${esc(t('positiveIsExpense'))}</label>
+      <label class="btn ghost" style="flex-direction:row;color:var(--fg);font-size:15px">${ic('upload','style="width:18px;height:18px"')} ${esc(t('chooseFile'))}<input type="file" id="i-file" accept=".csv,text/csv" hidden></label>
+      <div id="i-res"></div>
+    </div>`, sh => {
+    let result = null, fileText = null;
+    const run = () => {
+      if (!fileText) return;
+      const target = sh.querySelector('#i-acct').value || null;
+      result = buildImport(fileText, target, sh.querySelector('#i-pos').checked);
+      const box = sh.querySelector('#i-res');
+      if (result.err || (!result.isMF && !target)) { box.innerHTML = `<div class="okbox warnbox">${ic('alert')}<span>${esc(result.err ? t('csvErr') : (L()==='en' ? 'Choose which account this file belongs to.' : 'このファイルの口座を選んでください。'))}</span></div>`; return; }
+      const un = result.out.filter(x => x.cat === 'uncat').length;
+      box.innerHTML = `<div class="okbox">${ic('check')}<div>${result.isMF ? esc(t('mfDetected')) + '<br>' : ''}${esc(t('found', result.out.length + result.dupes))}<br>${esc(t('dupes', result.dupes))}${un ? '<br>' + esc(t('uncatN', un)) : ''}</div></div>
+        <div class="list prev mt">${result.out.slice(0,5).map(x => `<div class="row"><span class="main"><span class="t1">${esc(x.desc)}</span><span class="t2">${esc(x.date)} · ${esc(catName(x.cat))}</span></span><span class="amt tnum">${yen(x.amt, true)}</span></div>`).join('')}</div>
+        <button class="btn mt" id="i-go" ${result.out.length ? '' : 'disabled'}>${esc(t('doImport', result.out.length))}</button>`;
+      sh.querySelector('#i-go').addEventListener('click', () => {
+        result.out.forEach(x => { if (!x.acct && x.acctName) { let a = S.accounts.find(z => z.name === x.acctName); if (!a) { a = { id:'a' + uid(), name:x.acctName, type:'bank', balance:0, unit:null, rate:null, payDay:null }; S.accounts.push(a); } x.acct = a.id; } delete x.acctName; });
+        S.tx.push(...result.out);
+        new Set(result.out.map(x => x.acct)).forEach(id => { if (id) S.lastImport[id] = new Date().toISOString(); });
+        persist(); closeSheet(); UI.bannerHidden = true; render(); toast(t('imported', result.out.length));
+      });
+    };
+    sh.querySelector('#i-file').addEventListener('change', async e => { const f = e.target.files[0]; if (!f) return; fileText = decodeFile(await f.arrayBuffer()); run(); });
+    sh.querySelector('#i-acct').addEventListener('change', run); sh.querySelector('#i-pos').addEventListener('change', run);
+  });
+}
+
+function openCats(){
+  let draft = S.categories.map(c => ({ ...c }));
+  const rowH = c => `<div class="edrow ${c.type === 'inc' ? 'inc' : ''}" data-id="${c.id}">
+      <input class="inp" data-k="ja" value="${esc(c.ja)}" aria-label="${esc(t('nameJa'))}">
+      <input class="inp" data-k="en" value="${esc(c.en)}" aria-label="${esc(t('nameEn'))}">
+      ${c.type === 'exp' ? `<input class="inp tnum" data-k="budget" inputmode="numeric" value="${c.budget || ''}" placeholder="0" aria-label="${esc(t('budgetYen'))}">` : ''}
+      ${c.id === 'uncat' ? '<span></span>' : `<button class="del" data-del="${c.id}" aria-label="${esc(t('del'))}">${ic('x')}</button>`}</div>`;
+  const draw = sh => { sh.querySelector('#c-exp').innerHTML = draft.filter(c => c.type === 'exp').map(rowH).join(''); sh.querySelector('#c-inc').innerHTML = draft.filter(c => c.type === 'inc').map(rowH).join('');
+    sh.querySelector('#c-total').textContent = yen(sum(draft.filter(c => c.type === 'exp'), c => +c.budget || 0)); };
+  openSheet(`<h2>${esc(t('categories'))}</h2><p class="lead">${esc(t('catLead'))}</p>
+    <h5>${esc(t('expenseCats'))} · ${esc(t('total'))} <span id="c-total" class="tnum"></span></h5>
+    <div class="edrow" style="font-size:12px;color:var(--fg-3);padding:0"><span>${esc(t('nameJa'))}</span><span>${esc(t('nameEn'))}</span><span>${esc(t('budgetYen'))}</span><span></span></div>
+    <div id="c-exp"></div><button class="btn ghost sm mt" data-add="exp">${ic('plus','style="width:16px;height:16px"')} ${esc(t('addCat'))}</button>
+    <h5>${esc(t('incomeCats'))}</h5><div id="c-inc"></div><button class="btn ghost sm mt" data-add="inc">${ic('plus','style="width:16px;height:16px"')} ${esc(t('addCat'))}</button>
+    <button class="btn mt" id="c-save">${esc(t('save'))}</button>`, sh => {
+    draw(sh);
+    sh.addEventListener('input', e => { const r = e.target.closest('.edrow'); if (!r || !e.target.dataset.k) return; const c = draft.find(z => z.id === r.dataset.id); const k = e.target.dataset.k;
+      c[k] = k === 'budget' ? +e.target.value.replace(/[^\d]/g,'') : e.target.value; if (k === 'budget') sh.querySelector('#c-total').textContent = yen(sum(draft.filter(c => c.type === 'exp'), c => +c.budget || 0)); });
+    sh.addEventListener('click', e => {
+      const d = e.target.closest('[data-del]'); if (d) { draft = draft.filter(c => c.id !== d.dataset.del); draw(sh); return; }
+      const a = e.target.closest('[data-add]'); if (a) { draft.splice(draft.findIndex(c => c.id === (a.dataset.add === 'exp' ? 'uncat' : 'transfer')), 0, { id:'c' + uid(), ja:'', en:'', budget:0, type:a.dataset.add }); draw(sh); const ins = sh.querySelectorAll(`#c-${a.dataset.add} .edrow input`); ins[ins.length - (a.dataset.add === 'exp' ? 6 : 2)]?.focus(); }
+    });
+    sh.querySelector('#c-save').addEventListener('click', () => {
+      draft = draft.filter(c => c.ja.trim() || c.en.trim()).map(c => ({ ...c, ja: c.ja.trim() || c.en.trim(), en: c.en.trim() || c.ja.trim() }));
+      if (!draft.find(c => c.id === 'transfer')) draft.push(S.categories.find(c => c.id === 'transfer'));
+      const ids = new Set(draft.map(c => c.id)); S.tx.forEach(x => { if (!ids.has(x.cat)) x.cat = 'uncat'; }); S.rules = S.rules.filter(r => ids.has(r.cat));
+      S.categories = draft; persist(); closeSheet(); render(); toast(t('saved'));
+    });
+  });
+}
+
+function openRules(){
+  let draft = S.rules.map(r => ({ ...r }));
+  const opts = sel => S.categories.filter(c => c.type !== 'xfer' || true).map(c => `<option value="${c.id}" ${c.id === sel ? 'selected' : ''}>${esc(L()==='en' ? c.en : c.ja)}</option>`).join('');
+  const draw = sh => { sh.querySelector('#r-list').innerHTML = draft.map((r,i) => `<div class="edrow rule" data-i="${i}"><input class="inp" data-k="kw" value="${esc(r.kw)}" placeholder="${esc(t('keyword'))}" aria-label="${esc(t('keyword'))}"><select class="inp" data-k="cat" aria-label="${esc(t('category'))}">${opts(r.cat)}</select><button class="del" data-del="${i}" aria-label="${esc(t('del'))}">${ic('x')}</button></div>`).join(''); };
+  openSheet(`<h2>${esc(t('rules'))}</h2><p class="lead">${esc(t('ruleLead'))}</p><div id="r-list"></div>
+    <button class="btn ghost sm mt" id="r-add">${ic('plus','style="width:16px;height:16px"')} ${esc(t('addRule'))}</button><button class="btn mt" id="r-save">${esc(t('save'))}</button>`, sh => {
+    draw(sh);
+    sh.addEventListener('input', e => { const r = e.target.closest('.edrow'); if (!r) return; draft[+r.dataset.i][e.target.dataset.k] = e.target.value; });
+    sh.addEventListener('change', e => { const r = e.target.closest('.edrow'); if (!r) return; draft[+r.dataset.i][e.target.dataset.k] = e.target.value; });
+    sh.addEventListener('click', e => { const d = e.target.closest('[data-del]'); if (d) { draft.splice(+d.dataset.del, 1); draw(sh); } });
+    sh.querySelector('#r-add').addEventListener('click', () => { draft.push({ kw:'', cat:'food' }); draw(sh); const ins = sh.querySelectorAll('#r-list input'); ins[ins.length-1].focus(); });
+    sh.querySelector('#r-save').addEventListener('click', () => { S.rules = draft.filter(r => r.kw.trim()).map(r => ({ kw:r.kw.trim(), cat:r.cat })); persist(); closeSheet(); render(); toast(t('saved')); });
+  });
+}
+
+function openAcct(id){
+  const a = acct(id); const pts = ['points','miles'].includes(a.type);
+  openSheet(`<h2>${esc(t('editAcct'))}</h2><p class="lead">${esc(TYPE_LABEL[L()][a.type])}</p>
+    <form class="form" id="af"><label>${esc(t('name'))}<input class="inp" id="a-name" value="${esc(a.name)}"></label>
+    ${a.type === 'card' ? `<div class="okbox">${ic('info')}<span>${esc(t('liabilities'))}: ${yen(cardDebt(S, a))}</span></div>` : `<label>${esc(t('balance'))}${pts ? ` (${a.unit})` : ' (¥)'}<input class="inp tnum" id="a-bal" inputmode="numeric" value="${a.balance}"></label>`}
+    ${pts ? `<label>${esc(t('rate'))}<input class="inp tnum" id="a-rate" inputmode="decimal" value="${a.rate || 0}"></label>` : ''}
+    ${a.type === 'card' ? `<label>${esc(t('payDay'))}<select class="inp" id="a-pay">${Array.from({length:28}, (_,i) => `<option value="${i+1}" ${a.payDay === i+1 ? 'selected' : ''}>${i+1}${L()==='en' ? '' : '日'}</option>`).join('')}</select></label>` : ''}
+    <p class="note" style="margin:0">${esc(t('manualNote'))}</p>
+    <button class="btn">${esc(t('save'))}</button>
+    <button type="button" class="btn danger" id="a-del">${esc(t(S.tx.some(x => x.acct === a.id) ? 'archiveAcct' : 'delAcct'))}</button>
+    ${S.tx.some(x => x.acct === a.id) ? `<p class="note" style="margin:0">${esc(t('archiveNote'))}</p>` : ''}</form>`, sh => {
+    const del = sh.querySelector('#a-del');
+    del.addEventListener('click', () => { if (!del.dataset.arm) { del.dataset.arm = 1; del.textContent = t('delConfirm'); return; }
+      if (S.tx.some(x => x.acct === a.id)) { a.hidden = true; toast(t('acctArchived')); } else { S.accounts = S.accounts.filter(z => z !== a); delete S.lastImport[a.id]; toast(t('deleted')); }
+      persist(); closeSheet(); render(); });
+    sh.querySelector('#af').addEventListener('submit', e => { e.preventDefault(); a.name = sh.querySelector('#a-name').value.trim() || a.name;
+      const b = sh.querySelector('#a-bal'); if (b) a.balance = +b.value.replace(/[^\d.-]/g,'') || 0;
+      const r = sh.querySelector('#a-rate'); if (r) a.rate = +r.value || 0;
+      const pd2 = sh.querySelector('#a-pay'); if (pd2) a.payDay = +pd2.value;
+      persist(); closeSheet(); render(); toast(t('saved')); });
+  });
+}
+
+const ADD_TYPES = ['bank','card','emoney','cash','invest','pension','points','miles'];
+const PRESETS = {
+  bank:['住信SBIネット銀行','ゆうちょ銀行','三菱UFJ銀行','みずほ銀行','ソニー銀行','PayPay銀行','GMOあおぞらネット銀行'],
+  card:['JCBカード','三井住友カード','Amazon Mastercard','dカード','エポスカード','セゾンカード'],
+  emoney:['PASMO','楽天Edy','nanaco','WAON','d払い','au PAY','楽天ペイ'],
+  cash:['財布','へそくり','外貨（現金）'],
+  invest:['マネックス証券','松井証券','三菱UFJ eスマート証券','ウェルスナビ','SBI証券（特定口座）'],
+  pension:['iDeCo','企業型DC'],
+  points:['dポイント','Vポイント','PayPayポイント','Pontaポイント','WAON POINT','JRE POINT','nanacoポイント'],
+  miles:['ANAマイレージ','JALマイレージ','ユナイテッド航空 マイレージプラス']
+};
+function openAddAcct(pre){
+  let type = ADD_TYPES.includes(pre) ? pre : 'bank';
+  openSheet(`<h2>${esc(t('addAcct'))}</h2>
+    <form class="form" id="nf">
+      <label>${esc(t('acctType'))}</label><div class="chips wrapchips" id="n-types"></div>
+      <label>${esc(t('name'))}<input class="inp" id="n-name" autocomplete="off"></label>
+      <div><div class="eyebrow" style="margin-bottom:6px">${esc(t('presets'))}</div><div class="chips wrapchips" id="n-presets"></div></div>
+      <label id="n-bal-l"><span id="n-bal-lab"></span><input class="inp tnum" id="n-bal" inputmode="numeric" placeholder="0"></label>
+      <label id="n-rate-l">${esc(t('rate'))}<input class="inp tnum" id="n-rate" inputmode="decimal"></label>
+      <label id="n-pay-l">${esc(t('payDay'))}<select class="inp" id="n-pay">${Array.from({length:28}, (_,i) => `<option value="${i+1}" ${i+1 === 27 ? 'selected' : ''}>${i+1}${L()==='en' ? '' : '日'}</option>`).join('')}</select></label>
+      <p class="note" id="n-note" style="margin:0"></p>
+      <div id="n-err"></div>
+      <button class="btn">${esc(t('addAcct'))}</button>
+    </form>`, sh => {
+    const draw = () => {
+      sh.querySelector('#n-types').innerHTML = ADD_TYPES.map(tp => `<button type="button" class="chipb" data-tp="${tp}" aria-pressed="${tp === type}">${esc(TYPE_LABEL[L()][tp])}</button>`).join('');
+      sh.querySelector('#n-presets').innerHTML = PRESETS[type].filter(p => !S.accounts.some(a => a.name === p && !a.hidden)).map(p => `<button type="button" class="chipb" data-pre="${esc(p)}">${esc(p)}</button>`).join('');
+      const pts = type === 'points' || type === 'miles';
+      sh.querySelector('#n-bal-l').hidden = type === 'card';
+      sh.querySelector('#n-bal-lab').textContent = t('balance') + (type === 'miles' ? ' (mi)' : type === 'points' ? ' (pt)' : ' (¥)');
+      sh.querySelector('#n-rate-l').hidden = !pts;
+      sh.querySelector('#n-rate').value = type === 'points' ? 1 : 0;
+      sh.querySelector('#n-pay-l').hidden = type !== 'card';
+      sh.querySelector('#n-note').textContent = t('note_' + type);
+    };
+    draw();
+    sh.addEventListener('click', e => {
+      const tp = e.target.closest('[data-tp]'); if (tp) { type = tp.dataset.tp; draw(); return; }
+      const pr = e.target.closest('[data-pre]'); if (pr) { sh.querySelector('#n-name').value = pr.dataset.pre; sh.querySelectorAll('[data-pre]').forEach(b => b.setAttribute('aria-pressed', b === pr)); }
+    });
+    const bal = sh.querySelector('#n-bal');
+    bal.addEventListener('input', () => { const v = bal.value.replace(/[^\d]/g,''); bal.value = v ? (+v).toLocaleString('ja-JP') : ''; });
+    setTimeout(() => sh.querySelector('#n-name').focus(), 250);
+    sh.querySelector('#nf').addEventListener('submit', e => { e.preventDefault();
+      const name = sh.querySelector('#n-name').value.trim();
+      const err = m => { sh.querySelector('#n-err').innerHTML = `<div class="okbox warnbox">${ic('alert')}<span>${esc(m)}</span></div>`; };
+      if (!name) { sh.querySelector('#n-name').focus(); return err(t('nameReq')); }
+      if (S.accounts.some(a => a.name === name && !a.hidden)) return err(t('acctDup'));
+      const pts = type === 'points' || type === 'miles';
+      const a = { id:'a' + uid(), name, type, balance: type === 'card' ? 0 : (+bal.value.replace(/[^\d]/g,'') || 0),
+        unit: type === 'miles' ? 'mi' : type === 'points' ? 'pt' : null, rate: pts ? (+sh.querySelector('#n-rate').value || 0) : null,
+        payDay: type === 'card' ? +sh.querySelector('#n-pay').value : null };
+      S.accounts.push(a); persist(); closeSheet(); UI.tab = 'assets'; render(); scrollTo(0,0); toast(t('acctAdded', name));
+    });
+  });
+}
+function openHidden(){
+  const list = S.accounts.filter(a => a.hidden);
+  openSheet(`<h2>${esc(t('hiddenAccts', list.length))}</h2><div class="list">${list.map(a => `<div class="row"><span class="av">${esc(a.name.slice(0,1))}</span><span class="main"><span class="t1">${esc(a.name)}</span><span class="t2">${esc(TYPE_LABEL[L()][a.type])}</span></span><button class="btn sm ghost" data-act="unhide" data-arg="${a.id}">${esc(t('unhide'))}</button></div>`).join('')}</div>`);
+}
+
+function openPin(){
+  openSheet(`<h2>${esc(t('changePin'))}</h2><p class="lead">${esc(t('pinLead'))}</p>
+    <form class="form" id="pf"><label>${esc(t('curPin'))}<input class="inp" id="p0" type="password" inputmode="numeric" autocomplete="current-password" maxlength="6"></label>
+    <label>${esc(t('newPin'))}<input class="inp" id="p1" type="password" inputmode="numeric" autocomplete="new-password" maxlength="6"></label>
+    <label>${esc(t('newPin2'))}<input class="inp" id="p2" type="password" inputmode="numeric" autocomplete="new-password" maxlength="6"></label>
+    <div id="p-err"></div><button class="btn">${esc(t('save'))}</button></form>`, sh => {
+    sh.querySelector('#pf').addEventListener('submit', async e => { e.preventDefault();
+      const [p0,p1,p2] = ['#p0','#p1','#p2'].map(s => sh.querySelector(s).value); const err = m => sh.querySelector('#p-err').innerHTML = `<div class="okbox warnbox">${ic('alert')}<span>${esc(m)}</span></div>`;
+      if (!/^\d{4,6}$/.test(p1)) return err(t('pinFormat')); if (p1 !== p2) return err(t('pinMismatch'));
+      try { const raw = JSON.parse(lsGet(VAULT)); const k = await deriveKey(p0, b64d(raw.salt)); await unseal(k, raw); } catch(x) { return err(t('pinBad')); }
+      SALT = crypto.getRandomValues(new Uint8Array(16)); KEY = await deriveKey(p1, SALT); await persistNow(); writeMeta({ pinLen:p1.length });
+      closeSheet(); toast(t('pinChanged')); });
+  });
+}
+
+function openBackup(){
+  openSheet(`<h2>${esc(t('backup'))}</h2><p class="lead">${esc(t('backupLead'))}</p>
+    <div class="form"><label>${esc(t('passphrase'))}<input class="inp" id="b-pass" type="password" autocomplete="new-password"></label>
+    <button class="btn" id="b-go">${esc(t('makeBackup'))}</button><div id="b-out"></div></div>`, sh => {
+    sh.querySelector('#b-go').addEventListener('click', async () => {
+      const p = sh.querySelector('#b-pass').value; if (p.length < 8) { sh.querySelector('#b-pass').focus(); return; }
+      const salt = crypto.getRandomValues(new Uint8Array(16)); const k = await deriveKey(p, salt); const box = await seal(k, S);
+      const text = 'KURA1.' + b64e(salt) + '.' + box.iv + '.' + box.ct;
+      sh.querySelector('#b-out').innerHTML = `<textarea class="inp" id="b-text" readonly>${esc(text)}</textarea><button class="btn ghost mt" id="b-copy">${esc(t('copy'))}</button><p class="note">${(text.length/1024).toFixed(1)} KB · AES-256-GCM · PBKDF2 210,000</p>`;
+      sh.querySelector('#b-copy').addEventListener('click', () => { navigator.clipboard.writeText(text).then(() => toast(t('copied'))).catch(() => { const ta = sh.querySelector('#b-text'); ta.focus(); ta.select(); toast(t('copyFail')); }); });
+    });
+  });
+}
+function openRestore(){
+  openSheet(`<h2>${esc(t('restore'))}</h2><p class="lead">${esc(t('restoreLead'))}</p>
+    <div class="form"><textarea class="inp" id="r-text" placeholder="KURA1.…"></textarea><label>${esc(t('passphrase'))}<input class="inp" id="r-pass" type="password"></label>
+    <div id="r-err"></div><button class="btn" id="r-go">${esc(t('doRestore'))}</button></div>`, sh => {
+    sh.querySelector('#r-go').addEventListener('click', async () => {
+      try { const [tag, salt, iv, ct] = sh.querySelector('#r-text').value.trim().split('.'); if (tag !== 'KURA1') throw 0;
+        const k = await deriveKey(sh.querySelector('#r-pass').value, b64d(salt)); const data = migrate(await unseal(k, { iv, ct }));
+        S = data; persist(); closeSheet(); render(); toast(t('restored'));
+      } catch(e) { sh.querySelector('#r-err').innerHTML = `<div class="okbox warnbox">${ic('alert')}<span>${esc(t('restoreErr'))}</span></div>`; }
+    });
+  });
+}
+function openReset(){
+  openSheet(`<h2>${esc(t('resetSample'))}</h2><p class="lead">${esc(t('resetLead'))}</p><button class="btn danger" id="z-go">${esc(t('resetSample'))}</button>`, sh => {
+    const b = sh.querySelector('#z-go'); b.addEventListener('click', () => { if (!b.dataset.arm) { b.dataset.arm = 1; b.textContent = t('resetConfirm'); return; }
+      const lang = S.lang, lockMin = S.lockMin; S = makeSample(lang); S.lockMin = lockMin; UI.bannerHidden = false; persist(); closeSheet(); render(); toast(t('resetDone')); });
+  });
+}
+function openChangelog(isNew){
+  openSheet(`<h2>${esc(t(isNew ? 'whatsNew' : 'changelog'))}</h2><p class="lead">Kura v${VERSION} · data v${SCHEMA}</p><div class="changelog">${CHANGELOG.map(c => `<div class="ver"><span>v${c.v}</span><span class="faint tnum">${c.date}</span></div><ul>${c[L()].map(l => `<li>${esc(l)}</li>`).join('')}</ul>`).join('')}</div><button class="btn mt" data-act="closesheet">${esc(t('close'))}</button>`);
+}
+function openUpdate(){
+  openSheet(`<h2>${esc(t('checkUpdate'))}</h2><div class="okbox">${ic('check')}<span>${esc(t('upToDate', VERSION))}</span></div><p class="note">${esc(t('updateLead'))}</p><button class="btn ghost mt" data-act="changelog">${esc(t('changelog'))}</button>`);
+}
+function openSecPlan(){
+  const ja = L() === 'ja';
+  const L1 = ja ? [
+    ['now','PINロックと自動ロック','5回間違えると待ち時間が倍々に延びます。操作がない状態が続くと自動でロックします。'],
+    ['now','端末内の暗号化','データはAES-256-GCMで暗号化して保存。鍵はPINから毎回作り、保存しません。'],
+    ['now','暗号化バックアップ','パスフレーズで暗号化した文字列として書き出し・復元できます。'],
+    ['now','外部への送信なし','試作版は通信をしません。銀行のIDやパスワードは一切扱いません。'],
+    ['prod','ログイン：パスキー＋Face ID','パスワードを使わないログイン。端末を失くしても他人は開けません。'],
+    ['prod','データベースの行レベル保護','自分（と共有相手）の行しか読み書きできない設定をDB側で強制します。'],
+    ['prod','通信と保存の二重暗号化','HTTPS（TLS）に加え、重要な項目は端末側で暗号化してから送ります。'],
+    ['prod','ファイアウォールの多層化','①CDNのWAF ②API の流量制限とIP制限 ③DBは外部から直接つながらない設定 ④管理画面は2段階認証のみ。'],
+    ['prod','監視と自動バックアップ','不審なログインの通知、毎日の自動バックアップ、更新前の自動スナップショット。'],
+    ['prod','コードの二重チェック','Claude が書いたコードを Codex がレビューし、依存パッケージの脆弱性も自動で検査します。']
+  ] : [
+    ['now','PIN lock and auto-lock','Wait time doubles after 5 wrong tries. Locks itself after inactivity.'],
+    ['now','On-device encryption','Data is stored with AES-256-GCM. The key comes from your PIN each time and is never saved.'],
+    ['now','Encrypted backup','Export and restore as passphrase-encrypted text.'],
+    ['now','Nothing leaves the device','The prototype makes no network calls and never handles bank logins.'],
+    ['prod','Sign-in with passkeys + Face ID','No passwords. A lost phone cannot be opened by someone else.'],
+    ['prod','Row-level security','The database itself only lets you (and people you share with) read your rows.'],
+    ['prod','Encrypted twice','TLS in transit, plus sensitive fields encrypted on the device before upload.'],
+    ['prod','Layered firewalls','1) CDN web firewall 2) API rate and IP limits 3) database unreachable from the internet 4) admin only with 2FA.'],
+    ['prod','Monitoring and backups','Alerts on unusual sign-ins, daily backups, a snapshot before every update.'],
+    ['prod','Second-opinion code review','Codex reviews code Claude writes; dependencies are scanned for known vulnerabilities.']
+  ];
+  openSheet(`<h2>${esc(t('secPlan'))}</h2><p class="lead">${ja ? '試作版で動いているものと、本番版で加えるもの。' : 'What runs in the prototype, and what the full version adds.'}</p>
+    <div class="layers">${L1.map(([s,h,p]) => `<div class="layer"><span class="st ${s}">${s === 'now' ? (ja ? '試作で稼働' : 'Live now') : (ja ? '本番版' : 'Full version')}</span><div><b>${esc(h)}</b><p>${esc(p)}</p></div></div>`).join('')}</div>`);
+}
+function openAutoLock(){
+  openSheet(`<h2>${esc(t('autoLock'))}</h2><div class="list">${[1,5,15].map(m => `<button class="row" data-act="setlock" data-arg="${m}"><span class="main"><span class="t1">${esc(t('min', m))}</span></span>${S.lockMin === m ? `<span class="pos">${ic('check','style="width:20px;height:20px"')}</span>` : ''}</button>`).join('')}</div>`);
+}
+function openEnc(){
+  openSheet(`<h2>${esc(t('encryption'))}</h2><div class="okbox ${noCrypto || noStore ? 'warnbox' : ''}">${ic(noCrypto ? 'alert' : 'shield')}<span>${esc(noCrypto ? t('encNone') : noStore ? t('encMem') : t('encOk'))}</span></div>`);
+}
+function openSampleInfo(){
+  const ja = L() === 'ja';
+  openSheet(`<h2>${esc(t('sample'))}</h2><p class="lead">${ja ? '数字や取引はすべて架空のものです。口座名は、連携予定の金融機関に合わせています。CSVを取り込むと自分のデータが加わり、設定の「サンプルに戻す」でいつでも元に戻せます。' : 'All figures and transactions are made up. Account names match the institutions you plan to connect. Importing a CSV adds your own data; Settings → Reset to sample puts it back.'}</p><button class="btn" data-act="closesheet">${esc(t('close'))}</button>`);
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', e => {
+  const k = e.target.closest('[data-key]'); if (k && $('#lock') && !$('#lock').hidden) { pressKey(k.dataset.key); return; }
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const a = el.dataset.act, arg = el.dataset.arg;
+  switch (a) {
+    case 'tab': closeSheet(true); UI.tab = arg; if (arg !== 'tx') UI.q = ''; render(); scrollTo(0,0); break;
+    case 'add': openTx(); break;
+    case 'edit': openTx(arg); break;
+    case 'import': openImport(); break;
+    case 'review': openReview(); break;
+    case 'reviewdone': S.lastReview = new Date().toISOString(); persist(); closeSheet(); render(); toast(t('reviewDone')); break;
+    case 'gouncat': closeSheet(true); UI.tab = 'tx'; UI.filter = 'uncat'; UI.q = ''; render(); break;
+    case 'books': openBooks(); break;
+    case 'setbook': S.activeBook = arg; persist(); closeSheet(); if (UI.tab === 'assets' && arg !== 'personal') UI.tab = 'home'; render(); break;
+    case 'search': UI.tab = 'tx'; render(); setTimeout(() => $('#q')?.focus(), 30); break;
+    case 'month': UI.month = addMonths(UI.month, +arg); render(); break;
+    case 'filter': UI.filter = arg; render(); break;
+    case 'hidebanner': UI.bannerHidden = true; render(); break;
+    case 'lang': S.lang = arg; writeMeta({ lang:arg }); persist(); render(); break;
+    case 'locklang': writeMeta({ lang: L() === 'ja' ? 'en' : 'ja' }); showLock(); break;
+    case 'bio': toast(t('bioProto')); break;
+    case 'lock': lockApp(); break;
+    case 'pin': openPin(); break;
+    case 'autolock': openAutoLock(); break;
+    case 'setlock': S.lockMin = +arg; persist(); closeSheet(); render(); break;
+    case 'enc': openEnc(); break;
+    case 'secplan': openSecPlan(); break;
+    case 'cats': openCats(); break;
+    case 'rules': openRules(); break;
+    case 'acct': openAcct(arg); break;
+    case 'addacct': openAddAcct(arg); break;
+    case 'hiddenaccts': openHidden(); break;
+    case 'unhide': { const a = acct(arg); if (a) a.hidden = false; persist(); closeSheet(); render(); toast(t('unhidden')); break; }
+    case 'backup': openBackup(); break;
+    case 'restore': openRestore(); break;
+    case 'reset': openReset(); break;
+    case 'changelog': openChangelog(false); break;
+    case 'update': openUpdate(); break;
+    case 'sampleinfo': openSampleInfo(); break;
+    case 'closesheet': closeSheet(); break;
+  }
+});
+document.addEventListener('input', e => { if (e.target.id === 'q') { UI.q = e.target.value; const pos = e.target.selectionStart; render(); const q = $('#q'); q.focus(); try { q.setSelectionRange(pos, pos); } catch(x){} } });
+document.addEventListener('keydown', e => {
+  if ($('#lock') && !$('#lock').hidden) { if (/^\d$/.test(e.key)) pressKey(e.key); else if (e.key === 'Backspace') pressKey('del'); return; }
+  if (e.key === 'Escape') closeSheet();
+});
+
+showLock();
+</script>
+
+<script>
+(function(){
+  if(!('serviceWorker' in navigator)) return;
+  var lang='ja'; try{ lang=(JSON.parse(localStorage.getItem('kura.meta.v1')||'{}').lang)||'ja'; }catch(e){}
+  function banner(w){
+    if(document.querySelector('.upd')) return;
+    var b=document.createElement('div'); b.className='upd'; b.setAttribute('role','status');
+    b.innerHTML=(lang==='en'?'A new version is ready':'新しいバージョンがあります')+'<button type="button">'+(lang==='en'?'Update':'更新する')+'</button>';
+    b.querySelector('button').onclick=function(){ w.postMessage('skip'); };
+    document.body.appendChild(b);
+  }
+  var reloading=false;
+  navigator.serviceWorker.addEventListener('controllerchange',function(){ if(reloading) return; reloading=true; location.reload(); });
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      if(reg.waiting && navigator.serviceWorker.controller) banner(reg.waiting);
+      reg.addEventListener('updatefound',function(){ var w=reg.installing; if(!w) return;
+        w.addEventListener('statechange',function(){ if(w.state==='installed' && navigator.serviceWorker.controller) banner(w); }); });
+      setInterval(function(){ reg.update().catch(function(){}); }, 60*60*1000);
+      document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') reg.update().catch(function(){}); });
+    }).catch(function(){});
+    if(navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function(){});
+  });
+})();
+</script>
+</body>
+</html>
