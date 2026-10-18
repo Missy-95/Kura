@@ -50,7 +50,7 @@ html,body{background:#000} body{margin:0} img{max-width:100%} [hidden]{display:n
   --warn:#f5a94a;
   --ink:#141019;
   --b1:#7b3bf5;--b2:#f5e04a;--b3:#ff6fb0;--base:#3a1d9e;
-  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI","Meiryo",system-ui,sans-serif;
+  --font:"Noto Sans JP",-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",system-ui,sans-serif;
   --brand:"Onest",-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
   --jp:var(--font);
   --r-xl:30px;--r-lg:22px;--r-md:16px;
@@ -75,7 +75,8 @@ button{cursor:pointer;background:none;border:0;padding:0}
 .tnum{font-variant-numeric:tabular-nums}
 
 /* colour field */
-.mesh{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:var(--base)}
+.mesh{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:var(--base);opacity:0;transform:scale(1.06);transition:opacity 1.6s cubic-bezier(.4,0,.2,1),transform 2.2s cubic-bezier(.2,.7,.2,1)}
+body.ready .mesh{opacity:1;transform:none}
 .blob{position:absolute;border-radius:50%;will-change:transform}
 .blob.a{width:120vmax;height:120vmax;left:-62vmax;top:-70vmax;background:radial-gradient(closest-side,var(--b1) 0%,var(--b1) 45%,transparent 100%);animation:drift1 13s ease-in-out infinite alternate}
 .blob.b{width:100vmax;height:100vmax;right:-48vmax;top:-46vmax;background:radial-gradient(closest-side,var(--b2) 0%,var(--b2) 45%,transparent 100%);animation:drift2 16s ease-in-out infinite alternate}
@@ -92,7 +93,9 @@ body.locked .mesh::after{opacity:.4}
 @keyframes drift5{0%{transform:translate(0,0) scale(1)}50%{transform:translate(-24vmax,12vmax) scale(.86)}100%{transform:translate(-10vmax,-14vmax) scale(1.14)}}
 @keyframes drift6{0%{transform:translate(0,0) scale(1)}50%{transform:translate(18vmax,-16vmax) scale(1.16)}100%{transform:translate(30vmax,-4vmax) scale(.9)}}
 @media (prefers-reduced-motion:reduce){.blob{animation-duration:50s}*{transition:none!important}}
-#splash{position:fixed;inset:0;z-index:100;background:#000;display:grid;place-items:center;transition:opacity .7s ease}
+#splash{position:fixed;inset:0;z-index:100;background:#000;display:grid;place-items:center;transition:opacity 1.4s cubic-bezier(.4,0,.2,1)}
+#splash .word{transition:opacity .9s ease,transform 1.4s cubic-bezier(.2,.7,.2,1),filter .9s ease}
+#splash.out .word{opacity:0;transform:scale(1.08);filter:blur(8px)}
 #splash .word{font:700 54px/1 var(--brand);letter-spacing:-.045em;color:#fff;animation:splashIn .8s cubic-bezier(.2,.7,.2,1) both}
 #splash .word span{color:var(--accent)}
 #splash.out{opacity:0;pointer-events:none}
@@ -296,14 +299,17 @@ textarea.inp{height:110px;padding:12px 14px;font-size:12px;font-family:ui-monosp
 
 /* lock */
 .lock{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:max(24px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
-.lock .greet{display:flex;flex-direction:column;align-items:center;gap:14px;animation:greetIn 1s cubic-bezier(.2,.7,.2,1) .2s both}
+.lock .greet{display:flex;flex-direction:column;align-items:center;gap:14px;opacity:0}
+body.ready .lock .greet{animation:greetIn 1.2s cubic-bezier(.22,.8,.24,1) .45s both}
 @keyframes greetIn{from{opacity:0;transform:translateY(16px) scale(.95);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
 .avatar{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;font-size:36px;font-weight:600;letter-spacing:-.02em;color:rgba(255,255,255,.88);background:rgba(255,255,255,.2);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 0 0 1.5px rgba(245,232,120,.8);font-family:var(--font)}
 .avatar.scan{animation:scan 1.6s ease-in-out infinite}
 @keyframes scan{0%,100%{box-shadow:inset 0 0 0 1.5px rgba(245,232,120,.8),0 0 0 0 rgba(245,232,120,.0)}50%{box-shadow:inset 0 0 0 1.5px rgba(245,232,120,1),0 0 0 10px rgba(245,232,120,.12)}}
 .lock .hi{font-size:22px;font-weight:700;letter-spacing:-.01em;text-align:center}
-.pinpane{display:flex;flex-direction:column;align-items:center;margin-top:18px;animation:greetIn .5s ease both}
-.lockfoot{position:absolute;left:0;right:0;bottom:calc(26px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;gap:10px;animation:greetIn .8s ease .6s both}
+.pinpane{display:flex;flex-direction:column;align-items:center;margin-top:18px;opacity:0}
+body.ready .pinpane{animation:greetIn .9s cubic-bezier(.22,.8,.24,1) .7s both}
+.lockfoot{position:absolute;left:0;right:0;bottom:calc(26px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center;gap:10px;opacity:0}
+body.ready .lockfoot{animation:greetIn 1s cubic-bezier(.22,.8,.24,1) 1.1s both}
 .lockfoot button{padding:10px 18px;border-radius:999px;background:rgba(255,255,255,.14);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-weight:500;font-size:14.5px;display:inline-flex;align-items:center;gap:8px}
 .lockfoot svg{width:18px;height:18px}
 .lock .mark{font-size:40px;font-weight:700;letter-spacing:-.04em;font-family:var(--brand)}
@@ -341,13 +347,19 @@ textarea.inp{height:110px;padding:12px 14px;font-size:12px;font-family:ui-monosp
    - data is encrypted at rest (AES-256-GCM, key from PIN via PBKDF2)
    - schema migrations run on unlock so updates never break data
    ========================================================= */
-const VERSION = '0.6.0';
+const VERSION = '0.6.2';
 const SCHEMA = 3;
 const DEMO_PIN = '1234';
 const VAULT = 'kura.vault.v1';
 const META = 'kura.meta.v1';
 
 const CHANGELOG = [
+  { v: '0.6.2', date: '2026-10-18',
+    ja: ['日本語フォントをNoto Sans JPに統一（フォントの選択はなくしました）', '起動時の黒い画面から、Face IDの画面へふわっと切り替わるように。背景の色が黒からにじみ出て、名前とアイコンが少し遅れて浮かび上がります'],
+    en: ['All text now uses Noto Sans JP (the font picker was removed)', 'The black launch screen now dissolves into the Face ID screen: colours bloom out of the black, then your name and avatar float in'] },
+  { v: '0.6.1', date: '2026-10-18',
+    ja: ['設定に「フォント」を追加。ヒラギノ角ゴシック（iPhone標準）、Noto Sans JP、BIZ UDPゴシック、M PLUS 1、Zen角ゴシックから選べるように', '予算が0のときは「超過」ではなく「予算を設定」を表示'],
+    en: ['Added Font to Settings: choose Hiragino Sans (iPhone default), Noto Sans JP, BIZ UDPGothic, M PLUS 1 or Zen Kaku Gothic', 'With no budget set, Home shows "Set budget" instead of "Over"'] },
   { v: '0.6.0', date: '2026-10-18',
     ja: ['背景を、鮮やかな色の粒が画面全体でゆっくり動き続けるデザインに', 'タブごとに背景の色合いがなめらかに切り替わるように', '下のメニューバーを、半透明の濃い色で、選んでいる項目が丸く光るデザインに', 'カードを半透明の濃い色にして、明るい背景でも文字を読みやすく'],
     en: ['Background is now bright blobs of colour that keep drifting across the whole screen', 'Each tab blends smoothly into its own colours', 'Bottom bar redesigned: dark translucent pill with a rounded highlight on the current tab', 'Cards use a darker frosted glass so text stays readable on bright colours'] },
@@ -407,7 +419,7 @@ const I = {
     amount:'金額', desc:'内容', date:'日付', category:'カテゴリ', account:'口座', payer:'支払った人', memo:'メモ',
     learnRule:'この内容を次回から自動で分類する', newTx:'入出金を追加', editTx:'入出金を編集', saved:'保存しました', deleted:'削除しました',
     pinEnter:'PINを入力', pinWrong:n=>`PINが違います（あと${n}回）`, pinLocked:s=>`${s}秒後にもう一度お試しください`, pinHint:'最初のPINは 1234 です。設定から変更してください',
-    usePin:'PINで開く', spentThisMonth:'今月の支出', noBudget:'予算はまだ設定されていません', setBudget:'予算を設定', secProfile:'プロフィール', displayName:'表示名', notSet:'未設定', nameLead:'ロック画面のあいさつとアイコンに使います。ロックを解除する前に表示するため、この名前だけは暗号化せずに保存します。', bioProto:'', bioOn:'オン', bioOff:'オフ', pkCount:n=>`${n}件`, bioListTitle:'登録済みのパスキー', pkDefault:'パスキー', pkAddedOn:d=>`${d}に追加`, pkAddMore:'パスキーを追加', pkLabel:'名前（あとで見分けるため）', pkLabelPh:'例：iPhone（iCloud）、Googleアカウント',
+    usePin:'PINで開く', fontTitle:'フォント', spentThisMonth:'今月の支出', noBudget:'予算はまだ設定されていません', setBudget:'予算を設定', secProfile:'プロフィール', displayName:'表示名', notSet:'未設定', nameLead:'ロック画面のあいさつとアイコンに使います。ロックを解除する前に表示するため、この名前だけは暗号化せずに保存します。', bioProto:'', bioOn:'オン', bioOff:'オフ', pkCount:n=>`${n}件`, bioListTitle:'登録済みのパスキー', pkDefault:'パスキー', pkAddedOn:d=>`${d}に追加`, pkAddMore:'パスキーを追加', pkLabel:'名前（あとで見分けるため）', pkLabelPh:'例：iPhone（iCloud）、Googleアカウント',
     pkNew:'新しいパスキーを作る', pkExisting:'保存済みのパスキーを使う', pkAdded:'パスキーを追加しました。次からFace IDで開けます', pkDup:'このパスキーはすでに登録されています', pkRemoved:'パスキーを削除しました',
     googleTitle:'Googleアカウント（Chrome）に保存するには', googleSteps:['iPhone：設定 → 一般 → 自動入力とパスワード で「Chrome」をオンにします（iOS 17以降）', '「新しいパスキーを作る」を押し、保存先を選ぶ画面が出たら Chrome（Google パスワード マネージャー）を選びます', '初めてのときは、Google パスワード マネージャーのPINを作るよう求められます', 'Mac・WindowsのChromeでKuraを開いた場合は、「新しいパスキーを作る」でそのままGoogleアカウントに保存されます', '別の端末でGoogleに保存したKuraのパスキーがあるときは、「保存済みのパスキーを使う」から選びます', 'Googleのパスキーがデータの鍵の取り出しに対応していない場合は、その旨が表示されます。そのときはiCloudキーチェーンのパスキーを使ってください'], bioOpen:'Face IDで開く',
     bioLead:'設定すると、PINの代わりにFace ID（MacではTouch ID）でKuraを開けます。「Kura」のパスキーがiCloudキーチェーンかGoogle パスワード マネージャーに保存され、Face IDが通ったときだけ、データの鍵が取り出されます。複数登録でき、どれか1つで開けます。PINは予備としてそのまま使えます。',
@@ -474,7 +486,7 @@ const I = {
     amount:'Amount', desc:'Description', date:'Date', category:'Category', account:'Account', payer:'Paid by', memo:'Note',
     learnRule:'Categorize this automatically next time', newTx:'Add transaction', editTx:'Edit transaction', saved:'Saved', deleted:'Deleted',
     pinEnter:'Enter PIN', pinWrong:n=>`Wrong PIN (${n} tries left)`, pinLocked:s=>`Try again in ${s}s`, pinHint:'The starting PIN is 1234. Change it in Settings',
-    usePin:'Use PIN', spentThisMonth:'spent this month', noBudget:'No budget set yet', setBudget:'Set budget', secProfile:'Profile', displayName:'Display name', notSet:'Not set', nameLead:'Used for the greeting and avatar on the lock screen. Because it shows before unlocking, this name alone is stored unencrypted.', bioProto:'', bioOn:'On', bioOff:'Off', pkCount:n=>`${n}`, bioListTitle:'Registered passkeys', pkDefault:'Passkey', pkAddedOn:d=>`Added ${d}`, pkAddMore:'Add a passkey', pkLabel:'Name (to tell them apart)', pkLabelPh:'e.g. iPhone (iCloud), Google account',
+    usePin:'Use PIN', fontTitle:'Font', spentThisMonth:'spent this month', noBudget:'No budget set yet', setBudget:'Set budget', secProfile:'Profile', displayName:'Display name', notSet:'Not set', nameLead:'Used for the greeting and avatar on the lock screen. Because it shows before unlocking, this name alone is stored unencrypted.', bioProto:'', bioOn:'On', bioOff:'Off', pkCount:n=>`${n}`, bioListTitle:'Registered passkeys', pkDefault:'Passkey', pkAddedOn:d=>`Added ${d}`, pkAddMore:'Add a passkey', pkLabel:'Name (to tell them apart)', pkLabelPh:'e.g. iPhone (iCloud), Google account',
     pkNew:'Create a new passkey', pkExisting:'Use a saved passkey', pkAdded:'Passkey added. Next time, open Kura with Face ID', pkDup:'This passkey is already registered', pkRemoved:'Passkey removed',
     googleTitle:'Saving to your Google account (Chrome)', googleSteps:['iPhone: Settings → General → AutoFill & Passwords, turn on Chrome (iOS 17+)', 'Tap Create a new passkey and, when asked where to save it, choose Chrome (Google Password Manager)', 'The first time, you will be asked to create a Google Password Manager PIN', 'In Chrome on Mac or Windows, Create a new passkey saves straight to your Google account', 'If you already saved a Kura passkey to Google on another device, use "Use a saved passkey"', 'If Google passkeys cannot release the data key, Kura will tell you. Use an iCloud Keychain passkey instead'], bioOpen:'Open with Face ID',
     bioLead:'Open Kura with Face ID (Touch ID on Mac) instead of your PIN. A "Kura" passkey is saved in iCloud Keychain or Google Password Manager, and the data key is released only when Face ID succeeds. You can register several; any one opens Kura. Your PIN still works as a backup.',
@@ -1757,8 +1769,8 @@ document.addEventListener('keydown', e => {
 });
 
 showLock();
-setTimeout(() => { const sp = $('#splash'); if (sp) { sp.classList.add('out'); setTimeout(() => sp.remove(), 800); } }, 1100);
-if (hasPasskey(readVault())) setTimeout(() => bioUnlock(true), 1500);
+setTimeout(() => { document.body.classList.add('ready'); const sp = $('#splash'); if (sp) { sp.classList.add('out'); setTimeout(() => sp.remove(), 1600); } }, 1000);
+if (hasPasskey(readVault())) setTimeout(() => bioUnlock(true), 2300);
 </script>
 
 <script>
